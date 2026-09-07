@@ -35,7 +35,7 @@ function BuddyPage() {
   return (
     <AppShell title="Поддержи подругу" aside={<CoinsPanel />}>
       <div className="grid gap-5 lg:grid-cols-[320px_1fr]">
-        <section className="surface p-5">
+        <section className="surface min-w-0 p-5">
           <h2 className="font-display text-base">Категория поддержки</h2>
           <div className="mt-3 space-y-2">
             {lifeStatuses.map((s) => (
@@ -92,14 +92,14 @@ function BuddyPage() {
         </section>
 
         <section className="surface flex min-h-[560px] flex-col">
-          <header className="flex items-center justify-between gap-3 border-b border-border p-4">
-            <div className="flex items-center gap-3">
-              <span className="grid size-10 place-items-center rounded-full bg-primary-soft font-semibold">
+          <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4">
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary-soft font-semibold">
                 {buddy?.name.slice(0, 1)}
               </span>
-              <div>
-                <p className="text-sm font-semibold">{buddy?.name}</p>
-                <p className="text-xs text-muted-foreground">Приватная комната 1-на-1</p>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold">{buddy?.name}</p>
+                <p className="truncate text-xs text-muted-foreground">Приватная комната 1-на-1</p>
               </div>
             </div>
             <div className="flex gap-2">
