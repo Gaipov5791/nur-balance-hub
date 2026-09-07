@@ -92,7 +92,7 @@ function BuddyPage() {
         </section>
 
         <section className="surface flex min-h-[560px] flex-col">
-          <header className="flex items-center justify-between gap-3 border-b border-border p-4">
+          <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4">
             <div className="flex items-center gap-3">
               <span className="grid size-10 place-items-center rounded-full bg-primary-soft font-semibold">
                 {buddy?.name.slice(0, 1)}
