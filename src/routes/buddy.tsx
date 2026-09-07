@@ -35,7 +35,7 @@ function BuddyPage() {
   return (
     <AppShell title="Поддержи подругу" aside={<CoinsPanel />}>
       <div className="grid gap-5 lg:grid-cols-[320px_1fr]">
-        <section className="surface p-5">
+        <section className="surface min-w-0 p-5">
           <h2 className="font-display text-base">Категория поддержки</h2>
           <div className="mt-3 space-y-2">
             {lifeStatuses.map((s) => (
