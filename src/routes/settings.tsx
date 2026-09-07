@@ -29,7 +29,7 @@ export const Route = createFileRoute("/settings")({
 });
 
 function SettingsPage() {
-  const [goal, setGoal] = useState(goals[0].id);
+  const [goal, setGoal] = useState(goals[0]!.id);
   const [status, setStatus] = useState(profile.status);
   const [pin, setPin] = useState(true);
   const [dark, setDark] = useState(false);

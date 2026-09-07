@@ -27,7 +27,7 @@ export const Route = createFileRoute("/care")({
 });
 
 function CarePage() {
-  const [activeId, setActiveId] = useState(careCategories[0].id);
+  const [activeId, setActiveId] = useState(careCategories[0]!.id);
   const active = careCategories.find((c) => c.id === activeId)!;
 
   return (

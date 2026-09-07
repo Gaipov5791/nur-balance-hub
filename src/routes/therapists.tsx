@@ -29,7 +29,7 @@ export const Route = createFileRoute("/therapists")({
 });
 
 function TherapistsPage() {
-  const [selected, setSelected] = useState(therapists[0].id);
+  const [selected, setSelected] = useState(therapists[0]!.id);
   const person = therapists.find((t) => t.id === selected)!;
 
   return (

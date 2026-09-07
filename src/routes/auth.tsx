@@ -27,7 +27,7 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const [step, setStep] = useState<"login" | "onboarding">("login");
-  const [goal, setGoal] = useState(goals[0].id);
+  const [goal, setGoal] = useState(goals[0]!.id);
   const [status, setStatus] = useState("burnout");
 
   return (
