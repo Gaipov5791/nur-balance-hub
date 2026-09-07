@@ -10,33 +10,141 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ArchiveRouteImport } from './routes/archive'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as BuddyRouteImport } from './routes/buddy'
+import { Route as CareRouteImport } from './routes/care'
+import { Route as JournalRouteImport } from './routes/journal'
+import { Route as RewardsRouteImport } from './routes/rewards'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as TherapistsRouteImport } from './routes/therapists'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ArchiveRoute = ArchiveRouteImport.update({
+  id: '/archive',
+  path: '/archive',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BuddyRoute = BuddyRouteImport.update({
+  id: '/buddy',
+  path: '/buddy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CareRoute = CareRouteImport.update({
+  id: '/care',
+  path: '/care',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JournalRoute = JournalRouteImport.update({
+  id: '/journal',
+  path: '/journal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RewardsRoute = RewardsRouteImport.update({
+  id: '/rewards',
+  path: '/rewards',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TherapistsRoute = TherapistsRouteImport.update({
+  id: '/therapists',
+  path: '/therapists',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/archive': typeof ArchiveRoute
+  '/auth': typeof AuthRoute
+  '/buddy': typeof BuddyRoute
+  '/care': typeof CareRoute
+  '/journal': typeof JournalRoute
+  '/rewards': typeof RewardsRoute
+  '/settings': typeof SettingsRoute
+  '/therapists': typeof TherapistsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/archive': typeof ArchiveRoute
+  '/auth': typeof AuthRoute
+  '/buddy': typeof BuddyRoute
+  '/care': typeof CareRoute
+  '/journal': typeof JournalRoute
+  '/rewards': typeof RewardsRoute
+  '/settings': typeof SettingsRoute
+  '/therapists': typeof TherapistsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/archive': typeof ArchiveRoute
+  '/auth': typeof AuthRoute
+  '/buddy': typeof BuddyRoute
+  '/care': typeof CareRoute
+  '/journal': typeof JournalRoute
+  '/rewards': typeof RewardsRoute
+  '/settings': typeof SettingsRoute
+  '/therapists': typeof TherapistsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/archive'
+    | '/auth'
+    | '/buddy'
+    | '/care'
+    | '/journal'
+    | '/rewards'
+    | '/settings'
+    | '/therapists'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/archive'
+    | '/auth'
+    | '/buddy'
+    | '/care'
+    | '/journal'
+    | '/rewards'
+    | '/settings'
+    | '/therapists'
+  id:
+    | '__root__'
+    | '/'
+    | '/archive'
+    | '/auth'
+    | '/buddy'
+    | '/care'
+    | '/journal'
+    | '/rewards'
+    | '/settings'
+    | '/therapists'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ArchiveRoute: typeof ArchiveRoute
+  AuthRoute: typeof AuthRoute
+  BuddyRoute: typeof BuddyRoute
+  CareRoute: typeof CareRoute
+  JournalRoute: typeof JournalRoute
+  RewardsRoute: typeof RewardsRoute
+  SettingsRoute: typeof SettingsRoute
+  TherapistsRoute: typeof TherapistsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +156,75 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/archive': {
+      id: '/archive'
+      path: '/archive'
+      fullPath: '/archive'
+      preLoaderRoute: typeof ArchiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/buddy': {
+      id: '/buddy'
+      path: '/buddy'
+      fullPath: '/buddy'
+      preLoaderRoute: typeof BuddyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/care': {
+      id: '/care'
+      path: '/care'
+      fullPath: '/care'
+      preLoaderRoute: typeof CareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/journal': {
+      id: '/journal'
+      path: '/journal'
+      fullPath: '/journal'
+      preLoaderRoute: typeof JournalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rewards': {
+      id: '/rewards'
+      path: '/rewards'
+      fullPath: '/rewards'
+      preLoaderRoute: typeof RewardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/therapists': {
+      id: '/therapists'
+      path: '/therapists'
+      fullPath: '/therapists'
+      preLoaderRoute: typeof TherapistsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ArchiveRoute: ArchiveRoute,
+  AuthRoute: AuthRoute,
+  BuddyRoute: BuddyRoute,
+  CareRoute: CareRoute,
+  JournalRoute: JournalRoute,
+  RewardsRoute: RewardsRoute,
+  SettingsRoute: SettingsRoute,
+  TherapistsRoute: TherapistsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
