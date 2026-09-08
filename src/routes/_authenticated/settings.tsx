@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useProfile, useSignOut } from "@/hooks/useAuth";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { CoinsPanel } from "@/components/panels";
@@ -8,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { goals, lifeStatuses, profile } from "@/data/demo";
+import { goals, lifeStatuses } from "@/data/demo";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
@@ -66,10 +68,41 @@ function AccountCard() {
 }
 
 function SettingsPage() {
-  const [goal, setGoal] = useState(goals[0]!.id);
-  const [status, setStatus] = useState(profile.status);
+  const { user, profile: real } = useProfile();
+  const qc = useQueryClient();
+  const [name, setName] = useState(real?.name ?? user?.email?.split("@")[0] ?? "");
+  const [goal, setGoal] = useState(real?.goal ?? goals[0]!.id);
+  const [status, setStatus] = useState(real?.life_status ?? "burnout");
+  const [saving, setSaving] = useState(false);
   const [pin, setPin] = useState(true);
   const [dark, setDark] = useState(false);
+
+  // Sync local state when profile loads
+  useEffect(() => {
+    if (real) {
+      setName(real.name);
+      setGoal(real.goal ?? goals[0]!.id);
+      setStatus(real.life_status ?? "burnout");
+    }
+  }, [real]);
+
+  const save = async () => {
+    if (!user) return;
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ name, goal, life_status: status })
+        .eq("id", user.id);
+      if (error) throw error;
+      qc.invalidateQueries({ queryKey: ["profile", user.id] });
+      toast.success("Изменения сохранены");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Не удалось сохранить");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <AppShell title="Настройки" aside={<CoinsPanel />}>
@@ -78,11 +111,11 @@ function SettingsPage() {
           <h2 className="font-display text-base">Профиль</h2>
           <div className="mt-4 flex items-center gap-4">
             <span className="grid size-16 place-items-center rounded-2xl bg-primary-soft font-display text-xl">
-              {profile.name.slice(0, 1)}
+              {((name || user?.email?.[0]) ?? "?").slice(0, 1).toUpperCase()}
             </span>
             <div className="flex-1 space-y-2">
-              <Input defaultValue={profile.name} />
-              <Input defaultValue="aiperi@example.com" />
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Как к вам обращаться" />
+              <Input value={user?.email ?? ""} disabled />
             </div>
           </div>
 
@@ -123,8 +156,8 @@ function SettingsPage() {
             ))}
           </div>
 
-          <Button className="mt-5" onClick={() => toast.success("Изменения сохранены")}>
-            Сохранить
+          <Button className="mt-5" onClick={save} disabled={saving}>
+            {saving ? "Сохранение…" : "Сохранить"}
           </Button>
         </section>
 
