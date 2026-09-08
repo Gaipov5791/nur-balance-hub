@@ -327,7 +327,10 @@ function SettingsPage() {
             {pin ? (
               <div className="mt-3 flex gap-2">
                 <Input placeholder="Новый PIN" inputMode="numeric" maxLength={4} />
-                <Button variant="secondary" onClick={() => toast.success("PIN обновлён")}>
+                <Button
+                  variant="secondary"
+                  onClick={() => toast("PIN-код появится в ближайшем обновлении")}
+                >
                   Обновить
                 </Button>
               </div>
