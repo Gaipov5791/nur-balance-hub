@@ -4,6 +4,8 @@ import { AppShell } from "@/components/AppShell";
 import { BuddyPanel, CoinsPanel, MoodCalendar, TipPanel } from "@/components/panels";
 import { Button } from "@/components/ui/button";
 import { careCategories, journalEntries, moods, profile } from "@/data/demo";
+import { useProfile } from "@/hooks/useAuth";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -26,6 +28,19 @@ export const Route = createFileRoute("/")({
 
 function Dashboard() {
   const recent = journalEntries.slice(-3).reverse();
+  const { profile: real, user } = useProfile();
+  const name = real?.name || user?.email?.split("@")[0] || profile.name;
+  const coins = user ? (real?.coins ?? 0) : profile.coins;
+  const streak = user ? (real?.streak ?? 0) : profile.streak;
+  const today = new Date();
+  const dateLabel = new Intl.DateTimeFormat("ru-RU", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).format(today);
+  const hour = today.getHours();
+  const greeting =
+    hour < 6 ? "Доброй ночи" : hour < 12 ? "Доброе утро" : hour < 18 ? "Добрый день" : "Добрый вечер";
 
   return (
     <AppShell
@@ -40,11 +55,14 @@ function Dashboard() {
       <section className="surface overflow-hidden">
         <div className="flex flex-col gap-6 p-6 md:flex-row md:items-center lg:p-8">
           <div className="min-w-0 flex-1">
-            <p className="text-sm text-muted-foreground">Понедельник, 7 сентября</p>
-            <h1 className="mt-1 text-2xl md:text-3xl">Добрый вечер, {profile.name}</h1>
+            <p className="text-sm text-muted-foreground first-letter:uppercase">{dateLabel}</p>
+            <h1 className="mt-1 text-2xl md:text-3xl">
+              {greeting}, {name}
+            </h1>
             <p className="mt-3 max-w-md text-sm text-muted-foreground">
-              Вы держите серию {profile.streak} дней. Запишите короткое видео о том, как прошёл
-              день — это займёт три минуты.
+              {streak > 0
+                ? `Вы держите серию ${streak} дней. Запишите короткое видео о том, как прошёл день — это займёт три минуты.`
+                : "Запишите короткое видео о том, как прошёл день — это займёт три минуты."}
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
               <Button asChild size="lg">
@@ -58,12 +76,13 @@ function Dashboard() {
             </div>
           </div>
           <div className="grid w-full shrink-0 grid-cols-3 gap-3 md:w-72">
-            <Stat value={`${profile.streak}`} label="дней подряд" />
-            <Stat value={`${profile.coins}`} label="Nur-Coins" />
+            <Stat value={`${streak}`} label="дней подряд" />
+            <Stat value={`${coins}`} label="Nur-Coins" />
             <Stat value={`${journalEntries.length}`} label="записей" />
           </div>
         </div>
       </section>
+
 
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
         <MoodCalendar />
