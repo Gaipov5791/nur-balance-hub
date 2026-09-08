@@ -14,15 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      coin_transactions: {
+        Row: {
+          action: string
+          amount: number
+          created_at: string
+          entry_id: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          amount: number
+          created_at?: string
+          entry_id?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          amount?: number
+          created_at?: string
+          entry_id?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coin_transactions_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       journal_entries: {
         Row: {
           created_at: string
           duration_seconds: number
           entry_date: string
+          file_size: number
           id: string
           level: number
+          mime_type: string | null
           mood: string
           note: string
+          thumbnail_path: string | null
           user_id: string
           video_path: string | null
         }
@@ -30,10 +68,13 @@ export type Database = {
           created_at?: string
           duration_seconds?: number
           entry_date?: string
+          file_size?: number
           id?: string
           level?: number
+          mime_type?: string | null
           mood: string
           note?: string
+          thumbnail_path?: string | null
           user_id: string
           video_path?: string | null
         }
@@ -41,10 +82,13 @@ export type Database = {
           created_at?: string
           duration_seconds?: number
           entry_date?: string
+          file_size?: number
           id?: string
           level?: number
+          mime_type?: string | null
           mood?: string
           note?: string
+          thumbnail_path?: string | null
           user_id?: string
           video_path?: string | null
         }
@@ -92,15 +136,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -227,6 +298,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+    },
   },
 } as const

@@ -2,10 +2,13 @@ import { Link } from "@tanstack/react-router";
 import { Flame, Sparkles, Users } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { journalEntries, lifeStatuses, moods, profile } from "@/data/demo";
+import { journalEntries, lifeStatuses, moods, profile as demoProfile, type MoodKey } from "@/data/demo";
+import { useProfile } from "@/hooks/useAuth";
 
 export function CoinsPanel() {
-  const next = profile.streak < 14 ? 14 : 30;
+  const { profile: real } = useProfile();
+  const profile = real ? { coins: real.coins, streak: real.streak } : demoProfile;
+  const next = [3, 7, 14, 30].find((m) => m > profile.streak) ?? profile.streak;
   return (
     <div className="surface p-5">
       <div className="flex items-start justify-between">
@@ -38,7 +41,9 @@ export function CoinsPanel() {
 }
 
 export function BuddyPanel() {
-  const status = lifeStatuses.find((s) => s.id === profile.status);
+  const { profile: real } = useProfile();
+  const statusId = real?.life_status ?? demoProfile.status;
+  const status = lifeStatuses.find((s) => s.id === statusId);
   return (
     <div className="surface p-5">
       <p className="flex items-center gap-2 text-sm font-semibold">
@@ -84,18 +89,37 @@ export function TipPanel() {
   );
 }
 
-export function MoodCalendar({ compact = false }: { compact?: boolean }) {
-  const byDay = new Map(journalEntries.map((e) => [e.day, e]));
-  const days = Array.from({ length: 30 }, (_, i) => i + 1);
-  const today = 7;
+type CalendarEntry = { day: number; mood: MoodKey; date: string };
+
+export function MoodCalendar({
+  compact = false,
+  entries,
+  monthLabel = "Сентябрь 2026",
+  today = 7,
+  year = 2026,
+  month = 8,
+}: {
+  compact?: boolean;
+  /** Real entries; falls back to demo data when omitted. */
+  entries?: CalendarEntry[];
+  monthLabel?: string;
+  today?: number;
+  year?: number;
+  /** 0-based month */
+  month?: number;
+}) {
+  const source: CalendarEntry[] = entries ?? journalEntries;
+  const byDay = new Map(source.map((e) => [e.day, e]));
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  // Monday-first offset for the 1st of the month
+  const offset = (new Date(year, month, 1).getDay() + 6) % 7;
 
   return (
     <div className={compact ? "surface p-5" : "surface p-5 lg:p-6"}>
       <div className="flex items-center justify-between">
-        <p className="font-display text-base">Сентябрь 2026</p>
-        <span className="text-xs text-muted-foreground">
-          {journalEntries.length} записей
-        </span>
+        <p className="font-display text-base">{monthLabel}</p>
+        <span className="text-xs text-muted-foreground">{source.length} записей</span>
       </div>
       <div className="mt-4 grid grid-cols-7 gap-1.5 text-center text-[11px] text-muted-foreground">
         {["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"].map((d) => (
@@ -103,6 +127,9 @@ export function MoodCalendar({ compact = false }: { compact?: boolean }) {
         ))}
       </div>
       <div className="mt-2 grid grid-cols-7 gap-1.5">
+        {Array.from({ length: offset }, (_, i) => (
+          <span key={`pad-${i}`} />
+        ))}
         {days.map((day) => {
           const entry = byDay.get(day);
           const mood = entry ? moods[entry.mood] : null;
@@ -112,7 +139,7 @@ export function MoodCalendar({ compact = false }: { compact?: boolean }) {
               className={`grid aspect-square place-items-center rounded-xl text-sm ${
                 mood ? mood.tint : "bg-secondary/60 text-muted-foreground"
               } ${day === today ? "ring-2 ring-primary" : ""}`}
-              title={entry ? `${entry.date} — ${moods[entry.mood].label}` : `${day} сентября`}
+              title={entry ? `${entry.date} — ${moods[entry.mood].label}` : String(day)}
             >
               {mood ? <span className="text-base">{mood.emoji}</span> : day}
             </div>

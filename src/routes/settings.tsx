@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useProfile, useSignOut } from "@/hooks/useAuth";
 import { useState } from "react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
@@ -27,6 +28,42 @@ export const Route = createFileRoute("/settings")({
   }),
   component: SettingsPage,
 });
+
+function AccountCard() {
+  const { user } = useProfile();
+  const signOut = useSignOut();
+  const navigate = useNavigate();
+  return (
+    <div className="surface p-5">
+      <h2 className="font-display text-base">Аккаунт</h2>
+      {user ? (
+        <>
+          <p className="mt-2 text-sm text-muted-foreground">Вы вошли как {user.email}</p>
+          <Button
+            variant="secondary"
+            className="mt-4 w-full"
+            onClick={async () => {
+              await signOut();
+              toast.success("Вы вышли из аккаунта");
+              navigate({ to: "/auth" });
+            }}
+          >
+            Выйти
+          </Button>
+        </>
+      ) : (
+        <>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Войдите, чтобы записи дневника сохранялись в вашем личном архиве.
+          </p>
+          <Button asChild className="mt-4 w-full">
+            <Link to="/auth">Войти или зарегистрироваться</Link>
+          </Button>
+        </>
+      )}
+    </div>
+  );
+}
 
 function SettingsPage() {
   const [goal, setGoal] = useState(goals[0]!.id);
@@ -134,15 +171,7 @@ function SettingsPage() {
             </div>
           </div>
 
-          <div className="surface p-5">
-            <h2 className="font-display text-base">Аккаунт</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Вход по email или Google подключим на следующем этапе.
-            </p>
-            <Button asChild variant="secondary" className="mt-4 w-full">
-              <Link to="/auth">Экран входа</Link>
-            </Button>
-          </div>
+          <AccountCard />
         </section>
       </div>
     </AppShell>

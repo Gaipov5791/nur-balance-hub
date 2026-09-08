@@ -10,23 +10,23 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ArchiveRouteImport } from './routes/archive'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BuddyRouteImport } from './routes/buddy'
 import { Route as CareRouteImport } from './routes/care'
-import { Route as JournalRouteImport } from './routes/journal'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as TherapistsRouteImport } from './routes/therapists'
+import { Route as AuthenticatedArchiveRouteImport } from './routes/_authenticated/archive'
+import { Route as AuthenticatedJournalRouteImport } from './routes/_authenticated/journal'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ArchiveRoute = ArchiveRouteImport.update({
-  id: '/archive',
-  path: '/archive',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -44,11 +44,6 @@ const CareRoute = CareRouteImport.update({
   path: '/care',
   getParentRoute: () => rootRouteImport,
 } as any)
-const JournalRoute = JournalRouteImport.update({
-  id: '/journal',
-  path: '/journal',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const RewardsRoute = RewardsRouteImport.update({
   id: '/rewards',
   path: '/rewards',
@@ -64,84 +59,95 @@ const TherapistsRoute = TherapistsRouteImport.update({
   path: '/therapists',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedArchiveRoute = AuthenticatedArchiveRouteImport.update({
+  id: '/archive',
+  path: '/archive',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedJournalRoute = AuthenticatedJournalRouteImport.update({
+  id: '/journal',
+  path: '/journal',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/archive': typeof ArchiveRoute
   '/auth': typeof AuthRoute
   '/buddy': typeof BuddyRoute
   '/care': typeof CareRoute
-  '/journal': typeof JournalRoute
   '/rewards': typeof RewardsRoute
   '/settings': typeof SettingsRoute
   '/therapists': typeof TherapistsRoute
+  '/archive': typeof AuthenticatedArchiveRoute
+  '/journal': typeof AuthenticatedJournalRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/archive': typeof ArchiveRoute
   '/auth': typeof AuthRoute
   '/buddy': typeof BuddyRoute
   '/care': typeof CareRoute
-  '/journal': typeof JournalRoute
   '/rewards': typeof RewardsRoute
   '/settings': typeof SettingsRoute
   '/therapists': typeof TherapistsRoute
+  '/archive': typeof AuthenticatedArchiveRoute
+  '/journal': typeof AuthenticatedJournalRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/archive': typeof ArchiveRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/buddy': typeof BuddyRoute
   '/care': typeof CareRoute
-  '/journal': typeof JournalRoute
   '/rewards': typeof RewardsRoute
   '/settings': typeof SettingsRoute
   '/therapists': typeof TherapistsRoute
+  '/_authenticated/archive': typeof AuthenticatedArchiveRoute
+  '/_authenticated/journal': typeof AuthenticatedJournalRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/archive'
     | '/auth'
     | '/buddy'
     | '/care'
-    | '/journal'
     | '/rewards'
     | '/settings'
     | '/therapists'
+    | '/archive'
+    | '/journal'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/archive'
     | '/auth'
     | '/buddy'
     | '/care'
-    | '/journal'
     | '/rewards'
     | '/settings'
     | '/therapists'
+    | '/archive'
+    | '/journal'
   id:
     | '__root__'
     | '/'
-    | '/archive'
+    | '/_authenticated'
     | '/auth'
     | '/buddy'
     | '/care'
-    | '/journal'
     | '/rewards'
     | '/settings'
     | '/therapists'
+    | '/_authenticated/archive'
+    | '/_authenticated/journal'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ArchiveRoute: typeof ArchiveRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   BuddyRoute: typeof BuddyRoute
   CareRoute: typeof CareRoute
-  JournalRoute: typeof JournalRoute
   RewardsRoute: typeof RewardsRoute
   SettingsRoute: typeof SettingsRoute
   TherapistsRoute: typeof TherapistsRoute
@@ -156,11 +162,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/archive': {
-      id: '/archive'
-      path: '/archive'
-      fullPath: '/archive'
-      preLoaderRoute: typeof ArchiveRouteImport
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -184,13 +190,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CareRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/journal': {
-      id: '/journal'
-      path: '/journal'
-      fullPath: '/journal'
-      preLoaderRoute: typeof JournalRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/rewards': {
       id: '/rewards'
       path: '/rewards'
@@ -212,16 +211,42 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TherapistsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/archive': {
+      id: '/_authenticated/archive'
+      path: '/archive'
+      fullPath: '/archive'
+      preLoaderRoute: typeof AuthenticatedArchiveRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/journal': {
+      id: '/_authenticated/journal'
+      path: '/journal'
+      fullPath: '/journal'
+      preLoaderRoute: typeof AuthenticatedJournalRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedArchiveRoute: typeof AuthenticatedArchiveRoute
+  AuthenticatedJournalRoute: typeof AuthenticatedJournalRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedArchiveRoute: AuthenticatedArchiveRoute,
+  AuthenticatedJournalRoute: AuthenticatedJournalRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ArchiveRoute: ArchiveRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   BuddyRoute: BuddyRoute,
   CareRoute: CareRoute,
-  JournalRoute: JournalRoute,
   RewardsRoute: RewardsRoute,
   SettingsRoute: SettingsRoute,
   TherapistsRoute: TherapistsRoute,
