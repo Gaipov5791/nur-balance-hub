@@ -44,6 +44,15 @@ export function useBuddyNotifications() {
     if (pathname === "/buddy") qc.setQueryData(UNREAD_KEY, 0);
   }, [pathname, qc]);
 
+  // Pick up a room that started while the user was in another section.
+  useEffect(() => {
+    if (!user) return;
+    const id = window.setInterval(() => {
+      void qc.invalidateQueries({ queryKey: ["buddy", "match", user.id] });
+    }, 30000);
+    return () => window.clearInterval(id);
+  }, [user?.id, qc]);
+
   useEffect(() => {
     if (!matchId || !user) return;
     const channel = supabase
