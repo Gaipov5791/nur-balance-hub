@@ -111,7 +111,7 @@ function SettingsPage() {
           <h2 className="font-display text-base">Профиль</h2>
           <div className="mt-4 flex items-center gap-4">
             <span className="grid size-16 place-items-center rounded-2xl bg-primary-soft font-display text-xl">
-              {(name || user?.email?.[0] ?? "?").slice(0, 1).toUpperCase()}
+              {((name || user?.email?.[0]) ?? "?").slice(0, 1).toUpperCase()}
             </span>
             <div className="flex-1 space-y-2">
               <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Как к вам обращаться" />
