@@ -8,9 +8,16 @@ import {
   LifeBuoy,
   Stethoscope,
   Settings,
+  Menu,
   type LucideIcon,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { profile } from "@/data/demo";
 
 type NavItem = { to: string; label: string; icon: LucideIcon; primaryMobile?: boolean };
@@ -26,9 +33,7 @@ const nav: NavItem[] = [
   { to: "/settings", label: "Настройки", icon: Settings },
 ];
 
-const mobileNav = nav.filter((n) =>
-  ["/", "/journal", "/buddy", "/care", "/rewards"].includes(n.to),
-);
+const mobileNav = nav.filter((n) => ["/", "/journal", "/buddy", "/care"].includes(n.to));
 
 export function Logo() {
   return (
@@ -51,6 +56,11 @@ export function AppShell({
   title?: string;
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -143,8 +153,62 @@ export function AppShell({
               </Link>
             );
           })}
+          <button
+            type="button"
+            onClick={() => setMenuOpen(true)}
+            className={`flex min-w-16 flex-col items-center gap-1 rounded-xl px-2 py-1.5 text-[11px] font-medium ${
+              menuOpen ? "text-primary" : "text-muted-foreground"
+            }`}
+          >
+            <Menu className="size-5" />
+            Меню
+          </button>
         </div>
       </nav>
+
+      <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+        <SheetContent
+          side="bottom"
+          className="max-h-[85vh] overflow-y-auto rounded-t-3xl px-4 pb-8 lg:hidden"
+        >
+          <SheetHeader className="px-0 pt-2">
+            <SheetTitle className="font-display text-lg">Меню</SheetTitle>
+          </SheetHeader>
+          <Link
+            to="/settings"
+            className="mt-2 flex items-center gap-3 rounded-2xl border border-border bg-card p-3"
+          >
+            <span className="grid size-11 shrink-0 place-items-center rounded-full bg-primary-soft font-display text-sm">
+              {profile.name.slice(0, 1)}
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-semibold">{profile.name}</span>
+              <span className="block text-xs text-muted-foreground">
+                {profile.coins} Nur-Coins
+              </span>
+            </span>
+          </Link>
+          <nav className="mt-4 grid gap-1">
+            {nav.map((item) => {
+              const active = pathname === item.to;
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors ${
+                    active
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
+                  }`}
+                >
+                  <item.icon className="size-[18px] shrink-0" />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
