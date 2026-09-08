@@ -339,7 +339,10 @@ function SettingsPage() {
             </div>
           </div>
 
+          <PasswordCard />
+
           <AccountCard />
+
         </section>
       </div>
     </AppShell>
