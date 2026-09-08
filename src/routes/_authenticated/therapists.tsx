@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { therapists } from "@/data/demo";
 
-export const Route = createFileRoute("/therapists")({
+export const Route = createFileRoute("/_authenticated/therapists")({
   head: () => ({
     meta: [
       { title: "Психологи: каталог и запись на сессию — Nur Balance" },

@@ -8,6 +8,13 @@ import { useProfile } from "@/hooks/useAuth";
 
 
 export const Route = createFileRoute("/")({
+  beforeLoad: async ({ location }) => {
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user) {
+      throw redirect({ to: "/auth", search: { redirect: location.pathname } });
+    }
+  },
   head: () => ({
     meta: [
       { title: "Nur Balance — видео-дневник эмоций и взаимоподдержка" },
