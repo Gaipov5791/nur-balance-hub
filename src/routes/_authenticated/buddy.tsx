@@ -295,7 +295,7 @@ function BuddyPage() {
           </div>
         </section>
 
-        <section className="surface flex min-h-[560px] flex-col">
+        <section className="surface flex min-h-[560px] min-w-0 flex-col">
           <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4">
             <div className="flex min-w-0 items-center gap-3">
               <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary-soft font-semibold">
