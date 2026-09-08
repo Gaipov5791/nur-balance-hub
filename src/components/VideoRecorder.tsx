@@ -54,6 +54,8 @@ function describeMediaError(err: unknown): string {
     case "NotFoundError":
     case "OverconstrainedError":
       return "Камера или микрофон не найдены. Подключите устройство и попробуйте снова.";
+    case "NotSupportedError":
+      return "Браузер не даёт доступ к камере на этой странице. Откройте приложение по защищённой ссылке (https) в Chrome или Safari.";
     case "NotReadableError":
     case "AbortError":
       return "Камера занята другим приложением. Закройте его и попробуйте снова.";
