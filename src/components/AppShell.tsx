@@ -76,6 +76,8 @@ export function AppShell({
   const [menuOpen, setMenuOpen] = useState(false);
   const { profile: real, user } = useProfile();
   const { isAdmin } = useIsAdmin();
+  useBuddyNotifications();
+  const unread = useBuddyUnread();
   const nav: NavItem[] = isAdmin ? [...baseNav, moderationItem] : baseNav;
   const profile = user
     ? { name: real?.name || user.email?.split("@")[0] || "Вы", coins: real?.coins ?? 0 }
