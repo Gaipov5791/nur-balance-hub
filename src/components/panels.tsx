@@ -150,12 +150,13 @@ export function MoodCalendar({
         {Object.entries(moods).map(([key, m]) => (
           <span
             key={key}
-            className="rounded-full bg-secondary px-2.5 py-1 text-[11px] text-secondary-foreground"
+            className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-secondary px-2.5 py-1 text-[11px] leading-tight text-secondary-foreground"
           >
             {m.emoji} {m.label}
           </span>
         ))}
       </div>
+
     </div>
   );
 }
