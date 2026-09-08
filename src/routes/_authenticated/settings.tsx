@@ -193,6 +193,7 @@ function AccountCard() {
 function SettingsPage() {
   const { user, profile: real } = useProfile();
   const qc = useQueryClient();
+  const award = useServerFn(awardCoins);
   const [name, setName] = useState(real?.name ?? user?.email?.split("@")[0] ?? "");
   const [goal, setGoal] = useState(real?.goal ?? goals[0]!.id);
   const [status, setStatus] = useState(real?.life_status ?? "burnout");
@@ -224,8 +225,21 @@ function SettingsPage() {
         .eq("id", user.id);
       if (error) throw error;
       setName(trimmed);
+      let bonus = 0;
+      if (goal && status) {
+        try {
+          const res = await award({ data: { action: "profile_complete" } });
+          bonus = res.granted;
+        } catch {
+          /* профиль сохранён — бонус начислим при следующем сохранении */
+        }
+      }
       await qc.invalidateQueries({ queryKey: ["profile"] });
-      toast.success(`Готово, ${trimmed}! Изменения сохранены`);
+      toast.success(
+        bonus > 0
+          ? `Готово, ${trimmed}! Изменения сохранены. +${bonus} Nur-Coins за заполненный профиль`
+          : `Готово, ${trimmed}! Изменения сохранены`,
+      );
     } catch (e) {
       toast.error(
         e instanceof Error

@@ -1,5 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { toast } from "sonner";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/AppShell";
 import { BuddyPanel, CoinsPanel } from "@/components/panels";
 import { Button } from "@/components/ui/button";
@@ -7,11 +10,13 @@ import { Progress } from "@/components/ui/progress";
 import {
   coinRules,
   dailyCoinLimit,
-  profile,
+  profile as demoProfile,
   serviceRewards,
   streakMilestones,
   symbolicRewards,
 } from "@/data/demo";
+import { useProfile } from "@/hooks/useAuth";
+import { listRedemptions, redeemReward } from "@/lib/coins.functions";
 
 export const Route = createFileRoute("/_authenticated/rewards")({
   head: () => ({
@@ -34,8 +39,19 @@ export const Route = createFileRoute("/_authenticated/rewards")({
 
 type Reward = { id: string; title: string; desc: string; cost: number; emoji: string };
 
-function RewardCard({ r }: { r: Reward }) {
+function RewardCard({
+  r,
+  coins,
+  owned,
+  onRedeem,
+}: {
+  r: Reward;
+  coins: number;
+  owned: boolean;
+  onRedeem: (r: Reward) => void;
+}) {
   const free = r.cost === 0;
+  const affordable = free || coins >= r.cost;
   return (
     <div className="rounded-2xl border border-border p-4">
       <span className="text-2xl">{r.emoji}</span>
@@ -43,19 +59,60 @@ function RewardCard({ r }: { r: Reward }) {
       <p className="mt-1 text-sm text-muted-foreground">{r.desc}</p>
       <Button
         className="mt-3 w-full"
-        variant={free || profile.coins >= r.cost ? "default" : "secondary"}
-        disabled={!free && profile.coins < r.cost}
-        onClick={() =>
-          toast.success(free ? `«${r.title}» уже доступно` : `«${r.title}» активировано`)
-        }
+        variant={owned ? "secondary" : affordable ? "default" : "secondary"}
+        disabled={owned || !affordable}
+        onClick={() => onRedeem(r)}
       >
-        {free ? "Открывается автоматически" : `🪙 ${r.cost}`}
+        {owned ? "Получено ✓" : free ? "Получить бесплатно" : `🪙 ${r.cost}`}
       </Button>
+      {!owned && !affordable ? (
+        <p className="mt-2 text-xs text-muted-foreground">
+          Не хватает {r.cost - coins} монет
+        </p>
+      ) : null}
     </div>
   );
 }
 
 export function RewardsPage() {
+  const { profile: real } = useProfile();
+  const profile = real ?? demoProfile;
+  const qc = useQueryClient();
+  const redeem = useServerFn(redeemReward);
+  const list = useServerFn(listRedemptions);
+  const [busy, setBusy] = useState(false);
+  const { data: owned = [] } = useQuery({
+    queryKey: ["redemptions"],
+    queryFn: () => list(),
+  });
+
+  const onRedeem = async (r: Reward) => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const res = await redeem({ data: { rewardId: r.id } });
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["redemptions"] }),
+        qc.invalidateQueries({ queryKey: ["profile"] }),
+      ]);
+      if (res.reason === "redeemed") {
+        toast.success(
+          r.cost > 0 ? `«${r.title}» активировано. Списано ${r.cost} 🪙` : `«${r.title}» открыто`,
+        );
+      } else if (res.reason === "already") {
+        toast.success(`«${r.title}» уже получено`);
+      } else {
+        toast.error(`Не хватает монет: нужно ${r.cost}, у вас ${res.coins}`);
+      }
+    } catch {
+      toast.error("Не удалось активировать награду", {
+        action: { label: "Повторить", onClick: () => void onRedeem(r) },
+      });
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <AppShell title="Достижения и баланс" aside={<BuddyPanel />}>
       <div className="grid gap-5 lg:grid-cols-[1fr_1.2fr]">
@@ -126,14 +183,14 @@ export function RewardsPage() {
             <p className="mt-3 text-sm font-semibold">Символические</p>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               {symbolicRewards.map((r) => (
-                <RewardCard key={r.id} r={r} />
+                <RewardCard key={r.id} r={r} coins={profile.coins} owned={owned.includes(r.id)} onRedeem={onRedeem} />
               ))}
             </div>
 
             <p className="mt-5 text-sm font-semibold">Бонусы на консультации</p>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               {serviceRewards.map((r) => (
-                <RewardCard key={r.id} r={r} />
+                <RewardCard key={r.id} r={r} coins={profile.coins} owned={owned.includes(r.id)} onRedeem={onRedeem} />
               ))}
             </div>
             <p className="mt-4 text-xs text-muted-foreground">
