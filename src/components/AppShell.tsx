@@ -170,11 +170,14 @@ export function AppShell({
               <Link
                 key={item.to}
                 to={item.to}
-                className={`flex min-w-16 flex-col items-center gap-1 rounded-xl px-2 py-1.5 text-[11px] font-medium ${
+                className={`relative flex min-w-16 flex-col items-center gap-1 rounded-xl px-2 py-1.5 text-[11px] font-medium ${
                   active ? "text-primary" : "text-muted-foreground"
                 }`}
               >
                 <item.icon className="size-5" />
+                {item.to === "/buddy" ? (
+                  <UnreadBadge count={unread} className="absolute top-0.5 right-2.5" />
+                ) : null}
                 {item.label}
               </Link>
             );
