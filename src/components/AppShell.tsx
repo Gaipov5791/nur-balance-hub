@@ -8,9 +8,16 @@ import {
   LifeBuoy,
   Stethoscope,
   Settings,
+  Menu,
   type LucideIcon,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { profile } from "@/data/demo";
 
 type NavItem = { to: string; label: string; icon: LucideIcon; primaryMobile?: boolean };
@@ -26,9 +33,7 @@ const nav: NavItem[] = [
   { to: "/settings", label: "Настройки", icon: Settings },
 ];
 
-const mobileNav = nav.filter((n) =>
-  ["/", "/journal", "/buddy", "/care", "/rewards"].includes(n.to),
-);
+const mobileNav = nav.filter((n) => ["/", "/journal", "/buddy", "/care"].includes(n.to));
 
 export function Logo() {
   return (
