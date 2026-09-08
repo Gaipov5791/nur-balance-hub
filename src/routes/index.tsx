@@ -1,13 +1,20 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { ArrowRight, Video } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { BuddyPanel, CoinsPanel, MoodCalendar, TipPanel } from "@/components/panels";
 import { Button } from "@/components/ui/button";
 import { careCategories, journalEntries, moods, profile } from "@/data/demo";
 import { useProfile } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 
 export const Route = createFileRoute("/")({
+  beforeLoad: async ({ location }) => {
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user) {
+      throw redirect({ to: "/auth", search: { redirect: location.pathname } });
+    }
+  },
   head: () => ({
     meta: [
       { title: "Nur Balance — видео-дневник эмоций и взаимоподдержка" },

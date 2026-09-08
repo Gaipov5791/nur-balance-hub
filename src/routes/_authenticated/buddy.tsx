@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { buddies, chatMessages, lifeStatuses, profile } from "@/data/demo";
 
-export const Route = createFileRoute("/buddy")({
+export const Route = createFileRoute("/_authenticated/buddy")({
   head: () => ({
     meta: [
       { title: "Поддержи подругу — чат взаимоподдержки | Nur Balance" },

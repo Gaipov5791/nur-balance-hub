@@ -7,7 +7,7 @@ import { CoinsPanel, TipPanel } from "@/components/panels";
 import { Button } from "@/components/ui/button";
 import { careCategories } from "@/data/demo";
 
-export const Route = createFileRoute("/care")({
+export const Route = createFileRoute("/_authenticated/care")({
   head: () => ({
     meta: [
       { title: "Ситуативные советы: тревога, паника, бессонница — Nur Balance" },

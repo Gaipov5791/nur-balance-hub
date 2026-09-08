@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { goals, lifeStatuses, profile } from "@/data/demo";
 
-export const Route = createFileRoute("/settings")({
+export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
     meta: [
       { title: "Настройки профиля и приватности — Nur Balance" },

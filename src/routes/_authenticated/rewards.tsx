@@ -13,7 +13,7 @@ import {
   symbolicRewards,
 } from "@/data/demo";
 
-export const Route = createFileRoute("/rewards")({
+export const Route = createFileRoute("/_authenticated/rewards")({
   head: () => ({
     meta: [
       { title: "Достижения и Nur-Coins — Nur Balance" },

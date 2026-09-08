@@ -12,13 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as BuddyRouteImport } from './routes/buddy'
-import { Route as CareRouteImport } from './routes/care'
-import { Route as RewardsRouteImport } from './routes/rewards'
-import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as TherapistsRouteImport } from './routes/therapists'
 import { Route as AuthenticatedArchiveRouteImport } from './routes/_authenticated/archive'
+import { Route as AuthenticatedBuddyRouteImport } from './routes/_authenticated/buddy'
+import { Route as AuthenticatedCareRouteImport } from './routes/_authenticated/care'
 import { Route as AuthenticatedJournalRouteImport } from './routes/_authenticated/journal'
+import { Route as AuthenticatedRewardsRouteImport } from './routes/_authenticated/rewards'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedTherapistsRouteImport } from './routes/_authenticated/therapists'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,34 +34,19 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BuddyRoute = BuddyRouteImport.update({
-  id: '/buddy',
-  path: '/buddy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CareRoute = CareRouteImport.update({
-  id: '/care',
-  path: '/care',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RewardsRoute = RewardsRouteImport.update({
-  id: '/rewards',
-  path: '/rewards',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TherapistsRoute = TherapistsRouteImport.update({
-  id: '/therapists',
-  path: '/therapists',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedArchiveRoute = AuthenticatedArchiveRouteImport.update({
   id: '/archive',
   path: '/archive',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedBuddyRoute = AuthenticatedBuddyRouteImport.update({
+  id: '/buddy',
+  path: '/buddy',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCareRoute = AuthenticatedCareRouteImport.update({
+  id: '/care',
+  path: '/care',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedJournalRoute = AuthenticatedJournalRouteImport.update({
@@ -69,88 +54,98 @@ const AuthenticatedJournalRoute = AuthenticatedJournalRouteImport.update({
   path: '/journal',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedRewardsRoute = AuthenticatedRewardsRouteImport.update({
+  id: '/rewards',
+  path: '/rewards',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedTherapistsRoute = AuthenticatedTherapistsRouteImport.update({
+  id: '/therapists',
+  path: '/therapists',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/buddy': typeof BuddyRoute
-  '/care': typeof CareRoute
-  '/rewards': typeof RewardsRoute
-  '/settings': typeof SettingsRoute
-  '/therapists': typeof TherapistsRoute
   '/archive': typeof AuthenticatedArchiveRoute
+  '/buddy': typeof AuthenticatedBuddyRoute
+  '/care': typeof AuthenticatedCareRoute
   '/journal': typeof AuthenticatedJournalRoute
+  '/rewards': typeof AuthenticatedRewardsRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/therapists': typeof AuthenticatedTherapistsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/buddy': typeof BuddyRoute
-  '/care': typeof CareRoute
-  '/rewards': typeof RewardsRoute
-  '/settings': typeof SettingsRoute
-  '/therapists': typeof TherapistsRoute
   '/archive': typeof AuthenticatedArchiveRoute
+  '/buddy': typeof AuthenticatedBuddyRoute
+  '/care': typeof AuthenticatedCareRoute
   '/journal': typeof AuthenticatedJournalRoute
+  '/rewards': typeof AuthenticatedRewardsRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/therapists': typeof AuthenticatedTherapistsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/buddy': typeof BuddyRoute
-  '/care': typeof CareRoute
-  '/rewards': typeof RewardsRoute
-  '/settings': typeof SettingsRoute
-  '/therapists': typeof TherapistsRoute
   '/_authenticated/archive': typeof AuthenticatedArchiveRoute
+  '/_authenticated/buddy': typeof AuthenticatedBuddyRoute
+  '/_authenticated/care': typeof AuthenticatedCareRoute
   '/_authenticated/journal': typeof AuthenticatedJournalRoute
+  '/_authenticated/rewards': typeof AuthenticatedRewardsRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/therapists': typeof AuthenticatedTherapistsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/auth'
+    | '/archive'
     | '/buddy'
     | '/care'
+    | '/journal'
     | '/rewards'
     | '/settings'
     | '/therapists'
-    | '/archive'
-    | '/journal'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/archive'
     | '/buddy'
     | '/care'
+    | '/journal'
     | '/rewards'
     | '/settings'
     | '/therapists'
-    | '/archive'
-    | '/journal'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
-    | '/buddy'
-    | '/care'
-    | '/rewards'
-    | '/settings'
-    | '/therapists'
     | '/_authenticated/archive'
+    | '/_authenticated/buddy'
+    | '/_authenticated/care'
     | '/_authenticated/journal'
+    | '/_authenticated/rewards'
+    | '/_authenticated/settings'
+    | '/_authenticated/therapists'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
-  BuddyRoute: typeof BuddyRoute
-  CareRoute: typeof CareRoute
-  RewardsRoute: typeof RewardsRoute
-  SettingsRoute: typeof SettingsRoute
-  TherapistsRoute: typeof TherapistsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -176,46 +171,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/buddy': {
-      id: '/buddy'
-      path: '/buddy'
-      fullPath: '/buddy'
-      preLoaderRoute: typeof BuddyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/care': {
-      id: '/care'
-      path: '/care'
-      fullPath: '/care'
-      preLoaderRoute: typeof CareRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/rewards': {
-      id: '/rewards'
-      path: '/rewards'
-      fullPath: '/rewards'
-      preLoaderRoute: typeof RewardsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/therapists': {
-      id: '/therapists'
-      path: '/therapists'
-      fullPath: '/therapists'
-      preLoaderRoute: typeof TherapistsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated/archive': {
       id: '/_authenticated/archive'
       path: '/archive'
       fullPath: '/archive'
       preLoaderRoute: typeof AuthenticatedArchiveRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/buddy': {
+      id: '/_authenticated/buddy'
+      path: '/buddy'
+      fullPath: '/buddy'
+      preLoaderRoute: typeof AuthenticatedBuddyRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/care': {
+      id: '/_authenticated/care'
+      path: '/care'
+      fullPath: '/care'
+      preLoaderRoute: typeof AuthenticatedCareRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/journal': {
@@ -225,17 +199,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedJournalRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/rewards': {
+      id: '/_authenticated/rewards'
+      path: '/rewards'
+      fullPath: '/rewards'
+      preLoaderRoute: typeof AuthenticatedRewardsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/therapists': {
+      id: '/_authenticated/therapists'
+      path: '/therapists'
+      fullPath: '/therapists'
+      preLoaderRoute: typeof AuthenticatedTherapistsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedArchiveRoute: typeof AuthenticatedArchiveRoute
+  AuthenticatedBuddyRoute: typeof AuthenticatedBuddyRoute
+  AuthenticatedCareRoute: typeof AuthenticatedCareRoute
   AuthenticatedJournalRoute: typeof AuthenticatedJournalRoute
+  AuthenticatedRewardsRoute: typeof AuthenticatedRewardsRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedTherapistsRoute: typeof AuthenticatedTherapistsRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedArchiveRoute: AuthenticatedArchiveRoute,
+  AuthenticatedBuddyRoute: AuthenticatedBuddyRoute,
+  AuthenticatedCareRoute: AuthenticatedCareRoute,
   AuthenticatedJournalRoute: AuthenticatedJournalRoute,
+  AuthenticatedRewardsRoute: AuthenticatedRewardsRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedTherapistsRoute: AuthenticatedTherapistsRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -245,11 +250,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
-  BuddyRoute: BuddyRoute,
-  CareRoute: CareRoute,
-  RewardsRoute: RewardsRoute,
-  SettingsRoute: SettingsRoute,
-  TherapistsRoute: TherapistsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
