@@ -16,6 +16,7 @@ import { Route as AuthenticatedArchiveRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedBuddyRouteImport } from './routes/_authenticated/buddy'
 import { Route as AuthenticatedCareRouteImport } from './routes/_authenticated/care'
 import { Route as AuthenticatedJournalRouteImport } from './routes/_authenticated/journal'
+import { Route as AuthenticatedModerationRouteImport } from './routes/_authenticated/moderation'
 import { Route as AuthenticatedRewardsRouteImport } from './routes/_authenticated/rewards'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedTherapistsRouteImport } from './routes/_authenticated/therapists'
@@ -54,6 +55,11 @@ const AuthenticatedJournalRoute = AuthenticatedJournalRouteImport.update({
   path: '/journal',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedModerationRoute = AuthenticatedModerationRouteImport.update({
+  id: '/moderation',
+  path: '/moderation',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedRewardsRoute = AuthenticatedRewardsRouteImport.update({
   id: '/rewards',
   path: '/rewards',
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/buddy': typeof AuthenticatedBuddyRoute
   '/care': typeof AuthenticatedCareRoute
   '/journal': typeof AuthenticatedJournalRoute
+  '/moderation': typeof AuthenticatedModerationRoute
   '/rewards': typeof AuthenticatedRewardsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/therapists': typeof AuthenticatedTherapistsRoute
@@ -88,6 +95,7 @@ export interface FileRoutesByTo {
   '/buddy': typeof AuthenticatedBuddyRoute
   '/care': typeof AuthenticatedCareRoute
   '/journal': typeof AuthenticatedJournalRoute
+  '/moderation': typeof AuthenticatedModerationRoute
   '/rewards': typeof AuthenticatedRewardsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/therapists': typeof AuthenticatedTherapistsRoute
@@ -101,6 +109,7 @@ export interface FileRoutesById {
   '/_authenticated/buddy': typeof AuthenticatedBuddyRoute
   '/_authenticated/care': typeof AuthenticatedCareRoute
   '/_authenticated/journal': typeof AuthenticatedJournalRoute
+  '/_authenticated/moderation': typeof AuthenticatedModerationRoute
   '/_authenticated/rewards': typeof AuthenticatedRewardsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/therapists': typeof AuthenticatedTherapistsRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/buddy'
     | '/care'
     | '/journal'
+    | '/moderation'
     | '/rewards'
     | '/settings'
     | '/therapists'
@@ -125,6 +135,7 @@ export interface FileRouteTypes {
     | '/buddy'
     | '/care'
     | '/journal'
+    | '/moderation'
     | '/rewards'
     | '/settings'
     | '/therapists'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '/_authenticated/buddy'
     | '/_authenticated/care'
     | '/_authenticated/journal'
+    | '/_authenticated/moderation'
     | '/_authenticated/rewards'
     | '/_authenticated/settings'
     | '/_authenticated/therapists'
@@ -199,6 +211,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedJournalRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/moderation': {
+      id: '/_authenticated/moderation'
+      path: '/moderation'
+      fullPath: '/moderation'
+      preLoaderRoute: typeof AuthenticatedModerationRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/rewards': {
       id: '/_authenticated/rewards'
       path: '/rewards'
@@ -228,6 +247,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedBuddyRoute: typeof AuthenticatedBuddyRoute
   AuthenticatedCareRoute: typeof AuthenticatedCareRoute
   AuthenticatedJournalRoute: typeof AuthenticatedJournalRoute
+  AuthenticatedModerationRoute: typeof AuthenticatedModerationRoute
   AuthenticatedRewardsRoute: typeof AuthenticatedRewardsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTherapistsRoute: typeof AuthenticatedTherapistsRoute
@@ -238,6 +258,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBuddyRoute: AuthenticatedBuddyRoute,
   AuthenticatedCareRoute: AuthenticatedCareRoute,
   AuthenticatedJournalRoute: AuthenticatedJournalRoute,
+  AuthenticatedModerationRoute: AuthenticatedModerationRoute,
   AuthenticatedRewardsRoute: AuthenticatedRewardsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTherapistsRoute: AuthenticatedTherapistsRoute,

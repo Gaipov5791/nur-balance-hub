@@ -14,6 +14,160 @@ export type Database = {
   }
   public: {
     Tables: {
+      buddy_blocks: {
+        Row: {
+          blocked_user_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          blocked_user_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          blocked_user_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      buddy_matches: {
+        Row: {
+          created_at: string
+          ended_at: string | null
+          ended_by: string | null
+          id: string
+          life_status: string | null
+          status: string
+          user_a: string
+          user_b: string
+        }
+        Insert: {
+          created_at?: string
+          ended_at?: string | null
+          ended_by?: string | null
+          id?: string
+          life_status?: string | null
+          status?: string
+          user_a: string
+          user_b: string
+        }
+        Update: {
+          created_at?: string
+          ended_at?: string | null
+          ended_by?: string | null
+          id?: string
+          life_status?: string | null
+          status?: string
+          user_a?: string
+          user_b?: string
+        }
+        Relationships: []
+      }
+      buddy_messages: {
+        Row: {
+          body: string
+          created_at: string
+          duration_seconds: number
+          id: string
+          kind: string
+          match_id: string
+          media_path: string | null
+          sender_id: string
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          duration_seconds?: number
+          id?: string
+          kind?: string
+          match_id: string
+          media_path?: string | null
+          sender_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          duration_seconds?: number
+          id?: string
+          kind?: string
+          match_id?: string
+          media_path?: string | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buddy_messages_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "buddy_matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      buddy_queue: {
+        Row: {
+          created_at: string
+          life_status: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          life_status?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          life_status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      buddy_reports: {
+        Row: {
+          created_at: string
+          details: string
+          id: string
+          match_id: string | null
+          reason: string
+          reported_id: string
+          reporter_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string
+          id?: string
+          match_id?: string | null
+          reason: string
+          reported_id: string
+          reporter_id: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          details?: string
+          id?: string
+          match_id?: string | null
+          reason?: string
+          reported_id?: string
+          reporter_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buddy_reports_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "buddy_matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coin_transactions: {
         Row: {
           action: string
@@ -189,11 +343,41 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      active_buddy_match: {
+        Args: never
+        Returns: {
+          match_id: string
+          partner_id: string
+          partner_name: string
+          partner_status: string
+          started_at: string
+        }[]
+      }
+      find_or_queue_buddy: {
+        Args: { _life_status: string }
+        Returns: {
+          match_id: string
+          matched: boolean
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_match_participant: {
+        Args: { _match_id: string; _user_id: string }
+        Returns: boolean
+      }
+      leave_buddy_match: {
+        Args: { _block?: boolean; _match_id: string }
+        Returns: boolean
+      }
+      leave_buddy_queue: { Args: never; Returns: boolean }
+      report_buddy: {
+        Args: { _details?: string; _match_id: string; _reason: string }
         Returns: boolean
       }
     }

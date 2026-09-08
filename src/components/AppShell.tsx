@@ -8,6 +8,7 @@ import {
   LifeBuoy,
   Stethoscope,
   Settings,
+  ShieldCheck,
   Menu,
   type LucideIcon,
 } from "lucide-react";
@@ -19,11 +20,11 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { profile as demoProfile } from "@/data/demo";
-import { useProfile } from "@/hooks/useAuth";
+import { useIsAdmin, useProfile } from "@/hooks/useAuth";
 
 type NavItem = { to: string; label: string; icon: LucideIcon; primaryMobile?: boolean };
 
-const nav: NavItem[] = [
+const baseNav: NavItem[] = [
   { to: "/", label: "Главная", icon: Home },
   { to: "/journal", label: "Дневник", icon: Video, primaryMobile: true },
   { to: "/archive", label: "Календарь", icon: CalendarDays },
@@ -34,7 +35,9 @@ const nav: NavItem[] = [
   { to: "/settings", label: "Настройки", icon: Settings },
 ];
 
-const mobileNav = nav.filter((n) => ["/", "/journal", "/buddy", "/care"].includes(n.to));
+const moderationItem: NavItem = { to: "/moderation", label: "Модерация", icon: ShieldCheck };
+
+const mobileNav = baseNav.filter((n) => ["/", "/journal", "/buddy", "/care"].includes(n.to));
 
 export function Logo() {
   return (
@@ -59,6 +62,8 @@ export function AppShell({
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [menuOpen, setMenuOpen] = useState(false);
   const { profile: real, user } = useProfile();
+  const { isAdmin } = useIsAdmin();
+  const nav: NavItem[] = isAdmin ? [...baseNav, moderationItem] : baseNav;
   const profile = user
     ? { name: real?.name || user.email?.split("@")[0] || "Вы", coins: real?.coins ?? 0 }
     : demoProfile;
