@@ -8,7 +8,8 @@ import { useProfile } from "@/hooks/useAuth";
 export function CoinsPanel() {
   const { profile: real } = useProfile();
   const profile = real ? { coins: real.coins, streak: real.streak } : demoProfile;
-  const next = [3, 7, 14, 30].find((m) => m > profile.streak) ?? profile.streak;
+  const next = [3, 7, 14, 30].find((m) => m > profile.streak) ?? null;
+  const left = next ? next - profile.streak : 0;
   return (
     <div className="surface p-5">
       <div className="flex items-start justify-between">
