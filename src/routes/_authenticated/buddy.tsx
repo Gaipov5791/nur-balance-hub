@@ -2,11 +2,15 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Mic, Send, ShieldAlert, Shuffle, Video } from "lucide-react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/AppShell";
 import { CoinsPanel } from "@/components/panels";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { buddies, chatMessages, lifeStatuses, profile } from "@/data/demo";
+import { useProfile } from "@/hooks/useAuth";
+import { awardCoins } from "@/lib/coins.functions";
 
 export const Route = createFileRoute("/_authenticated/buddy")({
   head: () => ({
@@ -28,9 +32,35 @@ export const Route = createFileRoute("/_authenticated/buddy")({
 });
 
 function BuddyPage() {
-  const [status, setStatus] = useState(profile.status);
+  const { profile: real } = useProfile();
+  const [status, setStatus] = useState(real?.life_status ?? profile.status);
   const [active, setActive] = useState<string | null>("b1");
   const buddy = buddies.find((b) => b.id === active);
+  const [text, setText] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState<{ id: string; text: string; time: string }[]>([]);
+  const award = useServerFn(awardCoins);
+  const qc = useQueryClient();
+
+  const sendMessage = async (value: string) => {
+    const time = new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+    setSent((prev) => [...prev, { id: `${Date.now()}`, text: value, time }]);
+    setText("");
+    setSending(true);
+    try {
+      const res = await award({ data: { action: "buddy" } });
+      await qc.invalidateQueries({ queryKey: ["profile"] });
+      if (res.reason === "granted") toast.success(`Сообщение отправлено. +${res.granted} Nur-Coins`);
+      else toast.success("Сообщение отправлено");
+    } catch {
+      toast.error("Сообщение отправлено, но монеты не начислились", {
+        action: { label: "Повторить", onClick: () => void sendMessage(value) },
+      });
+    } finally {
+      setSending(false);
+    }
+  };
+
 
   return (
     <AppShell title="Поддержи подругу" aside={<CoinsPanel />}>
@@ -139,32 +169,50 @@ function BuddyPage() {
                 </div>
               </div>
             ))}
-            <div className="flex justify-start">
-              <div className="flex items-center gap-3 rounded-2xl bg-secondary px-4 py-3 text-sm">
-                <span className="grid size-8 place-items-center rounded-full bg-primary text-primary-foreground">
-                  <Mic className="size-4" />
-                </span>
-                <span className="h-6 w-32 rounded-full bg-primary-soft" />
-                <span className="text-xs text-muted-foreground">0:38</span>
+            {sent.map((m) => (
+              <div key={m.id} className="flex justify-end">
+                <div className="max-w-[75%] rounded-2xl bg-primary px-4 py-2.5 text-sm text-primary-foreground">
+                  {m.text}
+                  <span className="mt-1 block text-[10px] opacity-70">{m.time}</span>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
 
           <form
             className="flex items-center gap-2 border-t border-border p-3"
             onSubmit={(e) => {
               e.preventDefault();
-              toast.success("Сообщение отправлено. +15 Nur-Coins");
+              const value = text.trim();
+              if (!value || sending) return;
+              void sendMessage(value);
             }}
           >
-            <Button type="button" variant="ghost" size="icon" aria-label="Голосовое сообщение">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label="Голосовое сообщение"
+              onClick={() => toast("Голосовые сообщения появятся в следующем обновлении")}
+            >
               <Mic className="size-5" />
             </Button>
-            <Button type="button" variant="ghost" size="icon" aria-label="Видео-сообщение">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label="Видео-сообщение"
+              onClick={() => toast("Видео-сообщения появятся в следующем обновлении")}
+            >
               <Video className="size-5" />
             </Button>
-            <Input placeholder="Напишите слова поддержки…" className="flex-1" />
-            <Button type="submit" size="icon" aria-label="Отправить">
+            <Input
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="Напишите слова поддержки…"
+              className="flex-1"
+            />
+            <Button type="submit" size="icon" aria-label="Отправить" disabled={!text.trim() || sending}>
               <Send className="size-4" />
             </Button>
           </form>

@@ -2,7 +2,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useProfile, useSignOut } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
+import { awardCoins } from "@/lib/coins.functions";
 import { AppShell } from "@/components/AppShell";
 import { CoinsPanel } from "@/components/panels";
 import { Button } from "@/components/ui/button";
@@ -193,6 +195,7 @@ function AccountCard() {
 function SettingsPage() {
   const { user, profile: real } = useProfile();
   const qc = useQueryClient();
+  const award = useServerFn(awardCoins);
   const [name, setName] = useState(real?.name ?? user?.email?.split("@")[0] ?? "");
   const [goal, setGoal] = useState(real?.goal ?? goals[0]!.id);
   const [status, setStatus] = useState(real?.life_status ?? "burnout");
@@ -224,8 +227,21 @@ function SettingsPage() {
         .eq("id", user.id);
       if (error) throw error;
       setName(trimmed);
+      let bonus = 0;
+      if (goal && status) {
+        try {
+          const res = await award({ data: { action: "profile_complete" } });
+          bonus = res.granted;
+        } catch {
+          /* профиль сохранён — бонус начислим при следующем сохранении */
+        }
+      }
       await qc.invalidateQueries({ queryKey: ["profile"] });
-      toast.success(`Готово, ${trimmed}! Изменения сохранены`);
+      toast.success(
+        bonus > 0
+          ? `Готово, ${trimmed}! Изменения сохранены. +${bonus} Nur-Coins за заполненный профиль`
+          : `Готово, ${trimmed}! Изменения сохранены`,
+      );
     } catch (e) {
       toast.error(
         e instanceof Error
@@ -311,7 +327,10 @@ function SettingsPage() {
             {pin ? (
               <div className="mt-3 flex gap-2">
                 <Input placeholder="Новый PIN" inputMode="numeric" maxLength={4} />
-                <Button variant="secondary" onClick={() => toast.success("PIN обновлён")}>
+                <Button
+                  variant="secondary"
+                  onClick={() => toast("PIN-код появится в ближайшем обновлении")}
+                >
                   Обновить
                 </Button>
               </div>
