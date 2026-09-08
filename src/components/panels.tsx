@@ -27,11 +27,16 @@ export function CoinsPanel() {
           <span className="flex items-center gap-1.5">
             <Flame className="size-4 text-accent" /> Серия {profile.streak} дней
           </span>
-          <span className="text-muted-foreground">до {next}</span>
+          <span className="text-muted-foreground">{next ? `до ${next}` : "все этапы"}</span>
         </div>
-        <Progress value={(profile.streak / next) * 100} className="mt-3 h-2" />
+        <Progress
+          value={next ? Math.min(100, (profile.streak / next) * 100) : 100}
+          className="mt-3 h-2"
+        />
         <p className="mt-2 text-xs text-muted-foreground">
-          Ещё {next - profile.streak} дн. — и бонус за непрерывность
+          {next
+            ? `Ещё ${left} дн. — и бонус за непрерывность`
+            : "Вы прошли все этапы серии — так держать"}
         </p>
       </div>
       <Button asChild variant="secondary" className="mt-4 w-full">
