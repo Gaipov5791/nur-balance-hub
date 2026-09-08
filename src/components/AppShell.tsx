@@ -18,7 +18,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { profile } from "@/data/demo";
+import { profile as demoProfile } from "@/data/demo";
+import { useProfile } from "@/hooks/useAuth";
 
 type NavItem = { to: string; label: string; icon: LucideIcon; primaryMobile?: boolean };
 
@@ -57,6 +58,10 @@ export function AppShell({
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [menuOpen, setMenuOpen] = useState(false);
+  const { profile: real, user } = useProfile();
+  const profile = user
+    ? { name: real?.name || user.email?.split("@")[0] || "Вы", coins: real?.coins ?? 0 }
+    : demoProfile;
 
   useEffect(() => {
     setMenuOpen(false);
