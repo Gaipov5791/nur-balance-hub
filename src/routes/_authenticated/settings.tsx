@@ -9,8 +9,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { goals, lifeStatuses } from "@/data/demo";
 import { supabase } from "@/integrations/supabase/client";
+
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
@@ -31,27 +43,138 @@ export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
 });
 
+function PasswordCard() {
+  const { user } = useProfile();
+  const [current, setCurrent] = useState("");
+  const [next, setNext] = useState("");
+  const [repeat, setRepeat] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async () => {
+    if (!user?.email) return;
+    if (next.length < 6) {
+      toast.error("Новый пароль должен быть не короче 6 символов");
+      return;
+    }
+    if (next !== repeat) {
+      toast.error("Новый пароль и подтверждение не совпадают");
+      return;
+    }
+    setBusy(true);
+    try {
+      const { error: checkError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: current,
+      });
+      if (checkError) {
+        toast.error("Текущий пароль указан неверно");
+        return;
+      }
+      const { error } = await supabase.auth.updateUser({ password: next });
+      if (error) throw error;
+      setCurrent("");
+      setNext("");
+      setRepeat("");
+      toast.success("Пароль обновлён");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Не удалось изменить пароль", {
+        action: { label: "Повторить", onClick: () => void submit() },
+      });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="surface p-5">
+      <h2 className="font-display text-base">Смена пароля</h2>
+      <div className="mt-4 space-y-2">
+        <Label htmlFor="cur-pass">Текущий пароль</Label>
+        <Input
+          id="cur-pass"
+          type="password"
+          autoComplete="current-password"
+          value={current}
+          onChange={(e) => setCurrent(e.target.value)}
+        />
+        <Label htmlFor="new-pass">Новый пароль</Label>
+        <Input
+          id="new-pass"
+          type="password"
+          autoComplete="new-password"
+          value={next}
+          onChange={(e) => setNext(e.target.value)}
+        />
+        <Label htmlFor="rep-pass">Повторите новый пароль</Label>
+        <Input
+          id="rep-pass"
+          type="password"
+          autoComplete="new-password"
+          value={repeat}
+          onChange={(e) => setRepeat(e.target.value)}
+        />
+      </div>
+      <Button
+        className="mt-4"
+        variant="secondary"
+        onClick={submit}
+        disabled={busy || !current || !next}
+      >
+        {busy ? "Обновляем…" : "Изменить пароль"}
+      </Button>
+      <p className="mt-3 text-xs text-muted-foreground">
+        Если вы входите через Google, пароль задавать не нужно.
+      </p>
+    </div>
+  );
+}
+
 function AccountCard() {
   const { user } = useProfile();
   const signOut = useSignOut();
   const navigate = useNavigate();
+  const [leaving, setLeaving] = useState(false);
   return (
     <div className="surface p-5">
       <h2 className="font-display text-base">Аккаунт</h2>
       {user ? (
         <>
           <p className="mt-2 text-sm text-muted-foreground">Вы вошли как {user.email}</p>
-          <Button
-            variant="secondary"
-            className="mt-4 w-full"
-            onClick={async () => {
-              await signOut();
-              toast.success("Вы вышли из аккаунта");
-              navigate({ to: "/auth" });
-            }}
-          >
-            Выйти
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="secondary" className="mt-4 w-full" disabled={leaving}>
+                {leaving ? "Выходим…" : "Выйти"}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Выйти из аккаунта?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Записи дневника останутся в вашем архиве. Чтобы вернуться, нужно будет войти
+                  снова.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Остаться</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={async () => {
+                    setLeaving(true);
+                    try {
+                      await signOut();
+                      toast.success("Вы вышли из аккаунта");
+                      navigate({ to: "/auth" });
+                    } catch {
+                      toast.error("Не удалось выйти, попробуйте ещё раз");
+                    } finally {
+                      setLeaving(false);
+                    }
+                  }}
+                >
+                  Выйти
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </>
       ) : (
         <>
@@ -88,21 +211,33 @@ function SettingsPage() {
 
   const save = async () => {
     if (!user) return;
+    const trimmed = name.trim();
+    if (!trimmed) {
+      toast.error("Укажите имя, чтобы мы знали, как к вам обращаться");
+      return;
+    }
     setSaving(true);
     try {
       const { error } = await supabase
         .from("profiles")
-        .update({ name, goal, life_status: status })
+        .update({ name: trimmed, goal, life_status: status })
         .eq("id", user.id);
       if (error) throw error;
-      qc.invalidateQueries({ queryKey: ["profile", user.id] });
-      toast.success("Изменения сохранены");
+      setName(trimmed);
+      await qc.invalidateQueries({ queryKey: ["profile"] });
+      toast.success(`Готово, ${trimmed}! Изменения сохранены`);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Не удалось сохранить");
+      toast.error(
+        e instanceof Error
+          ? `Не удалось сохранить: ${e.message}`
+          : "Не удалось сохранить. Проверьте соединение",
+        { action: { label: "Повторить", onClick: () => void save() } },
+      );
     } finally {
       setSaving(false);
     }
   };
+
 
   return (
     <AppShell title="Настройки" aside={<CoinsPanel />}>
@@ -204,7 +339,10 @@ function SettingsPage() {
             </div>
           </div>
 
+          <PasswordCard />
+
           <AccountCard />
+
         </section>
       </div>
     </AppShell>
