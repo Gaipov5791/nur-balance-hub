@@ -21,6 +21,19 @@ import {
 } from "@/components/ui/sheet";
 import { profile as demoProfile } from "@/data/demo";
 import { useIsAdmin, useProfile } from "@/hooks/useAuth";
+import { useBuddyNotifications, useBuddyUnread } from "@/hooks/useBuddyNotifications";
+
+function UnreadBadge({ count, className = "" }: { count: number; className?: string }) {
+  if (count <= 0) return null;
+  return (
+    <span
+      className={`grid min-w-5 shrink-0 place-items-center rounded-full bg-accent px-1.5 text-[11px] font-semibold text-accent-foreground ${className}`}
+      aria-label={`Новых сообщений: ${count}`}
+    >
+      {count > 9 ? "9+" : count}
+    </span>
+  );
+}
 
 type NavItem = { to: string; label: string; icon: LucideIcon; primaryMobile?: boolean };
 
@@ -63,6 +76,8 @@ export function AppShell({
   const [menuOpen, setMenuOpen] = useState(false);
   const { profile: real, user } = useProfile();
   const { isAdmin } = useIsAdmin();
+  useBuddyNotifications();
+  const unread = useBuddyUnread();
   const nav: NavItem[] = isAdmin ? [...baseNav, moderationItem] : baseNav;
   const profile = user
     ? { name: real?.name || user.email?.split("@")[0] || "Вы", coins: real?.coins ?? 0 }
@@ -93,7 +108,8 @@ export function AppShell({
                   }`}
                 >
                   <item.icon className="size-[18px]" />
-                  {item.label}
+                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                  {item.to === "/buddy" ? <UnreadBadge count={unread} /> : null}
                 </Link>
               );
             })}
@@ -154,11 +170,14 @@ export function AppShell({
               <Link
                 key={item.to}
                 to={item.to}
-                className={`flex min-w-16 flex-col items-center gap-1 rounded-xl px-2 py-1.5 text-[11px] font-medium ${
+                className={`relative flex min-w-16 flex-col items-center gap-1 rounded-xl px-2 py-1.5 text-[11px] font-medium ${
                   active ? "text-primary" : "text-muted-foreground"
                 }`}
               >
                 <item.icon className="size-5" />
+                {item.to === "/buddy" ? (
+                  <UnreadBadge count={unread} className="absolute top-0.5 right-2.5" />
+                ) : null}
                 {item.label}
               </Link>
             );
@@ -212,7 +231,8 @@ export function AppShell({
                   }`}
                 >
                   <item.icon className="size-[18px] shrink-0" />
-                  {item.label}
+                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                  {item.to === "/buddy" ? <UnreadBadge count={unread} /> : null}
                 </Link>
               );
             })}
