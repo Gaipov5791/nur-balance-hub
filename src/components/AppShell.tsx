@@ -21,6 +21,19 @@ import {
 } from "@/components/ui/sheet";
 import { profile as demoProfile } from "@/data/demo";
 import { useIsAdmin, useProfile } from "@/hooks/useAuth";
+import { useBuddyNotifications, useBuddyUnread } from "@/hooks/useBuddyNotifications";
+
+function UnreadBadge({ count, className = "" }: { count: number; className?: string }) {
+  if (count <= 0) return null;
+  return (
+    <span
+      className={`grid min-w-5 shrink-0 place-items-center rounded-full bg-accent px-1.5 text-[11px] font-semibold text-accent-foreground ${className}`}
+      aria-label={`Новых сообщений: ${count}`}
+    >
+      {count > 9 ? "9+" : count}
+    </span>
+  );
+}
 
 type NavItem = { to: string; label: string; icon: LucideIcon; primaryMobile?: boolean };
 
