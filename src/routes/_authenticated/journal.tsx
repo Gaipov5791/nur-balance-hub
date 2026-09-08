@@ -239,8 +239,8 @@ function JournalPage() {
                         : "border-border bg-secondary/50 hover:bg-secondary"
                     }`}
                   >
-                    <span className="text-xl">{moods[key].emoji}</span>
-                    {moods[key].label}
+                    <span className="shrink-0 text-xl">{moods[key].emoji}</span>
+                    <span className="min-w-0 truncate">{moods[key].label}</span>
                   </button>
                 ))}
               </div>
