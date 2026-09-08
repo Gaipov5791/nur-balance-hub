@@ -62,6 +62,7 @@ function CarePage() {
           <h2 className="font-display text-base">
             {active.emoji} {active.title}: пошаговая техника
           </h2>
+          <p className="mt-2 text-sm text-muted-foreground">{active.intro}</p>
           <ol className="mt-4 space-y-3">
             {active.steps.map((s, i) => (
               <li key={s} className="flex gap-3 rounded-2xl bg-secondary/70 p-4">
@@ -72,6 +73,16 @@ function CarePage() {
               </li>
             ))}
           </ol>
+          <div className="mt-4 rounded-2xl bg-primary-soft p-4 text-sm">
+            <p className="font-semibold">Почему это работает</p>
+            <p className="mt-1">{active.why}</p>
+          </div>
+          {active.important ? (
+            <div className="mt-3 rounded-2xl border border-border p-4 text-sm">
+              <p className="font-semibold">Важно</p>
+              <p className="mt-1">{active.important}</p>
+            </div>
+          ) : null}
           <Button
             className="mt-5"
             onClick={() => toast.success("Упражнение выполнено. +5 Nur-Coins")}
@@ -79,6 +90,7 @@ function CarePage() {
             <CheckCircle2 className="size-4" /> Я выполнила упражнение
           </Button>
         </section>
+
 
         <section className="surface p-5">
           <h2 className="font-display text-base">Аудио-практики</h2>
