@@ -14,7 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      journal_entries: {
+        Row: {
+          created_at: string
+          duration_seconds: number
+          entry_date: string
+          id: string
+          level: number
+          mood: string
+          note: string
+          user_id: string
+          video_path: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds?: number
+          entry_date?: string
+          id?: string
+          level?: number
+          mood: string
+          note?: string
+          user_id: string
+          video_path?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number
+          entry_date?: string
+          id?: string
+          level?: number
+          mood?: string
+          note?: string
+          user_id?: string
+          video_path?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          coins: number
+          created_at: string
+          goal: string | null
+          id: string
+          last_entry_date: string | null
+          life_status: string | null
+          name: string
+          onboarded: boolean
+          pin_code: string | null
+          streak: number
+          updated_at: string
+        }
+        Insert: {
+          coins?: number
+          created_at?: string
+          goal?: string | null
+          id: string
+          last_entry_date?: string | null
+          life_status?: string | null
+          name?: string
+          onboarded?: boolean
+          pin_code?: string | null
+          streak?: number
+          updated_at?: string
+        }
+        Update: {
+          coins?: number
+          created_at?: string
+          goal?: string | null
+          id?: string
+          last_entry_date?: string | null
+          life_status?: string | null
+          name?: string
+          onboarded?: boolean
+          pin_code?: string | null
+          streak?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
