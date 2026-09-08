@@ -66,3 +66,23 @@ export function useSignOut() {
     qc.clear();
   };
 }
+
+/** True when the signed-in user has the admin role (moderation access). */
+export function useIsAdmin() {
+  const { user, loading } = useAuth();
+  const query = useQuery({
+    queryKey: ["is-admin", user?.id ?? null],
+    enabled: !!user,
+    queryFn: async (): Promise<boolean> => {
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user!.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      if (error) throw error;
+      return !!data;
+    },
+  });
+  return { isAdmin: query.data === true, isLoading: loading || (!!user && query.isLoading) };
+}
