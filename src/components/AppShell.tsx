@@ -231,7 +231,8 @@ export function AppShell({
                   }`}
                 >
                   <item.icon className="size-[18px] shrink-0" />
-                  {item.label}
+                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                  {item.to === "/buddy" ? <UnreadBadge count={unread} /> : null}
                 </Link>
               );
             })}
