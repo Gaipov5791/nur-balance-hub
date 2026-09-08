@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useProfile, useSignOut } from "@/hooks/useAuth";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { CoinsPanel } from "@/components/panels";
@@ -8,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { goals, lifeStatuses, profile } from "@/data/demo";
+import { goals, lifeStatuses } from "@/data/demo";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
