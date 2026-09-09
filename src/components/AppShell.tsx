@@ -22,6 +22,7 @@ import {
 import { profile as demoProfile } from "@/data/demo";
 import { useIsAdmin, useProfile } from "@/hooks/useAuth";
 import { useBuddyNotifications, useBuddyUnread } from "@/hooks/useBuddyNotifications";
+import { NotificationsBell } from "@/components/NotificationsBell";
 
 function UnreadBadge({ count, className = "" }: { count: number; className?: string }) {
   if (count <= 0) return null;
