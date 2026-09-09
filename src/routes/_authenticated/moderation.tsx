@@ -285,6 +285,7 @@ function TherapistRequestsPanel() {
       return;
     }
     await qc.invalidateQueries({ queryKey: ["moderation", "therapist-requests"] });
+    await qc.invalidateQueries({ queryKey: ["moderation", "request-events"] });
     toast.success("Статус заявки обновлён");
   };
 
@@ -293,6 +294,53 @@ function TherapistRequestsPanel() {
       <h2 className="flex items-center gap-2 font-display text-base">
         <ClipboardList className="size-4 text-primary" /> Заявки к психологам
       </h2>
+
+      <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        <Input
+          placeholder="Поиск: имя, контакт, запрос"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <select
+          className="h-10 rounded-xl border border-border bg-card px-3 text-sm"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="all">Все статусы</option>
+          {Object.entries(REQUEST_STATUS_LABEL).map(([key, label]) => (
+            <option key={key} value={key}>
+              {label}
+            </option>
+          ))}
+        </select>
+        <select
+          className="h-10 rounded-xl border border-border bg-card px-3 text-sm"
+          value={therapistFilter}
+          onChange={(e) => setTherapistFilter(e.target.value)}
+        >
+          <option value="all">Все специалисты</option>
+          {therapistOptions.map(([id, name]) => (
+            <option key={id} value={id}>
+              {name}
+            </option>
+          ))}
+        </select>
+        <Input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
+        <Input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
+        <Button
+          variant="secondary"
+          onClick={() => {
+            setSearch("");
+            setStatusFilter("all");
+            setTherapistFilter("all");
+            setFromDate("");
+            setToDate("");
+          }}
+        >
+          Сбросить фильтры
+        </Button>
+      </div>
+
       {requests.isLoading ? (
         <p className="mt-4 text-sm text-muted-foreground">Загружаем…</p>
       ) : requests.isError ? (
