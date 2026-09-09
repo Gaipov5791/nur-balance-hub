@@ -223,17 +223,57 @@ const NEXT_STATUS: { key: string; label: string }[] = [
 
 function TherapistRequestsPanel() {
   const qc = useQueryClient();
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [therapistFilter, setTherapistFilter] = useState("all");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+
   const requests = useQuery({
     queryKey: ["moderation", "therapist-requests"],
     queryFn: async (): Promise<AdminRequest[]> => {
       const { data, error } = await supabase
         .from("therapist_requests")
-        .select("id, client_name, contact, preferred_time, topic, status, created_at, therapists(name)")
+        .select(
+          "id, therapist_id, client_name, contact, preferred_time, topic, status, created_at, scheduled_at, therapists(name)",
+        )
         .order("created_at", { ascending: false })
-        .limit(100);
+        .limit(200);
       if (error) throw error;
       return (data ?? []) as unknown as AdminRequest[];
     },
+  });
+
+  const events = useQuery({
+    queryKey: ["moderation", "request-events"],
+    queryFn: async (): Promise<RequestEvent[]> => {
+      const { data, error } = await supabase
+        .from("therapist_request_events")
+        .select("id, request_id, from_status, to_status, changed_by, created_at")
+        .order("created_at", { ascending: true })
+        .limit(500);
+      if (error) throw error;
+      return (data ?? []) as RequestEvent[];
+    },
+  });
+
+  const all = requests.data ?? [];
+  const therapistOptions = Array.from(
+    new Map(all.map((r) => [r.therapist_id, r.therapists?.name ?? "Специалист"])).entries(),
+  );
+
+  const q = search.trim().toLowerCase();
+  const rows = all.filter((r) => {
+    if (statusFilter !== "all" && r.status !== statusFilter) return false;
+    if (therapistFilter !== "all" && r.therapist_id !== therapistFilter) return false;
+    if (fromDate && new Date(r.created_at) < new Date(`${fromDate}T00:00:00`)) return false;
+    if (toDate && new Date(r.created_at) > new Date(`${toDate}T23:59:59`)) return false;
+    if (
+      q &&
+      !`${r.client_name} ${r.contact} ${r.topic} ${r.therapists?.name ?? ""}`.toLowerCase().includes(q)
+    )
+      return false;
+    return true;
   });
 
   const setStatus = async (id: string, status: string) => {
