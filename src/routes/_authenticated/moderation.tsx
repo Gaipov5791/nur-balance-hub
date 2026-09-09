@@ -111,6 +111,7 @@ function ModerationPage() {
   return (
     <AppShell title="Модерация">
       <TherapistsAdminPanel />
+      <TherapistSlotsAdminPanel />
       <TherapistRequestsPanel />
       <div className="surface mt-5 p-5">
         <h2 className="flex items-center gap-2 font-display text-base">
