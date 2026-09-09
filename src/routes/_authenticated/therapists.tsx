@@ -84,6 +84,7 @@ function TherapistsPage() {
   const qc = useQueryClient();
   const [selected, setSelected] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", contact: "", time: "", topic: "" });
+  const [slotId, setSlotId] = useState<string | null>(null);
 
   const list = useQuery({
     queryKey: ["therapists"],
