@@ -185,6 +185,7 @@ function TherapistsPage() {
       setSlotId(null);
       await qc.invalidateQueries({ queryKey: ["therapist-requests"] });
       await qc.invalidateQueries({ queryKey: ["therapist-slots"] });
+      await qc.invalidateQueries({ queryKey: ["therapist-request-events"] });
       toast.success("Заявка отправлена — специалист свяжется с вами");
     },
     onError: (e: Error) => {
