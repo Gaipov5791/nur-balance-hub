@@ -294,7 +294,29 @@ function TherapistsPage() {
                           Отправлена {new Date(r.created_at).toLocaleString("ru-RU")}
                           {r.preferred_time ? ` · удобное время: ${r.preferred_time}` : ""}
                         </p>
+                        {r.scheduled_at ? (
+                          <p className="mt-1 text-sm font-medium text-primary">
+                            Приём: {formatSlot(r.scheduled_at)}
+                          </p>
+                        ) : null}
                         {r.topic ? <p className="mt-1 text-sm">{r.topic}</p> : null}
+                        {(events.data ?? []).some((e) => e.request_id === r.id) ? (
+                          <details className="mt-2">
+                            <summary className="cursor-pointer text-xs text-muted-foreground">
+                              История статусов
+                            </summary>
+                            <ul className="mt-1 space-y-0.5">
+                              {(events.data ?? [])
+                                .filter((e) => e.request_id === r.id)
+                                .map((e) => (
+                                  <li key={e.id} className="text-xs text-muted-foreground">
+                                    {new Date(e.created_at).toLocaleString("ru-RU")} —{" "}
+                                    {REQUEST_STATUS_LABEL[e.to_status] ?? e.to_status}
+                                  </li>
+                                ))}
+                            </ul>
+                          </details>
+                        ) : null}
                       </div>
                       {r.status === "new" || r.status === "in_progress" || r.status === "scheduled" ? (
                         <Button variant="secondary" size="sm" onClick={() => void cancel(r.id)}>
