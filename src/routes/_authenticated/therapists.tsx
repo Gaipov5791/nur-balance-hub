@@ -52,7 +52,24 @@ type RequestRow = {
   topic: string;
   status: string;
   created_at: string;
+  scheduled_at: string | null;
 };
+
+type SlotRow = {
+  id: string;
+  therapist_id: string;
+  starts_at: string;
+  duration_minutes: number;
+  format: string;
+  is_booked: boolean;
+};
+
+export function formatSlot(starts_at: string, duration?: number) {
+  const d = new Date(starts_at);
+  const date = d.toLocaleDateString("ru-RU", { day: "numeric", month: "long", weekday: "short" });
+  const time = d.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+  return duration ? `${date}, ${time} · ${duration} мин` : `${date}, ${time}`;
+}
 
 export const REQUEST_STATUS_LABEL: Record<string, string> = {
   new: "новая",
