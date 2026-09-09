@@ -152,20 +152,25 @@ function TherapistsPage() {
     mutationFn: async () => {
       if (!user || !person) throw new Error("Выберите специалиста");
       if (!form.contact.trim()) throw new Error("Укажите телефон или email для связи");
+      const slot = (slots.data ?? []).find((s) => s.id === slotId) ?? null;
       const { error } = await supabase.from("therapist_requests").insert({
         user_id: user.id,
         therapist_id: person.id,
         client_name: form.name.trim() || profile?.name || "",
         contact: form.contact.trim(),
-        preferred_time: form.time.trim(),
+        preferred_time: slot ? formatSlot(slot.starts_at, slot.duration_minutes) : form.time.trim(),
         topic: form.topic.trim(),
         status: "new",
+        slot_id: slot?.id ?? null,
+        scheduled_at: slot?.starts_at ?? null,
       });
       if (error) throw new Error("Не удалось отправить заявку. Проверьте связь и попробуйте ещё раз");
     },
     onSuccess: async () => {
       setForm((f) => ({ ...f, time: "", topic: "" }));
+      setSlotId(null);
       await qc.invalidateQueries({ queryKey: ["therapist-requests"] });
+      await qc.invalidateQueries({ queryKey: ["therapist-slots"] });
       toast.success("Заявка отправлена — специалист свяжется с вами");
     },
     onError: (e: Error) => {
