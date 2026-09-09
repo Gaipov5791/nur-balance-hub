@@ -104,7 +104,7 @@ function TherapistsPage() {
     queryFn: async (): Promise<RequestRow[]> => {
       const { data, error } = await supabase
         .from("therapist_requests")
-        .select("id, therapist_id, preferred_time, topic, status, created_at")
+        .select("id, therapist_id, preferred_time, topic, status, created_at, scheduled_at")
         .order("created_at", { ascending: false })
         .limit(20);
       if (error) throw error;
@@ -114,6 +114,28 @@ function TherapistsPage() {
 
   const therapists = list.data ?? [];
   const person = therapists.find((t) => t.id === selected) ?? therapists[0] ?? null;
+
+  const slots = useQuery({
+    queryKey: ["therapist-slots", person?.id ?? null],
+    enabled: !!person,
+    queryFn: async (): Promise<SlotRow[]> => {
+      const { data, error } = await supabase
+        .from("therapist_slots")
+        .select("id, therapist_id, starts_at, duration_minutes, format, is_booked")
+        .eq("therapist_id", person!.id)
+        .eq("is_active", true)
+        .eq("is_booked", false)
+        .gte("starts_at", new Date().toISOString())
+        .order("starts_at", { ascending: true })
+        .limit(24);
+      if (error) throw error;
+      return (data ?? []) as SlotRow[];
+    },
+  });
+
+  useEffect(() => {
+    setSlotId(null);
+  }, [person?.id]);
 
   useEffect(() => {
     if (!selected && therapists[0]) setSelected(therapists[0].id);
