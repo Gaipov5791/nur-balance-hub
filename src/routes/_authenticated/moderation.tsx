@@ -373,7 +373,33 @@ function TherapistRequestsPanel() {
                     {new Date(r.created_at).toLocaleString("ru-RU")} · {r.contact}
                     {r.preferred_time ? ` · ${r.preferred_time}` : ""}
                   </p>
+                  {r.scheduled_at ? (
+                    <p className="mt-1 text-xs font-medium text-primary">
+                      Приём: {new Date(r.scheduled_at).toLocaleString("ru-RU")}
+                    </p>
+                  ) : null}
                   {r.topic ? <p className="mt-2 text-sm">{r.topic}</p> : null}
+                  {(events.data ?? []).some((e) => e.request_id === r.id) ? (
+                    <details className="mt-2">
+                      <summary className="cursor-pointer text-xs text-muted-foreground">
+                        История изменений
+                      </summary>
+                      <ul className="mt-1 space-y-0.5">
+                        {(events.data ?? [])
+                          .filter((e) => e.request_id === r.id)
+                          .map((e) => (
+                            <li key={e.id} className="text-xs text-muted-foreground">
+                              {new Date(e.created_at).toLocaleString("ru-RU")} —{" "}
+                              {e.from_status
+                                ? `${REQUEST_STATUS_LABEL[e.from_status] ?? e.from_status} → `
+                                : "создана: "}
+                              {REQUEST_STATUS_LABEL[e.to_status] ?? e.to_status}
+                              {e.changed_by ? ` · ${e.changed_by.slice(0, 8)}…` : " · система"}
+                            </li>
+                          ))}
+                      </ul>
+                    </details>
+                  ) : null}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {NEXT_STATUS.filter((s) => s.key !== r.status).map((s) => (
