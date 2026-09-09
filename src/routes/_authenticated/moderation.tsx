@@ -188,3 +188,94 @@ function ModerationPage() {
     </AppShell>
   );
 }
+
+type AdminRequest = {
+  id: string;
+  client_name: string;
+  contact: string;
+  preferred_time: string;
+  topic: string;
+  status: string;
+  created_at: string;
+  therapists: { name: string } | null;
+};
+
+const NEXT_STATUS: { key: string; label: string }[] = [
+  { key: "in_progress", label: "В работу" },
+  { key: "scheduled", label: "Назначена" },
+  { key: "done", label: "Завершена" },
+  { key: "cancelled", label: "Отменить" },
+];
+
+function TherapistRequestsPanel() {
+  const qc = useQueryClient();
+  const requests = useQuery({
+    queryKey: ["moderation", "therapist-requests"],
+    queryFn: async (): Promise<AdminRequest[]> => {
+      const { data, error } = await supabase
+        .from("therapist_requests")
+        .select("id, client_name, contact, preferred_time, topic, status, created_at, therapists(name)")
+        .order("created_at", { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      return (data ?? []) as unknown as AdminRequest[];
+    },
+  });
+
+  const setStatus = async (id: string, status: string) => {
+    const { error } = await supabase.from("therapist_requests").update({ status }).eq("id", id);
+    if (error) {
+      toast.error("Не удалось обновить заявку");
+      return;
+    }
+    await qc.invalidateQueries({ queryKey: ["moderation", "therapist-requests"] });
+    toast.success("Статус заявки обновлён");
+  };
+
+  return (
+    <div className="surface p-5">
+      <h2 className="flex items-center gap-2 font-display text-base">
+        <ClipboardList className="size-4 text-primary" /> Заявки к психологам
+      </h2>
+      {requests.isLoading ? (
+        <p className="mt-4 text-sm text-muted-foreground">Загружаем…</p>
+      ) : (requests.data ?? []).length === 0 ? (
+        <p className="mt-4 text-sm text-muted-foreground">Заявок пока нет.</p>
+      ) : (
+        <ul className="mt-4 space-y-3">
+          {(requests.data ?? []).map((r) => (
+            <li key={r.id} className="rounded-2xl border border-border p-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold">
+                    {r.therapists?.name ?? "Специалист"} ← {r.client_name || "Без имени"}
+                    <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 text-[11px] font-normal">
+                      {REQUEST_STATUS_LABEL[r.status] ?? r.status}
+                    </span>
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {new Date(r.created_at).toLocaleString("ru-RU")} · {r.contact}
+                    {r.preferred_time ? ` · ${r.preferred_time}` : ""}
+                  </p>
+                  {r.topic ? <p className="mt-2 text-sm">{r.topic}</p> : null}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {NEXT_STATUS.filter((s) => s.key !== r.status).map((s) => (
+                    <Button
+                      key={s.key}
+                      size="sm"
+                      variant={s.key === "cancelled" ? "secondary" : "default"}
+                      onClick={() => void setStatus(r.id, s.key)}
+                    >
+                      {s.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
