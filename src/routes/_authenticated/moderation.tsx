@@ -228,7 +228,9 @@ function TherapistRequestsPanel() {
   const setStatus = async (id: string, status: string) => {
     const { error } = await supabase.from("therapist_requests").update({ status }).eq("id", id);
     if (error) {
-      toast.error("Не удалось обновить заявку");
+      toast.error("Не удалось обновить заявку", {
+        action: { label: "Повторить", onClick: () => void setStatus(id, status) },
+      });
       return;
     }
     await qc.invalidateQueries({ queryKey: ["moderation", "therapist-requests"] });
