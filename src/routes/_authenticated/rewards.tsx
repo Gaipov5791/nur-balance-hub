@@ -53,12 +53,12 @@ function RewardCard({
   const free = r.cost === 0;
   const affordable = free || coins >= r.cost;
   return (
-    <div className="rounded-2xl border border-border p-4">
+    <div className="flex min-w-0 flex-col rounded-2xl border border-border p-4">
       <span className="text-2xl">{r.emoji}</span>
-      <p className="mt-2 font-semibold">{r.title}</p>
-      <p className="mt-1 text-sm text-muted-foreground">{r.desc}</p>
+      <p className="mt-2 min-w-0 break-words font-semibold leading-snug">{r.title}</p>
+      <p className="mt-1 min-w-0 break-words text-sm text-muted-foreground">{r.desc}</p>
       <Button
-        className="mt-3 w-full"
+        className="mt-auto h-auto w-full whitespace-normal px-3 py-2 text-center text-sm leading-snug"
         variant={owned ? "secondary" : affordable ? "default" : "secondary"}
         disabled={owned || !affordable}
         onClick={() => onRedeem(r)}
@@ -115,6 +115,9 @@ export function RewardsPage() {
 
   return (
     <AppShell title="Достижения и баланс" aside={<BuddyPanel />}>
+      <div className="mb-5 xl:hidden">
+        <BuddyPanel />
+      </div>
       <div className="grid gap-5 lg:grid-cols-[1fr_1.2fr]">
         <div className="space-y-5">
           <CoinsPanel />
