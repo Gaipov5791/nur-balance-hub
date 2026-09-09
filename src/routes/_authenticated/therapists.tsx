@@ -116,6 +116,20 @@ function TherapistsPage() {
   const therapists = list.data ?? [];
   const person = therapists.find((t) => t.id === selected) ?? therapists[0] ?? null;
 
+  const events = useQuery({
+    queryKey: ["therapist-request-events", user?.id ?? null],
+    enabled: !!user,
+    queryFn: async (): Promise<{ id: string; request_id: string; to_status: string; created_at: string }[]> => {
+      const { data, error } = await supabase
+        .from("therapist_request_events")
+        .select("id, request_id, to_status, created_at")
+        .order("created_at", { ascending: true })
+        .limit(200);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   const slots = useQuery({
     queryKey: ["therapist-slots", person?.id ?? null],
     enabled: !!person,
