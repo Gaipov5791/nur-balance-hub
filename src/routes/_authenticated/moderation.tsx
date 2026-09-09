@@ -105,8 +105,9 @@ function ModerationPage() {
   }
 
   return (
-    <AppShell title="Модерация жалоб">
-      <div className="surface p-5">
+    <AppShell title="Модерация">
+      <TherapistRequestsPanel />
+      <div className="surface mt-5 p-5">
         <h2 className="flex items-center gap-2 font-display text-base">
           <ShieldCheck className="size-4 text-primary" /> Жалобы из чата поддержки
         </h2>
