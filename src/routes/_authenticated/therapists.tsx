@@ -205,6 +205,8 @@ function TherapistsPage() {
       return;
     }
     await qc.invalidateQueries({ queryKey: ["therapist-requests"] });
+    await qc.invalidateQueries({ queryKey: ["therapist-request-events"] });
+    await qc.invalidateQueries({ queryKey: ["therapist-slots"] });
     toast.success("Заявка отменена");
   };
 
