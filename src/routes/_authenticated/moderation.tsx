@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ClipboardList, ShieldCheck } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { TherapistsAdminPanel } from "@/components/TherapistsAdminPanel";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsAdmin } from "@/hooks/useAuth";
@@ -107,6 +108,7 @@ function ModerationPage() {
 
   return (
     <AppShell title="Модерация">
+      <TherapistsAdminPanel />
       <TherapistRequestsPanel />
       <div className="surface mt-5 p-5">
         <h2 className="flex items-center gap-2 font-display text-base">
