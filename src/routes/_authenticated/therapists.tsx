@@ -233,33 +233,51 @@ function TherapistsPage() {
                 key={t.id}
                 type="button"
                 onClick={() => setSelected(t.id)}
-                className={`surface flex w-full items-center gap-4 p-4 text-left transition-shadow hover:shadow-lift ${
+                className={`surface w-full p-5 text-left transition-shadow hover:shadow-lift ${
                   person?.id === t.id ? "ring-2 ring-primary" : ""
                 }`}
               >
-                {t.photo_url ? (
-                  <img
-                    src={t.photo_url}
-                    alt={`Фото психолога ${t.name}`}
-                    loading="lazy"
-                    className="size-16 shrink-0 rounded-2xl object-cover"
-                  />
-                ) : (
-                  <span className="grid size-16 shrink-0 place-items-center rounded-2xl bg-primary-soft font-display text-lg">
-                    {t.initials || t.name.slice(0, 2)}
-                  </span>
-                )}
-                <span className="min-w-0 flex-1">
-                  <span className="flex flex-wrap items-center gap-1.5 font-semibold">
-                    {t.name}
-                    {t.is_verified ? <BadgeCheck className="size-4 shrink-0 text-primary" /> : null}
-                  </span>
-                  <span className="block text-sm text-muted-foreground">{t.spec}</span>
-                  <span className="block text-xs text-muted-foreground">
-                    {[t.experience, t.languages].filter(Boolean).join(" · ")}
+                <span className="flex items-start gap-4">
+                  {t.photo_url ? (
+                    <img
+                      src={t.photo_url}
+                      alt={`Фото психолога ${t.name}`}
+                      loading="lazy"
+                      className="size-20 shrink-0 rounded-2xl object-cover"
+                    />
+                  ) : (
+                    <span className="grid size-20 shrink-0 place-items-center rounded-2xl bg-primary-soft font-display text-xl">
+                      {t.initials || t.name.slice(0, 2)}
+                    </span>
+                  )}
+                  <span className="min-w-0 flex-1">
+                    <span className="flex flex-wrap items-center gap-1.5 font-display text-lg leading-tight">
+                      {t.name}
+                      {t.is_verified ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-primary-soft px-2 py-0.5 text-[11px] font-medium text-primary">
+                          <BadgeCheck className="size-3.5 shrink-0" /> проверен
+                        </span>
+                      ) : null}
+                    </span>
+                    <span className="mt-1 block break-words text-sm text-muted-foreground">
+                      {t.spec}
+                    </span>
                   </span>
                 </span>
-                <span className="hidden shrink-0 text-sm font-semibold sm:block">{t.price_label}</span>
+                <span className="mt-3 flex flex-wrap gap-1.5">
+                  {[t.experience, t.languages].filter(Boolean).map((chip) => (
+                    <span
+                      key={chip}
+                      className="rounded-full bg-secondary px-2.5 py-1 text-xs text-secondary-foreground"
+                    >
+                      {chip}
+                    </span>
+                  ))}
+                </span>
+                <span className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-coin/25 px-4 py-2.5">
+                  <span className="text-xs text-muted-foreground">Стоимость</span>
+                  <span className="text-right text-sm font-semibold">{t.price_label}</span>
+                </span>
               </button>
             ))
           )}
