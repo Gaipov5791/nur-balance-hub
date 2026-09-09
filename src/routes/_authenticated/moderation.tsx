@@ -244,6 +244,13 @@ function TherapistRequestsPanel() {
       </h2>
       {requests.isLoading ? (
         <p className="mt-4 text-sm text-muted-foreground">Загружаем…</p>
+      ) : requests.isError ? (
+        <div className="mt-4">
+          <p className="text-sm">Не удалось загрузить заявки.</p>
+          <Button className="mt-3" variant="secondary" onClick={() => void requests.refetch()}>
+            Повторить
+          </Button>
+        </div>
       ) : (requests.data ?? []).length === 0 ? (
         <p className="mt-4 text-sm text-muted-foreground">Заявок пока нет.</p>
       ) : (
