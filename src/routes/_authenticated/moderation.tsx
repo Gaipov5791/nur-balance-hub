@@ -2,12 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ShieldCheck } from "lucide-react";
+import { ClipboardList, ShieldCheck } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsAdmin } from "@/hooks/useAuth";
 import { formatTime } from "@/components/VideoRecorder";
+import { REQUEST_STATUS_LABEL } from "@/routes/_authenticated/therapists";
 
 export const Route = createFileRoute("/_authenticated/moderation")({
   head: () => ({
