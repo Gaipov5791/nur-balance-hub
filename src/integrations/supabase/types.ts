@@ -317,6 +317,113 @@ export type Database = {
         }
         Relationships: []
       }
+      therapist_requests: {
+        Row: {
+          admin_note: string
+          client_name: string
+          contact: string
+          created_at: string
+          id: string
+          preferred_time: string
+          status: string
+          therapist_id: string
+          topic: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string
+          client_name?: string
+          contact?: string
+          created_at?: string
+          id?: string
+          preferred_time?: string
+          status?: string
+          therapist_id: string
+          topic?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string
+          client_name?: string
+          contact?: string
+          created_at?: string
+          id?: string
+          preferred_time?: string
+          status?: string
+          therapist_id?: string
+          topic?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "therapist_requests_therapist_id_fkey"
+            columns: ["therapist_id"]
+            isOneToOne: false
+            referencedRelation: "therapists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      therapists: {
+        Row: {
+          bio: string
+          contact_email: string | null
+          created_at: string
+          experience: string
+          id: string
+          initials: string
+          is_active: boolean
+          is_verified: boolean
+          languages: string
+          name: string
+          photo_url: string | null
+          price_label: string
+          sort_order: number
+          spec: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          bio?: string
+          contact_email?: string | null
+          created_at?: string
+          experience?: string
+          id?: string
+          initials?: string
+          is_active?: boolean
+          is_verified?: boolean
+          languages?: string
+          name: string
+          photo_url?: string | null
+          price_label?: string
+          sort_order?: number
+          spec?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          bio?: string
+          contact_email?: string | null
+          created_at?: string
+          experience?: string
+          id?: string
+          initials?: string
+          is_active?: boolean
+          is_verified?: boolean
+          languages?: string
+          name?: string
+          photo_url?: string | null
+          price_label?: string
+          sort_order?: number
+          spec?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -382,7 +489,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
+      app_role: "admin" | "moderator" | "user" | "therapist"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -510,7 +617,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user"],
+      app_role: ["admin", "moderator", "user", "therapist"],
     },
   },
 } as const

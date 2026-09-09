@@ -134,11 +134,6 @@ export const careCategories = [
   },
 ];
 
-export const therapists = [
-  { id: "t1", name: "Асель Т.", spec: "КПТ, тревожные состояния", exp: "8 лет практики", price: "3 500 сом / сессия", initials: "АТ" },
-  { id: "t2", name: "Нургуль С.", spec: "Выгорание, работа со стрессом", exp: "6 лет практики", price: "3 000 сом / сессия", initials: "НС" },
-  { id: "t3", name: "Элина К.", spec: "Материнство, семейные отношения", exp: "11 лет практики", price: "4 200 сом / сессия", initials: "ЭК" },
-];
 
 export const coinRules = [
   { emoji: "🎥", text: "Запись видео-дневника", value: "+10", note: "Один раз в день, независимо от длительности" },
