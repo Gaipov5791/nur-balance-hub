@@ -216,13 +216,21 @@ function TherapistsPage() {
                       <div className="min-w-0">
                         <p className="text-sm font-semibold">
                           {t?.name ?? "Специалист"}
-                          <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 text-[11px] font-normal">
+                          <span
+                            className={`ml-2 rounded-full px-2 py-0.5 text-[11px] font-normal ${
+                              r.status === "scheduled"
+                                ? "bg-primary-soft text-primary"
+                                : r.status === "cancelled"
+                                  ? "bg-secondary text-muted-foreground"
+                                  : "bg-accent/25"
+                            }`}
+                          >
                             {REQUEST_STATUS_LABEL[r.status] ?? r.status}
                           </span>
                         </p>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          {new Date(r.created_at).toLocaleString("ru-RU")}
-                          {r.preferred_time ? ` · ${r.preferred_time}` : ""}
+                          Отправлена {new Date(r.created_at).toLocaleString("ru-RU")}
+                          {r.preferred_time ? ` · удобное время: ${r.preferred_time}` : ""}
                         </p>
                         {r.topic ? <p className="mt-1 text-sm">{r.topic}</p> : null}
                       </div>
