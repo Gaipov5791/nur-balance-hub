@@ -248,6 +248,39 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          kind: string
+          link: string
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          link?: string
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          link?: string
+          read_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           coins: number
@@ -317,6 +350,41 @@ export type Database = {
         }
         Relationships: []
       }
+      therapist_request_events: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          from_status: string | null
+          id: string
+          request_id: string
+          to_status: string
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          request_id: string
+          to_status: string
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          request_id?: string
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "therapist_request_events_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "therapist_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       therapist_requests: {
         Row: {
           admin_note: string
@@ -325,6 +393,8 @@ export type Database = {
           created_at: string
           id: string
           preferred_time: string
+          scheduled_at: string | null
+          slot_id: string | null
           status: string
           therapist_id: string
           topic: string
@@ -338,6 +408,8 @@ export type Database = {
           created_at?: string
           id?: string
           preferred_time?: string
+          scheduled_at?: string | null
+          slot_id?: string | null
           status?: string
           therapist_id: string
           topic?: string
@@ -351,6 +423,8 @@ export type Database = {
           created_at?: string
           id?: string
           preferred_time?: string
+          scheduled_at?: string | null
+          slot_id?: string | null
           status?: string
           therapist_id?: string
           topic?: string
@@ -359,7 +433,58 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "therapist_requests_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "therapist_slots"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "therapist_requests_therapist_id_fkey"
+            columns: ["therapist_id"]
+            isOneToOne: false
+            referencedRelation: "therapists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      therapist_slots: {
+        Row: {
+          created_at: string
+          duration_minutes: number
+          format: string
+          id: string
+          is_active: boolean
+          is_booked: boolean
+          starts_at: string
+          therapist_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          duration_minutes?: number
+          format?: string
+          id?: string
+          is_active?: boolean
+          is_booked?: boolean
+          starts_at: string
+          therapist_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          duration_minutes?: number
+          format?: string
+          id?: string
+          is_active?: boolean
+          is_booked?: boolean
+          starts_at?: string
+          therapist_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "therapist_slots_therapist_id_fkey"
             columns: ["therapist_id"]
             isOneToOne: false
             referencedRelation: "therapists"

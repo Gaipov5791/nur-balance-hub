@@ -22,6 +22,7 @@ import {
 import { profile as demoProfile } from "@/data/demo";
 import { useIsAdmin, useProfile } from "@/hooks/useAuth";
 import { useBuddyNotifications, useBuddyUnread } from "@/hooks/useBuddyNotifications";
+import { NotificationsBell } from "@/components/NotificationsBell";
 
 function UnreadBadge({ count, className = "" }: { count: number; className?: string }) {
   if (count <= 0) return null;
@@ -131,15 +132,19 @@ export function AppShell({
         </aside>
 
         <main className="min-w-0 flex-1">
-          <header className="mb-5 flex items-center justify-between gap-4 lg:hidden">
+          <header className="mb-5 flex items-center justify-between gap-3 lg:hidden">
             <Logo />
-            <span className="rounded-full bg-coin/30 px-3 py-1.5 text-sm font-semibold text-coin-foreground">
-              🪙 {profile.coins}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="rounded-full bg-coin/30 px-3 py-1.5 text-sm font-semibold text-coin-foreground">
+                🪙 {profile.coins}
+              </span>
+              <NotificationsBell />
+            </div>
           </header>
-          {title ? (
-            <h1 className="mb-5 hidden text-2xl lg:block">{title}</h1>
-          ) : null}
+          <div className="mb-5 hidden items-center justify-between gap-4 lg:flex">
+            <h1 className="text-2xl">{title ?? ""}</h1>
+            <NotificationsBell />
+          </div>
           {children}
         </main>
 

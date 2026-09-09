@@ -52,7 +52,24 @@ type RequestRow = {
   topic: string;
   status: string;
   created_at: string;
+  scheduled_at: string | null;
 };
+
+type SlotRow = {
+  id: string;
+  therapist_id: string;
+  starts_at: string;
+  duration_minutes: number;
+  format: string;
+  is_booked: boolean;
+};
+
+export function formatSlot(starts_at: string, duration?: number) {
+  const d = new Date(starts_at);
+  const date = d.toLocaleDateString("ru-RU", { day: "numeric", month: "long", weekday: "short" });
+  const time = d.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+  return duration ? `${date}, ${time} · ${duration} мин` : `${date}, ${time}`;
+}
 
 export const REQUEST_STATUS_LABEL: Record<string, string> = {
   new: "новая",
@@ -67,6 +84,7 @@ function TherapistsPage() {
   const qc = useQueryClient();
   const [selected, setSelected] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", contact: "", time: "", topic: "" });
+  const [slotId, setSlotId] = useState<string | null>(null);
 
   const list = useQuery({
     queryKey: ["therapists"],
@@ -87,7 +105,7 @@ function TherapistsPage() {
     queryFn: async (): Promise<RequestRow[]> => {
       const { data, error } = await supabase
         .from("therapist_requests")
-        .select("id, therapist_id, preferred_time, topic, status, created_at")
+        .select("id, therapist_id, preferred_time, topic, status, created_at, scheduled_at")
         .order("created_at", { ascending: false })
         .limit(20);
       if (error) throw error;
@@ -97,6 +115,42 @@ function TherapistsPage() {
 
   const therapists = list.data ?? [];
   const person = therapists.find((t) => t.id === selected) ?? therapists[0] ?? null;
+
+  const events = useQuery({
+    queryKey: ["therapist-request-events", user?.id ?? null],
+    enabled: !!user,
+    queryFn: async (): Promise<{ id: string; request_id: string; to_status: string; created_at: string }[]> => {
+      const { data, error } = await supabase
+        .from("therapist_request_events")
+        .select("id, request_id, to_status, created_at")
+        .order("created_at", { ascending: true })
+        .limit(200);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const slots = useQuery({
+    queryKey: ["therapist-slots", person?.id ?? null],
+    enabled: !!person,
+    queryFn: async (): Promise<SlotRow[]> => {
+      const { data, error } = await supabase
+        .from("therapist_slots")
+        .select("id, therapist_id, starts_at, duration_minutes, format, is_booked")
+        .eq("therapist_id", person!.id)
+        .eq("is_active", true)
+        .eq("is_booked", false)
+        .gte("starts_at", new Date().toISOString())
+        .order("starts_at", { ascending: true })
+        .limit(24);
+      if (error) throw error;
+      return (data ?? []) as SlotRow[];
+    },
+  });
+
+  useEffect(() => {
+    setSlotId(null);
+  }, [person?.id]);
 
   useEffect(() => {
     if (!selected && therapists[0]) setSelected(therapists[0].id);
@@ -112,20 +166,26 @@ function TherapistsPage() {
     mutationFn: async () => {
       if (!user || !person) throw new Error("Выберите специалиста");
       if (!form.contact.trim()) throw new Error("Укажите телефон или email для связи");
+      const slot = (slots.data ?? []).find((s) => s.id === slotId) ?? null;
       const { error } = await supabase.from("therapist_requests").insert({
         user_id: user.id,
         therapist_id: person.id,
         client_name: form.name.trim() || profile?.name || "",
         contact: form.contact.trim(),
-        preferred_time: form.time.trim(),
+        preferred_time: slot ? formatSlot(slot.starts_at, slot.duration_minutes) : form.time.trim(),
         topic: form.topic.trim(),
         status: "new",
+        slot_id: slot?.id ?? null,
+        scheduled_at: slot?.starts_at ?? null,
       });
       if (error) throw new Error("Не удалось отправить заявку. Проверьте связь и попробуйте ещё раз");
     },
     onSuccess: async () => {
       setForm((f) => ({ ...f, time: "", topic: "" }));
+      setSlotId(null);
       await qc.invalidateQueries({ queryKey: ["therapist-requests"] });
+      await qc.invalidateQueries({ queryKey: ["therapist-slots"] });
+      await qc.invalidateQueries({ queryKey: ["therapist-request-events"] });
       toast.success("Заявка отправлена — специалист свяжется с вами");
     },
     onError: (e: Error) => {
@@ -145,6 +205,8 @@ function TherapistsPage() {
       return;
     }
     await qc.invalidateQueries({ queryKey: ["therapist-requests"] });
+    await qc.invalidateQueries({ queryKey: ["therapist-request-events"] });
+    await qc.invalidateQueries({ queryKey: ["therapist-slots"] });
     toast.success("Заявка отменена");
   };
 
@@ -232,7 +294,29 @@ function TherapistsPage() {
                           Отправлена {new Date(r.created_at).toLocaleString("ru-RU")}
                           {r.preferred_time ? ` · удобное время: ${r.preferred_time}` : ""}
                         </p>
+                        {r.scheduled_at ? (
+                          <p className="mt-1 text-sm font-medium text-primary">
+                            Приём: {formatSlot(r.scheduled_at)}
+                          </p>
+                        ) : null}
                         {r.topic ? <p className="mt-1 text-sm">{r.topic}</p> : null}
+                        {(events.data ?? []).some((e) => e.request_id === r.id) ? (
+                          <details className="mt-2">
+                            <summary className="cursor-pointer text-xs text-muted-foreground">
+                              История статусов
+                            </summary>
+                            <ul className="mt-1 space-y-0.5">
+                              {(events.data ?? [])
+                                .filter((e) => e.request_id === r.id)
+                                .map((e) => (
+                                  <li key={e.id} className="text-xs text-muted-foreground">
+                                    {new Date(e.created_at).toLocaleString("ru-RU")} —{" "}
+                                    {REQUEST_STATUS_LABEL[e.to_status] ?? e.to_status}
+                                  </li>
+                                ))}
+                            </ul>
+                          </details>
+                        ) : null}
                       </div>
                       {r.status === "new" || r.status === "in_progress" || r.status === "scheduled" ? (
                         <Button variant="secondary" size="sm" onClick={() => void cancel(r.id)}>
@@ -275,8 +359,38 @@ function TherapistsPage() {
               onChange={(e) => setForm({ ...form, contact: e.target.value })}
               required
             />
+            <div>
+              <p className="text-sm font-medium">Свободное время специалиста</p>
+              {slots.isLoading ? (
+                <p className="mt-2 text-sm text-muted-foreground">Загружаем расписание…</p>
+              ) : (slots.data ?? []).length === 0 ? (
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Свободных слотов пока нет — напишите удобное время ниже.
+                </p>
+              ) : (
+                <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                  {(slots.data ?? []).map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => setSlotId(slotId === s.id ? null : s.id)}
+                      className={`rounded-2xl border px-3 py-2 text-left text-sm transition-colors ${
+                        slotId === s.id
+                          ? "border-primary bg-primary-soft"
+                          : "border-border hover:bg-secondary"
+                      }`}
+                    >
+                      <span className="block font-medium">{formatSlot(s.starts_at)}</span>
+                      <span className="block text-xs text-muted-foreground">
+                        {s.duration_minutes} мин · {s.format === "offline" ? "офлайн" : "онлайн"}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <Input
-              placeholder="Удобные день и время"
+              placeholder={slotId ? "Комментарий ко времени (необязательно)" : "Удобные день и время"}
               value={form.time}
               onChange={(e) => setForm({ ...form, time: e.target.value })}
             />
