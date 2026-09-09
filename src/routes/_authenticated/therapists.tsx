@@ -320,8 +320,38 @@ function TherapistsPage() {
               onChange={(e) => setForm({ ...form, contact: e.target.value })}
               required
             />
+            <div>
+              <p className="text-sm font-medium">Свободное время специалиста</p>
+              {slots.isLoading ? (
+                <p className="mt-2 text-sm text-muted-foreground">Загружаем расписание…</p>
+              ) : (slots.data ?? []).length === 0 ? (
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Свободных слотов пока нет — напишите удобное время ниже.
+                </p>
+              ) : (
+                <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                  {(slots.data ?? []).map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => setSlotId(slotId === s.id ? null : s.id)}
+                      className={`rounded-2xl border px-3 py-2 text-left text-sm transition-colors ${
+                        slotId === s.id
+                          ? "border-primary bg-primary-soft"
+                          : "border-border hover:bg-secondary"
+                      }`}
+                    >
+                      <span className="block font-medium">{formatSlot(s.starts_at)}</span>
+                      <span className="block text-xs text-muted-foreground">
+                        {s.duration_minutes} мин · {s.format === "offline" ? "офлайн" : "онлайн"}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <Input
-              placeholder="Удобные день и время"
+              placeholder={slotId ? "Комментарий ко времени (необязательно)" : "Удобные день и время"}
               value={form.time}
               onChange={(e) => setForm({ ...form, time: e.target.value })}
             />
