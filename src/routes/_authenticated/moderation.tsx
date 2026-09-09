@@ -194,13 +194,24 @@ function ModerationPage() {
 
 type AdminRequest = {
   id: string;
+  therapist_id: string;
   client_name: string;
   contact: string;
   preferred_time: string;
   topic: string;
   status: string;
   created_at: string;
+  scheduled_at: string | null;
   therapists: { name: string } | null;
+};
+
+type RequestEvent = {
+  id: string;
+  request_id: string;
+  from_status: string | null;
+  to_status: string;
+  changed_by: string | null;
+  created_at: string;
 };
 
 const NEXT_STATUS: { key: string; label: string }[] = [
