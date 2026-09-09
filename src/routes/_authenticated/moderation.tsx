@@ -353,11 +353,13 @@ function TherapistRequestsPanel() {
             Повторить
           </Button>
         </div>
-      ) : (requests.data ?? []).length === 0 ? (
-        <p className="mt-4 text-sm text-muted-foreground">Заявок пока нет.</p>
+      ) : rows.length === 0 ? (
+        <p className="mt-4 text-sm text-muted-foreground">
+          {all.length === 0 ? "Заявок пока нет." : "Ничего не найдено по фильтрам."}
+        </p>
       ) : (
         <ul className="mt-4 space-y-3">
-          {(requests.data ?? []).map((r) => (
+          {rows.map((r) => (
             <li key={r.id} className="rounded-2xl border border-border p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
