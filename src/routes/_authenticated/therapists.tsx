@@ -139,7 +139,9 @@ function TherapistsPage() {
       .update({ status: "cancelled" })
       .eq("id", id);
     if (error) {
-      toast.error("Не удалось отменить заявку");
+      toast.error("Не удалось отменить заявку", {
+        action: { label: "Повторить", onClick: () => void cancel(id) },
+      });
       return;
     }
     await qc.invalidateQueries({ queryKey: ["therapist-requests"] });
@@ -224,7 +226,7 @@ function TherapistsPage() {
                         </p>
                         {r.topic ? <p className="mt-1 text-sm">{r.topic}</p> : null}
                       </div>
-                      {r.status === "new" ? (
+                      {r.status === "new" || r.status === "in_progress" || r.status === "scheduled" ? (
                         <Button variant="secondary" size="sm" onClick={() => void cancel(r.id)}>
                           Отменить
                         </Button>
