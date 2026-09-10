@@ -357,6 +357,11 @@ function SettingsPage() {
                 onCheckedChange={(v) => {
                   setDark(v);
                   document.documentElement.classList.toggle("dark", v);
+                  try {
+                    localStorage.setItem("nur-theme", v ? "dark" : "light");
+                  } catch {
+                    /* ignore */
+                  }
                 }}
               />
             </div>
