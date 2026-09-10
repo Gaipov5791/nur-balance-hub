@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useAuth";
 import { extractInstagram, extractPhone, priceParts, specItems, toTelHref } from "@/lib/therapists";
+import { ensureTherapistCatalog } from "@/lib/therapist-catalog.functions";
 
 export const Route = createFileRoute("/_authenticated/therapists")({
   head: () => ({
@@ -158,6 +159,11 @@ function TherapistsPage() {
   const list = useQuery({
     queryKey: ["therapists"],
     queryFn: async (): Promise<TherapistRow[]> => {
+      try {
+        await ensureTherapistCatalog();
+      } catch {
+        // Seed needs the Cloud service role; the list still loads from the table.
+      }
       const { data, error } = await supabase
         .from("therapists")
         .select("id, name, initials, spec, experience, bio, price_label, languages, photo_url, contact_email, is_verified")
