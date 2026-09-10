@@ -173,7 +173,7 @@ export function TherapistsAdminPanel() {
           />
           <Input
             className="sm:col-span-2"
-            placeholder="Ссылка на фото"
+            placeholder="Ссылка на фото, например /therapists/name.jpg"
             value={form.photo_url ?? ""}
             onChange={(e) => setForm({ ...form, photo_url: e.target.value })}
           />

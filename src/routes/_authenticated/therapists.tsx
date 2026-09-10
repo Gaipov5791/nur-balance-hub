@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BadgeCheck, Loader2 } from "lucide-react";
+import { BadgeCheck, Instagram, Loader2, Mail, Phone } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { CoinsPanel } from "@/components/panels";
@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useAuth";
+import { extractInstagram, extractPhone, priceParts, specItems, toTelHref } from "@/lib/therapists";
 
 export const Route = createFileRoute("/_authenticated/therapists")({
   head: () => ({
@@ -42,6 +43,7 @@ type TherapistRow = {
   price_label: string;
   languages: string;
   photo_url: string | null;
+  contact_email: string | null;
   is_verified: boolean;
 };
 
@@ -79,9 +81,76 @@ export const REQUEST_STATUS_LABEL: Record<string, string> = {
   cancelled: "отменена",
 };
 
+function Chip({ children }: { children: string }) {
+  return (
+    <span className="max-w-full rounded-full bg-secondary px-2.5 py-1 text-xs leading-snug text-secondary-foreground">{children}</span>
+  );
+}
+
+function TherapistPhoto({
+  person,
+  className,
+}: {
+  person: Pick<TherapistRow, "photo_url" | "name" | "initials">;
+  className: string;
+}) {
+  if (person.photo_url) {
+    return (
+      <img
+        src={person.photo_url}
+        alt={`Фото психолога ${person.name}`}
+        loading="lazy"
+        className={`${className} object-cover`}
+      />
+    );
+  }
+  return (
+    <span className={`grid place-items-center bg-primary-soft font-display ${className}`}>
+      {person.initials || person.name.slice(0, 2)}
+    </span>
+  );
+}
+
+function TherapistContacts({ person }: { person: TherapistRow }) {
+  const phone = extractPhone(`${person.bio} ${person.price_label}`);
+  const instagram = extractInstagram(person.bio);
+  const email = person.contact_email?.trim() || null;
+  if (!phone && !email && !instagram) return null;
+
+  return (
+    <div className="mt-3 flex flex-wrap gap-2">
+      {phone ? (
+        <Button asChild size="sm" variant="secondary">
+          <a href={`tel:${toTelHref(phone)}`}>
+            <Phone className="size-3.5" />
+            {phone}
+          </a>
+        </Button>
+      ) : null}
+      {email ? (
+        <Button asChild size="sm" variant="secondary">
+          <a href={`mailto:${email}`}>
+            <Mail className="size-3.5" />
+            Написать
+          </a>
+        </Button>
+      ) : null}
+      {instagram ? (
+        <Button asChild size="sm" variant="secondary">
+          <a href={`https://instagram.com/${instagram}`} target="_blank" rel="noreferrer">
+            <Instagram className="size-3.5" />
+            @{instagram}
+          </a>
+        </Button>
+      ) : null}
+    </div>
+  );
+}
+
 function TherapistsPage() {
   const { user, profile } = useProfile();
   const qc = useQueryClient();
+  const bookingRef = useRef<HTMLElement>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", contact: "", time: "", topic: "" });
   const [slotId, setSlotId] = useState<string | null>(null);
@@ -91,7 +160,7 @@ function TherapistsPage() {
     queryFn: async (): Promise<TherapistRow[]> => {
       const { data, error } = await supabase
         .from("therapists")
-        .select("id, name, initials, spec, experience, bio, price_label, languages, photo_url, is_verified")
+        .select("id, name, initials, spec, experience, bio, price_label, languages, photo_url, contact_email, is_verified")
         .eq("is_active", true)
         .order("sort_order", { ascending: true });
       if (error) throw error;
@@ -115,6 +184,8 @@ function TherapistsPage() {
 
   const therapists = list.data ?? [];
   const person = therapists.find((t) => t.id === selected) ?? therapists[0] ?? null;
+  const personSpecs = person ? specItems(person.spec) : [];
+  const personPrices = person ? priceParts(person.price_label) : [];
 
   const events = useQuery({
     queryKey: ["therapist-request-events", user?.id ?? null],
@@ -161,6 +232,15 @@ function TherapistsPage() {
       f.name ? f : { ...f, name: profile?.name ?? "", contact: f.contact || (user?.email ?? "") },
     );
   }, [profile?.name, user?.email]);
+
+  const selectTherapist = (id: string) => {
+    setSelected(id);
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 1023px)").matches) {
+      window.requestAnimationFrame(() => {
+        bookingRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  };
 
   const submit = useMutation({
     mutationFn: async () => {
@@ -212,7 +292,10 @@ function TherapistsPage() {
 
   return (
     <AppShell title="Психологи" aside={<CoinsPanel />}>
-      <div className="grid gap-5 lg:grid-cols-[1.3fr_1fr]">
+      <p className="mb-4 text-sm text-muted-foreground">
+        Выберите специалиста: можно записаться через форму или связаться напрямую по телефону, почте или Instagram.
+      </p>
+      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.95fr)]">
         <section className="min-w-0 space-y-3">
           {list.isLoading ? (
             <p className="text-sm text-muted-foreground">Загружаем специалистов…</p>
@@ -228,58 +311,64 @@ function TherapistsPage() {
               Пока ни одного специалиста в каталоге.
             </div>
           ) : (
-            therapists.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => setSelected(t.id)}
-                className={`surface w-full p-5 text-left transition-shadow hover:shadow-lift ${
-                  person?.id === t.id ? "ring-2 ring-primary" : ""
-                }`}
-              >
-                <span className="flex items-start gap-4">
-                  {t.photo_url ? (
-                    <img
-                      src={t.photo_url}
-                      alt={`Фото психолога ${t.name}`}
-                      loading="lazy"
-                      className="size-20 shrink-0 rounded-2xl object-cover"
+            therapists.map((t) => {
+              const chips = specItems(t.spec);
+              const prices = priceParts(t.price_label);
+              const extra = Math.max(0, chips.length - 3);
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => selectTherapist(t.id)}
+                  className={`surface w-full p-4 text-left transition-shadow hover:shadow-lift sm:p-5 ${
+                    person?.id === t.id ? "ring-2 ring-primary" : ""
+                  }`}
+                >
+                  <span className="flex items-start gap-4">
+                    <TherapistPhoto
+                      person={t}
+                      className="size-20 shrink-0 rounded-2xl sm:size-24"
                     />
-                  ) : (
-                    <span className="grid size-20 shrink-0 place-items-center rounded-2xl bg-primary-soft font-display text-xl">
-                      {t.initials || t.name.slice(0, 2)}
-                    </span>
-                  )}
-                  <span className="min-w-0 flex-1">
-                    <span className="flex flex-wrap items-center gap-1.5 font-display text-lg leading-tight">
-                      {t.name}
-                      {t.is_verified ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-primary-soft px-2 py-0.5 text-[11px] font-medium text-primary">
-                          <BadgeCheck className="size-3.5 shrink-0" /> проверен
-                        </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex flex-wrap items-center gap-1.5 font-display text-lg leading-tight">
+                        {t.name}
+                        {t.is_verified ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-primary-soft px-2 py-0.5 text-[11px] font-medium text-primary">
+                            <BadgeCheck className="size-3.5 shrink-0" /> проверен
+                          </span>
+                        ) : null}
+                      </span>
+                      <span className="mt-2 flex flex-wrap gap-1.5">
+                        {chips.slice(0, 3).map((chip) => (
+                          <Chip key={chip}>{chip}</Chip>
+                        ))}
+                        {extra > 0 ? <Chip>{`ещё ${extra}`}</Chip> : null}
+                      </span>
+                      {t.experience ? (
+                        <span className="mt-2 block text-xs text-muted-foreground">{t.experience}</span>
                       ) : null}
                     </span>
-                    <span className="mt-1 block break-words text-sm text-muted-foreground">
-                      {t.spec}
-                    </span>
                   </span>
-                </span>
-                <span className="mt-3 flex flex-wrap gap-1.5">
-                  {[t.experience, t.languages].filter(Boolean).map((chip) => (
-                    <span
-                      key={chip}
-                      className="rounded-full bg-secondary px-2.5 py-1 text-xs text-secondary-foreground"
-                    >
-                      {chip}
+                  {prices.length > 1 ? (
+                    <span className="mt-3 grid grid-cols-2 gap-2">
+                      {prices.map((p) => (
+                        <span key={p} className="rounded-2xl bg-coin/25 px-3 py-2">
+                          <span className="block text-[11px] capitalize text-muted-foreground">
+                            {p.split(/\s+/)[0]}
+                          </span>
+                          <span className="block text-sm font-semibold">{p.replace(/^\S+\s+/, "")}</span>
+                        </span>
+                      ))}
                     </span>
-                  ))}
-                </span>
-                <span className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-coin/25 px-4 py-2.5">
-                  <span className="text-xs text-muted-foreground">Стоимость</span>
-                  <span className="text-right text-sm font-semibold">{t.price_label}</span>
-                </span>
-              </button>
-            ))
+                  ) : t.price_label ? (
+                    <span className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-coin/25 px-4 py-2.5">
+                      <span className="text-xs text-muted-foreground">Стоимость</span>
+                      <span className="text-right text-sm font-semibold">{t.price_label}</span>
+                    </span>
+                  ) : null}
+                </button>
+              );
+            })
           )}
 
           {(myRequests.data ?? []).length > 0 ? (
@@ -349,16 +438,45 @@ function TherapistsPage() {
           ) : null}
         </section>
 
-        <section className="surface min-w-0 p-5">
-          <h2 className="font-display text-base">
-            {person ? `Записаться к ${person.name}` : "Записаться на консультацию"}
-          </h2>
+        <section ref={bookingRef} className="surface min-w-0 scroll-mt-4 p-5 lg:sticky lg:top-4">
           {person ? (
-            <p className="mt-1 text-sm text-muted-foreground">
-              {person.spec} · {person.price_label}
+            <div className="mb-4 flex items-start gap-3 border-b border-border pb-4">
+              <TherapistPhoto person={person} className="size-16 shrink-0 rounded-2xl text-lg" />
+              <div className="min-w-0">
+                <h2 className="font-display text-base leading-tight">Записаться к {person.name}</h2>
+                {person.experience ? (
+                  <p className="mt-1 text-xs text-muted-foreground">{person.experience}</p>
+                ) : null}
+              </div>
+            </div>
+          ) : (
+            <h2 className="font-display text-base">Записаться на консультацию</h2>
+          )}
+          {personPrices.length > 1 ? (
+            <div className="grid grid-cols-2 gap-2">
+              {personPrices.map((p) => (
+                <div key={p} className="rounded-2xl bg-coin/25 px-3 py-2">
+                  <p className="text-[11px] capitalize text-muted-foreground">{p.split(/\s+/)[0]}</p>
+                  <p className="text-sm font-semibold">{p.replace(/^\S+\s+/, "")}</p>
+                </div>
+              ))}
+            </div>
+          ) : person?.price_label ? (
+            <p className="text-sm text-muted-foreground">{person.price_label}</p>
+          ) : null}
+          {personSpecs.length > 0 ? (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {personSpecs.map((chip) => (
+                <Chip key={chip}>{chip}</Chip>
+              ))}
+            </div>
+          ) : null}
+          {person ? <TherapistContacts person={person} /> : null}
+          {person?.bio ? (
+            <p className="mt-3 max-h-40 overflow-y-auto whitespace-pre-line text-sm leading-relaxed">
+              {person.bio}
             </p>
           ) : null}
-          {person?.bio ? <p className="mt-2 text-sm">{person.bio}</p> : null}
           <form
             className="mt-4 space-y-3"
             onSubmit={(e) => {
