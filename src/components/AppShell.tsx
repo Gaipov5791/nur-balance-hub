@@ -203,15 +203,14 @@ export function AppShell({
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
         <SheetContent
           side="bottom"
-          className="top-2 bottom-0 flex h-auto max-h-none flex-col overflow-x-hidden overflow-y-scroll overscroll-y-contain rounded-t-3xl border-border/60 bg-background/85 px-4 backdrop-blur-xl [scrollbar-gutter:stable] [-webkit-overflow-scrolling:touch] lg:hidden"
-          style={{ paddingBottom: "calc(6rem + env(safe-area-inset-bottom))" }}
+          className="flex h-[100dvh] max-h-[100dvh] w-full flex-col gap-0 overflow-hidden rounded-t-3xl border-border/40 bg-background/30 p-0 pt-3 shadow-none backdrop-blur-md lg:hidden"
         >
-          <SheetHeader className="px-0 pt-2">
+          <SheetHeader className="shrink-0 px-4">
             <SheetTitle className="font-display text-lg">Меню</SheetTitle>
           </SheetHeader>
           <Link
             to="/settings"
-            className="mt-2 flex items-center gap-3 rounded-2xl border border-border bg-card p-3"
+            className="mx-4 mt-2 flex shrink-0 items-center gap-3 rounded-2xl border border-border/50 bg-card/50 p-3"
           >
             <span className="grid size-11 shrink-0 place-items-center rounded-full bg-primary-soft font-display text-sm">
               {profile.name.slice(0, 1)}
@@ -223,7 +222,7 @@ export function AppShell({
               </span>
             </span>
           </Link>
-          <nav className="mt-4 grid shrink-0 content-start gap-1 pb-4 touch-pan-y">
+          <nav className="mt-3 flex min-h-0 flex-1 flex-col gap-1 overflow-x-hidden overflow-y-auto overscroll-y-contain px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] touch-pan-y">
             {nav.map((item) => {
               const active = pathname === item.to;
               return (
@@ -232,8 +231,8 @@ export function AppShell({
                   to={item.to}
                   className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors ${
                     active
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
+                      ? "bg-primary/90 text-primary-foreground"
+                      : "text-muted-foreground hover:bg-sidebar-accent/70 hover:text-foreground"
                   }`}
                 >
                   <item.icon className="size-[18px] shrink-0" />
