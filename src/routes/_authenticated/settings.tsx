@@ -267,7 +267,7 @@ function SettingsPage() {
   return (
     <AppShell title="Настройки" aside={<CoinsPanel />}>
       <div className="grid gap-5 lg:grid-cols-2">
-        <section className="surface p-5">
+        <section className="surface min-w-0 p-5">
           <h2 className="font-display text-base">Профиль</h2>
           <div className="mt-4 flex items-center gap-4">
             <span className="grid size-16 place-items-center rounded-2xl bg-primary-soft font-display text-xl">
@@ -298,22 +298,32 @@ function SettingsPage() {
           </div>
 
           <p className="mt-6 text-sm font-medium">Жизненный статус</p>
-          <div className="mt-2 grid gap-2 sm:grid-cols-2">
-            {lifeStatuses.map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => setStatus(s.id)}
-                className={`flex items-center gap-2 rounded-xl border p-3 text-left text-sm transition-colors ${
-                  status === s.id
-                    ? "border-primary bg-primary-soft"
-                    : "border-border hover:bg-secondary"
-                }`}
-              >
-                <span className="text-lg">{s.emoji}</span>
-                {s.label}
-              </button>
-            ))}
+          <div className="mt-2 grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-2">
+            {lifeStatuses.map((s) => {
+              const [primary, secondary] = s.label.split(" / ");
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => setStatus(s.id)}
+                  className={`flex h-full min-w-0 items-start gap-2.5 rounded-xl border p-3 text-left transition-colors ${
+                    status === s.id
+                      ? "border-primary bg-primary-soft"
+                      : "border-border hover:bg-secondary"
+                  }`}
+                >
+                  <span className="shrink-0 text-lg leading-none">{s.emoji}</span>
+                  <span className="min-w-0 flex-1 leading-snug">
+                    <span className="block break-words text-sm font-medium">{primary}</span>
+                    {secondary ? (
+                      <span className="mt-0.5 block break-words text-[13px] leading-snug text-muted-foreground">
+                        {secondary}
+                      </span>
+                    ) : null}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
           <Button className="mt-5" onClick={save} disabled={saving}>
