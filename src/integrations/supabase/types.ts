@@ -586,6 +586,8 @@ export type Database = {
         }[]
       }
       award_action: { Args: { _action: string }; Returns: Json }
+      claim_first_admin: { Args: never; Returns: boolean }
+      sync_assigned_admins: { Args: never; Returns: boolean }
       clear_journal_pin: { Args: { _current: string }; Returns: boolean }
       find_or_queue_buddy: {
         Args: { _life_status: string }

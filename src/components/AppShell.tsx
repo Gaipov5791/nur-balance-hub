@@ -19,7 +19,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { useIsAdmin, useProfile } from "@/hooks/useAuth";
+import { useStaffAccess, useProfile } from "@/hooks/useAuth";
+import { canAccessModeration } from "@/lib/staff";
 import { useBuddyNotifications, useBuddyUnread } from "@/hooks/useBuddyNotifications";
 import { NotificationsBell } from "@/components/NotificationsBell";
 
@@ -32,6 +33,34 @@ function UnreadBadge({ count, className = "" }: { count: number; className?: str
     >
       {count > 9 ? "9+" : count}
     </span>
+  );
+}
+
+function ShellNavLink({
+  item,
+  pathname,
+  unread,
+  className = "py-2.5",
+}: {
+  item: NavItem;
+  pathname: string;
+  unread: number;
+  className?: string;
+}) {
+  const active = pathname === item.to;
+  return (
+    <Link
+      to={item.to}
+      className={`flex items-center gap-3 rounded-xl px-3 text-sm font-medium transition-colors ${className} ${
+        active
+          ? "bg-primary text-primary-foreground"
+          : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
+      }`}
+    >
+      <item.icon className="size-[18px] shrink-0" />
+      <span className="min-w-0 flex-1 truncate">{item.label}</span>
+      {item.to === "/buddy" ? <UnreadBadge count={unread} /> : null}
+    </Link>
   );
 }
 
@@ -75,10 +104,12 @@ export function AppShell({
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [menuOpen, setMenuOpen] = useState(false);
   const { profile: real, user } = useProfile();
-  const { isAdmin } = useIsAdmin();
+  const staffAccess = useStaffAccess();
+  const isAdmin = canAccessModeration(staffAccess);
   useBuddyNotifications();
   const unread = useBuddyUnread();
-  const nav: NavItem[] = isAdmin ? [...baseNav, moderationItem] : baseNav;
+  const mainNav = baseNav;
+  const staffNav: NavItem[] = isAdmin ? [moderationItem] : [];
   const profile = {
     name: real?.name || user?.email?.split("@")[0] || "Вы",
     coins: real?.coins ?? 0,
@@ -96,24 +127,19 @@ export function AppShell({
             <Logo />
           </div>
           <nav className="flex flex-1 flex-col gap-1">
-            {nav.map((item) => {
-              const active = pathname === item.to;
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
-                    active
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
-                  }`}
-                >
-                  <item.icon className="size-[18px]" />
-                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                  {item.to === "/buddy" ? <UnreadBadge count={unread} /> : null}
-                </Link>
-              );
-            })}
+            {mainNav.map((item) => (
+              <ShellNavLink key={item.to} item={item} pathname={pathname} unread={unread} />
+            ))}
+            {staffNav.length > 0 ? (
+              <div className="mt-3 border-t border-border pt-3">
+                <p className="px-3 pb-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                  Служебное
+                </p>
+                {staffNav.map((item) => (
+                  <ShellNavLink key={item.to} item={item} pathname={pathname} unread={unread} />
+                ))}
+              </div>
+            ) : null}
           </nav>
           <Link
             to="/settings"
@@ -190,11 +216,16 @@ export function AppShell({
           <button
             type="button"
             onClick={() => setMenuOpen(true)}
-            className={`flex min-w-16 flex-col items-center gap-1 rounded-xl px-2 py-1.5 text-[11px] font-medium ${
+            className={`relative flex min-w-16 flex-col items-center gap-1 rounded-xl px-2 py-1.5 text-[11px] font-medium ${
               menuOpen ? "text-primary" : "text-muted-foreground"
             }`}
           >
-            <Menu className="size-5" />
+            <span className="relative">
+              <Menu className="size-5" />
+              {isAdmin ? (
+                <ShieldCheck className="absolute -right-2.5 -top-1 size-3 text-primary" aria-hidden />
+              ) : null}
+            </span>
             Меню
           </button>
         </div>
@@ -203,14 +234,14 @@ export function AppShell({
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
         <SheetContent
           side="bottom"
-          className="flex h-[100dvh] max-h-[100dvh] w-full flex-col gap-0 overflow-hidden rounded-t-3xl border-border/40 bg-background/30 p-0 pt-3 shadow-none backdrop-blur-md lg:hidden"
+          className="flex h-[100svh] max-h-[100svh] w-full flex-col gap-0 overflow-hidden rounded-t-3xl border-border/40 bg-background p-0 pt-3 shadow-none lg:hidden"
         >
           <SheetHeader className="shrink-0 px-4">
             <SheetTitle className="font-display text-lg">Меню</SheetTitle>
           </SheetHeader>
           <Link
             to="/settings"
-            className="mx-4 mt-2 flex shrink-0 items-center gap-3 rounded-2xl border border-border/50 bg-card/50 p-3"
+            className="mx-4 mt-2 flex shrink-0 items-center gap-3 rounded-2xl border border-border bg-card p-3"
           >
             <span className="grid size-11 shrink-0 place-items-center rounded-full bg-primary-soft font-display text-sm">
               {profile.name.slice(0, 1)}
@@ -222,25 +253,32 @@ export function AppShell({
               </span>
             </span>
           </Link>
-          <nav className="mt-3 flex min-h-0 flex-1 flex-col gap-1 overflow-x-hidden overflow-y-auto overscroll-y-contain px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] touch-pan-y">
-            {nav.map((item) => {
-              const active = pathname === item.to;
-              return (
-                <Link
+          {staffNav.length > 0 ? (
+            <div className="mx-4 mt-3 shrink-0 rounded-2xl border border-primary/20 bg-primary-soft/60 p-2">
+              <p className="px-2 pb-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                Служебное
+              </p>
+              {staffNav.map((item) => (
+                <ShellNavLink
                   key={item.to}
-                  to={item.to}
-                  className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors ${
-                    active
-                      ? "bg-primary/90 text-primary-foreground"
-                      : "text-muted-foreground hover:bg-sidebar-accent/70 hover:text-foreground"
-                  }`}
-                >
-                  <item.icon className="size-[18px] shrink-0" />
-                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                  {item.to === "/buddy" ? <UnreadBadge count={unread} /> : null}
-                </Link>
-              );
-            })}
+                  item={item}
+                  pathname={pathname}
+                  unread={unread}
+                  className="py-3"
+                />
+              ))}
+            </div>
+          ) : null}
+          <nav className="mt-3 flex min-h-0 flex-1 flex-col gap-1 overflow-x-hidden overflow-y-auto overscroll-y-contain px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] touch-pan-y">
+            {mainNav.map((item) => (
+              <ShellNavLink
+                key={item.to}
+                item={item}
+                pathname={pathname}
+                unread={unread}
+                className="py-3"
+              />
+            ))}
           </nav>
         </SheetContent>
       </Sheet>

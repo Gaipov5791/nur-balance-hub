@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { loadStaffAccess, type StaffAccess } from "@/lib/staff";
+import { syncAssignedAdmins } from "@/lib/staff.functions";
 
 /** Client-side session state. `loading` is true until the first check finishes. */
 export function useAuth() {
@@ -67,21 +69,32 @@ export function useSignOut() {
   };
 }
 
-/** True when the signed-in user can open moderation (admin or moderator). */
-export function useIsAdmin() {
+const NO_STAFF: StaffAccess = { isAdmin: false, isModerator: false, isStaff: false };
+
+/** Role flags for the signed-in user. `isStaff` is admin or moderator. */
+export function useStaffAccess() {
   const { user, loading } = useAuth();
   const query = useQuery({
-    queryKey: ["is-admin", user?.id ?? null],
+    queryKey: ["staff-access", user?.id ?? null],
     enabled: !!user,
-    queryFn: async (): Promise<boolean> => {
-      const { data, error } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user!.id)
-        .in("role", ["admin", "moderator"]);
-      if (error) throw error;
-      return (data ?? []).some((row) => row.role === "admin" || row.role === "moderator");
+    queryFn: async () => {
+      try {
+        await syncAssignedAdmins();
+      } catch {
+        // Local Vite may lack the Cloud service role; RPC still runs in loadStaffAccess.
+      }
+      return loadStaffAccess(user!.id, user!.email);
     },
   });
-  return { isAdmin: query.data === true, isLoading: loading || (!!user && query.isLoading) };
+  const access = query.data ?? NO_STAFF;
+  return {
+    ...access,
+    isLoading: loading || (!!user && query.isLoading),
+  };
+}
+
+/** True when the signed-in user is an admin (moderation nav and page). */
+export function useIsAdmin() {
+  const { isAdmin, isLoading } = useStaffAccess();
+  return { isAdmin, isLoading };
 }

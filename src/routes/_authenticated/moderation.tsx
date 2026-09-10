@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -9,11 +9,18 @@ import { TherapistSlotsAdminPanel } from "@/components/TherapistSlotsAdminPanel"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
-import { useIsAdmin } from "@/hooks/useAuth";
+import { useStaffAccess } from "@/hooks/useAuth";
+import { loadStaffAccess, canAccessModeration } from "@/lib/staff";
 import { formatTime } from "@/components/VideoRecorder";
 import { REQUEST_STATUS_LABEL } from "@/routes/_authenticated/therapists";
 
 export const Route = createFileRoute("/_authenticated/moderation")({
+  beforeLoad: async () => {
+    const { data } = await supabase.auth.getUser();
+    if (!data.user) throw redirect({ to: "/auth" });
+    const access = await loadStaffAccess(data.user.id, data.user.email);
+    if (!canAccessModeration(access)) throw redirect({ to: "/" });
+  },
   head: () => ({
     meta: [
       { title: "Модерация жалоб — Nur Balance" },
@@ -45,7 +52,9 @@ type Report = {
 };
 
 function ModerationPage() {
-  const { isAdmin, isLoading } = useIsAdmin();
+  const staffAccess = useStaffAccess();
+  const isAdmin = canAccessModeration(staffAccess);
+  const { isLoading } = staffAccess;
   const qc = useQueryClient();
   const [openMatch, setOpenMatch] = useState<string | null>(null);
 
@@ -99,9 +108,9 @@ function ModerationPage() {
     return (
       <AppShell title="Модерация">
         <div className="surface p-6">
-          <h2 className="font-display text-lg">Раздел доступен только модераторам</h2>
+          <h2 className="font-display text-lg">Раздел доступен только администратору</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Если вам нужен доступ к разбору жалоб, напишите администратору проекта.
+            Если доступ нужен, напишите владельцу проекта.
           </p>
         </div>
       </AppShell>
