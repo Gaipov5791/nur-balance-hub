@@ -203,6 +203,10 @@ function SettingsPage() {
   const [pin, setPin] = useState(true);
   const [dark, setDark] = useState(false);
 
+  useEffect(() => {
+    setDark(document.documentElement.classList.contains("dark"));
+  }, []);
+
   // Sync local state when profile loads
   useEffect(() => {
     if (real) {
