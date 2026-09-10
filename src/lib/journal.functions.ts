@@ -1,20 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { moodKeys, type MoodKey } from "@/data/demo";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Json } from "@/integrations/supabase/types";
+import { MAX_RECORD_SECONDS } from "@/lib/economy";
+import { assertNearbyEntryDate, assertOwnedStoragePath, utcToday } from "@/lib/journal-guards";
 
 export const VIDEO_BUCKET = "journal-videos";
-export const MAX_RECORD_SECONDS = 180;
+export { MAX_RECORD_SECONDS };
 const SIGNED_URL_TTL = 60 * 60; // 1 hour
-
-/** Coin rules (approved by the client, see «Правила Nur-Coins»). */
-const COIN_JOURNAL = 10;
-const COIN_MOOD = 5;
-const COIN_FIRST_ENTRY = 20;
-const DAILY_LIMIT = 30;
-const STREAK_MILESTONES: Record<number, number> = { 3: 10, 7: 30, 14: 50, 30: 100 };
-/** Actions that count against the daily limit. Bonuses (first entry, streak) do not. */
-const LIMITED_ACTIONS = ["journal_daily", "mood", "practice", "buddy"];
 
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 
@@ -44,9 +38,32 @@ export type JournalEntryDto = {
   createdAt: string;
 };
 
-function daysBetween(a: string, b: string) {
-  const ms = Date.parse(`${b}T00:00:00Z`) - Date.parse(`${a}T00:00:00Z`);
-  return Math.round(ms / 86_400_000);
+function asSaveResult(data: Json | null) {
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    throw new Error("Не удалось сохранить запись");
+  }
+  const o = data as Record<string, Json | undefined>;
+  const rawAwards = o["awards"];
+  const awards = Array.isArray(rawAwards)
+    ? rawAwards.flatMap((item) => {
+        if (!item || typeof item !== "object" || Array.isArray(item)) return [];
+        const row = item as Record<string, Json | undefined>;
+        return [
+          {
+            action: String(row["action"] ?? ""),
+            amount: Number(row["amount"] ?? 0),
+            label: String(row["label"] ?? ""),
+          },
+        ];
+      })
+    : [];
+  return {
+    entryId: String(o["entryId"] ?? ""),
+    awards,
+    total: Number(o["total"] ?? 0),
+    coins: Number(o["coins"] ?? 0),
+    streak: Number(o["streak"] ?? 0),
+  };
 }
 
 export const createJournalEntry = createServerFn({ method: "POST" })
@@ -55,118 +72,23 @@ export const createJournalEntry = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
-    // The path must live inside the caller's own folder — never trust a foreign path.
-    for (const p of [data.videoPath, data.thumbnailPath]) {
-      if (p && !p.startsWith(`${userId}/`)) throw new Error("Недопустимый путь файла");
-    }
+    assertOwnedStoragePath(userId, data.videoPath);
+    assertOwnedStoragePath(userId, data.thumbnailPath);
+    assertNearbyEntryDate(data.entryDate, utcToday());
 
-    // The client sends its local date; reject anything far from server time.
-    const serverToday = new Date().toISOString().slice(0, 10);
-    if (Math.abs(daysBetween(serverToday, data.entryDate)) > 1) {
-      throw new Error("Некорректная дата записи");
-    }
-
-    const { data: entry, error: insertError } = await supabase
-      .from("journal_entries")
-      .insert({
-        user_id: userId,
-        entry_date: data.entryDate,
-        mood: data.mood,
-        level: data.level,
-        note: data.note,
-        duration_seconds: data.durationSeconds,
-        video_path: data.videoPath,
-        thumbnail_path: data.thumbnailPath,
-        mime_type: data.mimeType,
-        file_size: data.fileSize,
-      })
-      .select("id")
-      .single();
-    if (insertError || !entry) {
-      throw new Error(`Не удалось сохранить запись: ${insertError?.message ?? "unknown"}`);
-    }
-
-    // ---- Coins & streak (server-side only) ----
-    const day = data.entryDate;
-    const [{ data: profile }, { data: txs }] = await Promise.all([
-      supabase
-        .from("profiles")
-        .select("coins, streak, last_entry_date")
-        .eq("id", userId)
-        .single(),
-      supabase.from("coin_transactions").select("action, amount").eq("user_id", userId),
-    ]);
-
-    const done = new Set((txs ?? []).map((t) => t.action));
-    const earnedToday = (txs ?? [])
-      .filter((t) => LIMITED_ACTIONS.some((a) => t.action === `${a}:${day}`))
-      .reduce((s, t) => s + t.amount, 0);
-
-    let remaining = Math.max(0, DAILY_LIMIT - earnedToday);
-    const awards: { action: string; amount: number; label: string }[] = [];
-
-    const limited = (action: string, amount: number, label: string) => {
-      if (done.has(action) || remaining <= 0) return;
-      const granted = Math.min(amount, remaining);
-      remaining -= granted;
-      awards.push({ action, amount: granted, label });
-    };
-
-    limited(`journal_daily:${day}`, COIN_JOURNAL, "Запись дневника");
-    limited(`mood:${day}`, COIN_MOOD, "Эмоция и интенсивность");
-    if (!done.has("first_entry")) {
-      awards.push({ action: "first_entry", amount: COIN_FIRST_ENTRY, label: "Первая запись" });
-    }
-
-    // Streak: consecutive days, one missed day is forgiven.
-    let streak = profile?.streak ?? 0;
-    let lastDate = profile?.last_entry_date ?? null;
-    if (!lastDate) {
-      streak = 1;
-    } else {
-      const diff = daysBetween(lastDate, day);
-      if (diff >= 1 && diff <= 2) streak += 1;
-      else if (diff > 2) streak = 1;
-      else if (diff < 0) {
-        /* backdated entry — keep the streak as is */
-      }
-    }
-    if (!lastDate || daysBetween(lastDate, day) > 0) lastDate = day;
-
-    const bonus = STREAK_MILESTONES[streak];
-    if (bonus && !done.has(`streak:${streak}`)) {
-      awards.push({ action: `streak:${streak}`, amount: bonus, label: `Серия ${streak} дней` });
-    }
-
-    const total = awards.reduce((s, a) => s + a.amount, 0);
-
-    if (awards.length) {
-      await supabase.from("coin_transactions").insert(
-        awards.map((a) => ({
-          user_id: userId,
-          action: a.action,
-          amount: a.amount,
-          entry_id: entry.id,
-        })),
-      );
-    }
-    const { error: profileError } = await supabase
-      .from("profiles")
-      .update({
-        coins: (profile?.coins ?? 0) + total,
-        streak,
-        last_entry_date: lastDate,
-      })
-      .eq("id", userId);
-    if (profileError) console.error("profile update failed", profileError);
-
-    return {
-      entryId: entry.id,
-      awards,
-      total,
-      coins: (profile?.coins ?? 0) + total,
-      streak,
-    };
+    const { data: result, error } = await supabase.rpc("save_journal_entry", {
+      _entry_date: data.entryDate,
+      _mood: data.mood,
+      _level: data.level,
+      _note: data.note,
+      _duration: data.durationSeconds,
+      _video_path: data.videoPath,
+      _thumbnail_path: data.thumbnailPath,
+      _mime_type: data.mimeType ?? "",
+      _file_size: data.fileSize,
+    });
+    if (error) throw new Error(`Не удалось сохранить запись: ${error.message}`);
+    return asSaveResult(result);
   });
 
 export const listJournalEntries = createServerFn({ method: "GET" })

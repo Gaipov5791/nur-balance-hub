@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { CheckCircle2, Loader2, Play } from "lucide-react";
+import { CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -17,12 +17,12 @@ export const Route = createFileRoute("/_authenticated/care")({
       {
         name: "description",
         content:
-          "Быстрая помощь при тревоге, панике, бессоннице и выгорании: аудио-практики и пошаговые техники заземления.",
+          "Быстрая помощь при тревоге, панике, бессоннице и выгорании: пошаговые техники заземления.",
       },
       { property: "og:title", content: "Ситуативные советы — Nur Balance" },
       {
         property: "og:description",
-        content: "Дыхательные практики, медитации и пошаговые карточки на трудный момент.",
+        content: "Пошаговые карточки на трудный момент: дыхание, заземление, ритуал сна.",
       },
     ],
   }),
@@ -123,26 +123,13 @@ function CarePage() {
 
 
         <section className="surface p-5">
-          <h2 className="font-display text-base">Аудио-практики</h2>
-          <ul className="mt-4 space-y-3">
-            {active.audio.map((a) => (
-              <li
-                key={a.id}
-                className="flex items-center gap-3 rounded-2xl border border-border p-3"
-              >
-                <Button size="icon" aria-label={`Слушать: ${a.title}`}>
-                  <Play className="size-4" />
-                </Button>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold">{a.title}</span>
-                  <span className="mt-2 block h-1.5 rounded-full bg-secondary">
-                    <span className="block h-1.5 w-1/4 rounded-full bg-primary" />
-                  </span>
-                </span>
-                <span className="text-xs text-muted-foreground tabular-nums">{a.duration}</span>
-              </li>
-            ))}
-          </ul>
+          <h2 className="font-display text-base">Если нужна живая поддержка</h2>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Эти техники — самопомощь на короткий момент, а не замена специалисту.
+          </p>
+          <Button asChild variant="secondary" className="mt-4 w-full">
+            <Link to="/therapists">Подобрать психолога</Link>
+          </Button>
           <p className="mt-4 rounded-2xl bg-accent/15 p-4 text-sm">
             Если состояние острое и вам небезопасно — обратитесь за срочной помощью к специалисту
             или в кризисную службу.

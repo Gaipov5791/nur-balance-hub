@@ -9,12 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {
   coinRules,
-  dailyCoinLimit,
-  profile as demoProfile,
+  DAILY_COIN_LIMIT,
   serviceRewards,
-  streakMilestones,
+  STREAK_MILESTONES,
   symbolicRewards,
-} from "@/data/demo";
+} from "@/lib/economy";
 import { useProfile } from "@/hooks/useAuth";
 import { listRedemptions, redeemReward } from "@/lib/coins.functions";
 
@@ -76,7 +75,7 @@ function RewardCard({
 
 export function RewardsPage() {
   const { profile: real } = useProfile();
-  const profile = real ?? demoProfile;
+  const profile = { coins: real?.coins ?? 0, streak: real?.streak ?? 0 };
   const qc = useQueryClient();
   const redeem = useServerFn(redeemReward);
   const list = useServerFn(listRedemptions);
@@ -138,7 +137,7 @@ export function RewardsPage() {
               ))}
             </ul>
             <p className="mt-4 rounded-2xl bg-secondary/70 p-4 text-sm text-muted-foreground">
-              За обычную активность можно получить не больше {dailyCoinLimit} монет в день. Монеты —
+              За обычную активность можно получить не больше {DAILY_COIN_LIMIT} монет в день. Монеты —
               это мягкое поощрение за заботу о себе, а не гонка.
             </p>
           </section>
@@ -151,7 +150,7 @@ export function RewardsPage() {
               Текущая серия — {profile.streak} дней подряд
             </p>
             <div className="mt-4 space-y-4">
-              {streakMilestones.map((m) => (
+              {STREAK_MILESTONES.map((m) => (
                 <div key={m.days}>
                   <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
                     <span className="min-w-0">

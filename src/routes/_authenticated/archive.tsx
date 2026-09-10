@@ -1,22 +1,26 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader2, Lock, Play, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { CoinsPanel, MoodCalendar } from "@/components/panels";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { moods } from "@/data/demo";
+import { useAuth } from "@/hooks/useAuth";
 import { formatTime } from "@/components/VideoRecorder";
+import { calendarMonth, formatRuDay } from "@/lib/dates";
 import {
   deleteJournalEntry,
   getEntryPlaybackUrl,
   listJournalEntries,
   type JournalEntryDto,
 } from "@/lib/journal.functions";
+import { archivePinStorageKey, hasJournalPin, verifyJournalPin } from "@/lib/pin";
 
 export const Route = createFileRoute("/_authenticated/archive")({
   head: () => ({
@@ -51,10 +55,6 @@ const MONTHS = [
   "января", "февраля", "марта", "апреля", "мая", "июня",
   "июля", "августа", "сентября", "октября", "ноября", "декабря",
 ];
-const MONTHS_NOM = [
-  "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
-  "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь",
-];
 
 function formatDate(iso: string) {
   const [y, m, d] = iso.split("-").map(Number);
@@ -62,22 +62,43 @@ function formatDate(iso: string) {
 }
 
 function ArchivePage() {
+  const { user } = useAuth();
   const listFn = useServerFn(listJournalEntries);
+  const pinQuery = useQuery({
+    queryKey: ["journal-pin"],
+    queryFn: hasJournalPin,
+  });
+  const [unlocked, setUnlocked] = useState(false);
+  const [pin, setPin] = useState("");
+  const [unlocking, setUnlocking] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    try {
+      setUnlocked(sessionStorage.getItem(archivePinStorageKey(user.id)) === "1");
+    } catch {
+      /* ignore */
+    }
+  }, [user?.id]);
+
+  const pinReady = pinQuery.isSuccess;
+  const locked = pinReady && pinQuery.data === true && !unlocked;
   const entriesQuery = useQuery({
     queryKey: ["journal", "list"],
     queryFn: () => listFn(),
     retry: 2,
+    enabled: pinReady && !locked,
   });
   const [active, setActive] = useState<JournalEntryDto | null>(null);
 
   const entries = entriesQuery.data ?? [];
-  const now = new Date();
+  const month = calendarMonth();
   const calendarEntries = entries
     .filter((e) => {
       const [y, m] = e.entryDate.split("-").map(Number);
-      return y === now.getFullYear() && m === now.getMonth() + 1;
+      return y === month.year && m === month.month + 1;
     })
-    .map((e) => ({ day: Number(e.entryDate.slice(8, 10)), mood: e.mood, date: formatDate(e.entryDate) }));
+    .map((e) => ({ day: Number(e.entryDate.slice(8, 10)), mood: e.mood, date: formatRuDay(e.entryDate) }));
 
   const groups = new Map<string, JournalEntryDto[]>();
   for (const e of entries) {
@@ -88,13 +109,66 @@ function ArchivePage() {
 
   return (
     <AppShell title="Календарь и архив" aside={<CoinsPanel />}>
+      {!pinReady ? (
+        <div className="surface p-6">
+          <Skeleton className="h-40 rounded-2xl" />
+        </div>
+      ) : locked ? (
+        <section className="surface mx-auto max-w-md p-6 text-center">
+          <Lock className="mx-auto size-8 text-primary" />
+          <h2 className="mt-3 font-display text-lg">Архив закрыт PIN-кодом</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Введите 4 цифры, чтобы открыть календарь и записи на этом устройстве.
+          </p>
+          <form
+            className="mt-5 space-y-3"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              if (!user || unlocking) return;
+              setUnlocking(true);
+              try {
+                const ok = await verifyJournalPin(pin);
+                if (!ok) {
+                  toast.error("Неверный PIN");
+                  return;
+                }
+                try {
+                  sessionStorage.setItem(archivePinStorageKey(user.id), "1");
+                } catch {
+                  /* ignore */
+                }
+                setUnlocked(true);
+                setPin("");
+              } catch (err) {
+                toast.error(err instanceof Error ? err.message : "Не удалось проверить PIN");
+              } finally {
+                setUnlocking(false);
+              }
+            }}
+          >
+            <Input
+              value={pin}
+              onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              inputMode="numeric"
+              autoComplete="off"
+              maxLength={4}
+              placeholder="••••"
+              className="text-center tracking-[0.4em]"
+            />
+            <Button type="submit" className="w-full" disabled={pin.length !== 4 || unlocking}>
+              {unlocking ? <Loader2 className="size-4 animate-spin" /> : null} Открыть архив
+            </Button>
+          </form>
+        </section>
+      ) : (
+        <>
       <div className="grid gap-5 lg:grid-cols-[1fr_1.1fr]">
         <MoodCalendar
           entries={calendarEntries}
-          monthLabel={`${MONTHS_NOM[now.getMonth()]} ${now.getFullYear()}`}
-          today={now.getDate()}
-          year={now.getFullYear()}
-          month={now.getMonth()}
+          monthLabel={month.monthLabel}
+          today={month.today}
+          year={month.year}
+          month={month.month}
         />
 
         <section className="surface p-5">
@@ -186,6 +260,8 @@ function ArchivePage() {
       </div>
 
       <PlaybackDialog entry={active} onClose={() => setActive(null)} />
+        </>
+      )}
     </AppShell>
   );
 }

@@ -2,13 +2,17 @@ import { Link } from "@tanstack/react-router";
 import { Flame, Sparkles, Users } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { journalEntries, lifeStatuses, moods, profile as demoProfile, type MoodKey } from "@/data/demo";
+import { lifeStatuses, moods, type MoodKey } from "@/data/demo";
 import { useProfile } from "@/hooks/useAuth";
+import { calendarMonth } from "@/lib/dates";
+import { STREAK_MILESTONES } from "@/lib/economy";
+
+const EMPTY_BALANCE = { coins: 0, streak: 0 };
 
 export function CoinsPanel() {
   const { profile: real } = useProfile();
-  const profile = real ? { coins: real.coins, streak: real.streak } : demoProfile;
-  const next = [3, 7, 14, 30].find((m) => m > profile.streak) ?? null;
+  const profile = real ? { coins: real.coins, streak: real.streak } : EMPTY_BALANCE;
+  const next = STREAK_MILESTONES.map((m) => m.days).find((m) => m > profile.streak) ?? null;
   const left = next ? next - profile.streak : 0;
   return (
     <div className="surface p-5">
@@ -48,30 +52,17 @@ export function CoinsPanel() {
 
 export function BuddyPanel() {
   const { profile: real } = useProfile();
-  const statusId = real?.life_status ?? demoProfile.status;
-  const status = lifeStatuses.find((s) => s.id === statusId);
+  const status = lifeStatuses.find((s) => s.id === real?.life_status);
   return (
     <div className="surface p-5">
       <p className="flex items-center gap-2 text-sm font-semibold">
         <Users className="size-4 text-primary" /> Поддержи подругу
       </p>
       <p className="mt-2 text-sm text-muted-foreground">
-        Ваша категория: {status?.emoji} {status?.label}
+        {status
+          ? `Ваша категория: ${status.emoji} ${status.label}`
+          : "Укажите жизненный статус в настройках — так проще найти собеседницу с похожим опытом."}
       </p>
-      <div className="mt-4 flex -space-x-2">
-        {["А", "Д", "М", "К"].map((l) => (
-          <span
-            key={l}
-            className="grid size-9 place-items-center rounded-full border-2 border-card bg-primary-soft text-sm font-semibold"
-          >
-            {l}
-          </span>
-        ))}
-        <span className="grid size-9 place-items-center rounded-full border-2 border-card bg-secondary text-xs font-semibold">
-          +7
-        </span>
-      </div>
-      <p className="mt-3 text-xs text-muted-foreground">11 участниц сейчас онлайн</p>
       <Button asChild className="mt-4 w-full">
         <Link to="/buddy">Найти собеседницу</Link>
       </Button>
@@ -99,14 +90,13 @@ type CalendarEntry = { day: number; mood: MoodKey; date: string };
 
 export function MoodCalendar({
   compact = false,
-  entries,
-  monthLabel = "Сентябрь 2026",
-  today = 7,
-  year = 2026,
-  month = 8,
+  entries = [],
+  monthLabel,
+  today,
+  year,
+  month,
 }: {
   compact?: boolean;
-  /** Real entries; falls back to demo data when omitted. */
   entries?: CalendarEntry[];
   monthLabel?: string;
   today?: number;
@@ -114,18 +104,21 @@ export function MoodCalendar({
   /** 0-based month */
   month?: number;
 }) {
-  const source: CalendarEntry[] = entries ?? journalEntries;
-  const byDay = new Map(source.map((e) => [e.day, e]));
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const fallback = calendarMonth();
+  const resolvedYear = year ?? fallback.year;
+  const resolvedMonth = month ?? fallback.month;
+  const resolvedToday = today ?? fallback.today;
+  const resolvedLabel = monthLabel ?? fallback.monthLabel;
+  const byDay = new Map(entries.map((e) => [e.day, e]));
+  const daysInMonth = new Date(resolvedYear, resolvedMonth + 1, 0).getDate();
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-  // Monday-first offset for the 1st of the month
-  const offset = (new Date(year, month, 1).getDay() + 6) % 7;
+  const offset = (new Date(resolvedYear, resolvedMonth, 1).getDay() + 6) % 7;
 
   return (
     <div className={compact ? "surface p-5" : "surface p-5 lg:p-6"}>
       <div className="flex items-center justify-between">
-        <p className="font-display text-base">{monthLabel}</p>
-        <span className="text-xs text-muted-foreground">{source.length} записей</span>
+        <p className="font-display text-base">{resolvedLabel}</p>
+        <span className="text-xs text-muted-foreground">{entries.length} записей</span>
       </div>
       <div className="mt-4 grid grid-cols-7 gap-1.5 text-center text-[11px] text-muted-foreground">
         {["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"].map((d) => (
@@ -144,7 +137,7 @@ export function MoodCalendar({
               key={day}
               className={`grid aspect-square place-items-center rounded-xl text-sm ${
                 mood ? mood.tint : "bg-secondary/60 text-muted-foreground"
-              } ${day === today ? "ring-2 ring-primary" : ""}`}
+              } ${day === resolvedToday ? "ring-2 ring-primary" : ""}`}
               title={entry ? `${entry.date} — ${moods[entry.mood].label}` : String(day)}
             >
               {mood ? <span className="text-base">{mood.emoji}</span> : day}
@@ -162,7 +155,6 @@ export function MoodCalendar({
           </span>
         ))}
       </div>
-
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useProfile, useSignOut } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { awardCoins } from "@/lib/coins.functions";
@@ -24,6 +24,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { goals, lifeStatuses } from "@/data/demo";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  archivePinStorageKey,
+  clearJournalPin,
+  hasJournalPin,
+  setJournalPin,
+} from "@/lib/pin";
 
 
 export const Route = createFileRoute("/_authenticated/settings")({
@@ -200,7 +206,6 @@ function SettingsPage() {
   const [goal, setGoal] = useState(real?.goal ?? goals[0]!.id);
   const [status, setStatus] = useState(real?.life_status ?? "burnout");
   const [saving, setSaving] = useState(false);
-  const [pin, setPin] = useState(true);
   const [dark, setDark] = useState(false);
 
   useEffect(() => {
@@ -317,32 +322,7 @@ function SettingsPage() {
         </section>
 
         <section className="space-y-5">
-          <div className="surface p-5">
-            <h2 className="font-display text-base">Приватность</h2>
-            <div className="mt-4 flex items-center justify-between gap-4 rounded-2xl bg-secondary/70 p-4">
-              <div>
-                <Label htmlFor="pin">PIN-код на архив дневника</Label>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Запрашивать код перед просмотром записей
-                </p>
-              </div>
-              <Switch id="pin" checked={pin} onCheckedChange={setPin} />
-            </div>
-            {pin ? (
-              <div className="mt-3 flex gap-2">
-                <Input placeholder="Новый PIN" inputMode="numeric" maxLength={4} />
-                <Button
-                  variant="secondary"
-                  onClick={() => toast("PIN-код появится в ближайшем обновлении")}
-                >
-                  Обновить
-                </Button>
-              </div>
-            ) : null}
-            <p className="mt-3 text-xs text-muted-foreground">
-              Видео-записи видны только вам и не публикуются в модуле поддержки.
-            </p>
-          </div>
+          {user ? <PinCard userId={user.id} /> : null}
 
           <div className="surface p-5">
             <h2 className="font-display text-base">Оформление</h2>
@@ -374,5 +354,143 @@ function SettingsPage() {
         </section>
       </div>
     </AppShell>
+  );
+}
+
+function digits(value: string) {
+  return value.replace(/\D/g, "").slice(0, 4);
+}
+
+function PinCard({ userId }: { userId: string }) {
+  const qc = useQueryClient();
+  const pinQuery = useQuery({ queryKey: ["journal-pin"], queryFn: hasJournalPin });
+  const hasPin = pinQuery.data === true;
+  const [nextPin, setNextPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
+  const [currentPin, setCurrentPin] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const rememberUnlock = () => {
+    if (!userId) return;
+    try {
+      sessionStorage.setItem(archivePinStorageKey(userId), "1");
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const forgetUnlock = () => {
+    if (!userId) return;
+    try {
+      sessionStorage.removeItem(archivePinStorageKey(userId));
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const run = async (fn: () => Promise<void>, ok: string) => {
+    setBusy(true);
+    try {
+      await fn();
+      await qc.invalidateQueries({ queryKey: ["journal-pin"] });
+      setNextPin("");
+      setConfirmPin("");
+      setCurrentPin("");
+      toast.success(ok);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Не удалось обновить PIN");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="surface p-5">
+      <h2 className="font-display text-base">Приватность</h2>
+      <p className="mt-2 text-sm text-muted-foreground">
+        {hasPin
+          ? "Архив дневника закрыт PIN-кодом на этом аккаунте."
+          : "Можно закрыть архив 4-значным кодом — его спросят перед просмотром записей."}
+      </p>
+      {hasPin ? (
+        <div className="mt-4 space-y-3">
+          <Input
+            value={currentPin}
+            onChange={(e) => setCurrentPin(digits(e.target.value))}
+            inputMode="numeric"
+            autoComplete="off"
+            maxLength={4}
+            placeholder="Текущий PIN"
+          />
+          <Input
+            value={nextPin}
+            onChange={(e) => setNextPin(digits(e.target.value))}
+            inputMode="numeric"
+            autoComplete="off"
+            maxLength={4}
+            placeholder="Новый PIN (если меняете)"
+          />
+          <div className="flex flex-wrap gap-2">
+            <Button
+              disabled={busy || currentPin.length !== 4 || nextPin.length !== 4}
+              onClick={() =>
+                void run(async () => {
+                  await setJournalPin(nextPin, currentPin);
+                  rememberUnlock();
+                }, "PIN обновлён")
+              }
+            >
+              Сменить PIN
+            </Button>
+            <Button
+              variant="secondary"
+              disabled={busy || currentPin.length !== 4}
+              onClick={() =>
+                void run(async () => {
+                  await clearJournalPin(currentPin);
+                  forgetUnlock();
+                }, "PIN снят, архив открыт")
+              }
+            >
+              Снять защиту
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-4 space-y-3">
+          <Input
+            value={nextPin}
+            onChange={(e) => setNextPin(digits(e.target.value))}
+            inputMode="numeric"
+            autoComplete="off"
+            maxLength={4}
+            placeholder="Новый PIN"
+          />
+          <Input
+            value={confirmPin}
+            onChange={(e) => setConfirmPin(digits(e.target.value))}
+            inputMode="numeric"
+            autoComplete="off"
+            maxLength={4}
+            placeholder="Повторите PIN"
+          />
+          <Button
+            disabled={busy || nextPin.length !== 4 || nextPin !== confirmPin}
+            onClick={() =>
+              void run(async () => {
+                await setJournalPin(nextPin);
+                rememberUnlock();
+              }, "PIN установлен")
+            }
+          >
+            Установить PIN
+          </Button>
+        </div>
+      )}
+      <p className="mt-3 text-xs text-muted-foreground">
+        Видео-записи видны только вам и не публикуются в модуле поддержки. PIN хранится в виде
+        хэша и нужен, чтобы закрыть экран от случайного просмотра.
+      </p>
+    </div>
   );
 }

@@ -585,6 +585,8 @@ export type Database = {
           started_at: string
         }[]
       }
+      award_action: { Args: { _action: string }; Returns: Json }
+      clear_journal_pin: { Args: { _current: string }; Returns: boolean }
       find_or_queue_buddy: {
         Args: { _life_status: string }
         Returns: {
@@ -592,6 +594,7 @@ export type Database = {
           matched: boolean
         }[]
       }
+      has_journal_pin: { Args: never; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -608,10 +611,27 @@ export type Database = {
         Returns: boolean
       }
       leave_buddy_queue: { Args: never; Returns: boolean }
+      redeem_catalog_reward: { Args: { _reward_id: string }; Returns: Json }
       report_buddy: {
         Args: { _details?: string; _match_id: string; _reason: string }
         Returns: boolean
       }
+      save_journal_entry: {
+        Args: {
+          _duration: number
+          _entry_date: string
+          _file_size: number
+          _level: number
+          _mime_type: string
+          _mood: string
+          _note: string
+          _thumbnail_path: string | null
+          _video_path: string
+        }
+        Returns: Json
+      }
+      set_journal_pin: { Args: { _current?: string; _pin: string }; Returns: boolean }
+      verify_journal_pin: { Args: { _pin: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user" | "therapist"

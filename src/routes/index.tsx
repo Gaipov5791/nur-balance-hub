@@ -1,12 +1,16 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Video } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { BuddyPanel, CoinsPanel, MoodCalendar, TipPanel } from "@/components/panels";
 import { Button } from "@/components/ui/button";
-import { careCategories, journalEntries, moods, profile } from "@/data/demo";
+import { careCategories, moods } from "@/data/demo";
 import { useProfile } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-
+import { calendarMonth, formatRuDay } from "@/lib/dates";
+import { listJournalEntries } from "@/lib/journal.functions";
+import { formatTime } from "@/components/VideoRecorder";
 
 export const Route = createFileRoute("/")({
   ssr: false,
@@ -35,12 +39,32 @@ export const Route = createFileRoute("/")({
 });
 
 function Dashboard() {
-  const recent = journalEntries.slice(-3).reverse();
   const { profile: real, user } = useProfile();
-  const name = real?.name || user?.email?.split("@")[0] || profile.name;
-  const coins = user ? (real?.coins ?? 0) : profile.coins;
-  const streak = user ? (real?.streak ?? 0) : profile.streak;
+  const listFn = useServerFn(listJournalEntries);
+  const entriesQuery = useQuery({
+    queryKey: ["journal", "list"],
+    queryFn: () => listFn(),
+    retry: 2,
+  });
+  const entries = entriesQuery.data ?? [];
+  const recent = [...entries]
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .slice(0, 3);
+  const name = real?.name || user?.email?.split("@")[0] || "Вы";
+  const coins = real?.coins ?? 0;
+  const streak = real?.streak ?? 0;
   const today = new Date();
+  const month = calendarMonth(today);
+  const calendarEntries = entries
+    .filter((e) => {
+      const [y, m] = e.entryDate.split("-").map(Number);
+      return y === month.year && m === month.month + 1;
+    })
+    .map((e) => ({
+      day: Number(e.entryDate.slice(8, 10)),
+      mood: e.mood,
+      date: formatRuDay(e.entryDate),
+    }));
   const dateLabel = new Intl.DateTimeFormat("ru-RU", {
     weekday: "long",
     day: "numeric",
@@ -86,14 +110,22 @@ function Dashboard() {
           <div className="grid w-full shrink-0 grid-cols-3 gap-3 md:w-72">
             <Stat value={`${streak}`} label="дней подряд" />
             <Stat value={`${coins}`} label="Nur-Coins" />
-            <Stat value={`${journalEntries.length}`} label="записей" />
+            <Stat
+              value={entriesQuery.isPending ? "…" : `${entries.length}`}
+              label="записей"
+            />
           </div>
         </div>
       </section>
 
-
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
-        <MoodCalendar />
+        <MoodCalendar
+          entries={calendarEntries}
+          monthLabel={month.monthLabel}
+          today={month.today}
+          year={month.year}
+          month={month.month}
+        />
         <div className="surface p-5 lg:p-6">
           <div className="flex items-center justify-between">
             <h2 className="font-display text-base">Последние записи</h2>
@@ -104,22 +136,34 @@ function Dashboard() {
               Весь архив <ArrowRight className="size-3.5" />
             </Link>
           </div>
-          <ul className="mt-4 space-y-3">
-            {recent.map((e) => (
-              <li key={e.id} className="flex items-center gap-3 rounded-2xl bg-secondary/70 p-3">
-                <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-card text-xl">
-                  {moods[e.mood].emoji}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-semibold">{e.date}</span>
-                    <span className="text-xs text-muted-foreground">{e.duration}</span>
+          {entriesQuery.isPending ? (
+            <p className="mt-4 text-sm text-muted-foreground">Загружаем записи…</p>
+          ) : recent.length === 0 ? (
+            <p className="mt-4 text-sm text-muted-foreground">
+              Здесь появятся ваши видео-записи. Первая займёт около трёх минут.
+            </p>
+          ) : (
+            <ul className="mt-4 space-y-3">
+              {recent.map((e) => (
+                <li key={e.id} className="flex items-center gap-3 rounded-2xl bg-secondary/70 p-3">
+                  <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-card text-xl">
+                    {moods[e.mood].emoji}
                   </span>
-                  <span className="block truncate text-sm text-muted-foreground">{e.note}</span>
-                </span>
-              </li>
-            ))}
-          </ul>
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-center justify-between gap-2">
+                      <span className="text-sm font-semibold">{formatRuDay(e.entryDate)}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {formatTime(e.durationSeconds)}
+                      </span>
+                    </span>
+                    <span className="block truncate text-sm text-muted-foreground">
+                      {e.note || moods[e.mood].label}
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
 

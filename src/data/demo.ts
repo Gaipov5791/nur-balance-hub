@@ -10,26 +10,6 @@ export const moods: Record<MoodKey, { label: string; emoji: string; tint: string
 
 export const moodKeys = Object.keys(moods) as MoodKey[];
 
-export type JournalEntry = {
-  id: string;
-  day: number;
-  date: string;
-  mood: MoodKey;
-  level: number;
-  duration: string;
-  note: string;
-};
-
-export const journalEntries: JournalEntry[] = [
-  { id: "e1", day: 1, date: "1 сентября", mood: "anxiety", level: 2, duration: "2:14", note: "Первый день после отпуска, много задач." },
-  { id: "e2", day: 2, date: "2 сентября", mood: "tired", level: 2, duration: "1:48", note: "Плохо спала, но проговорила это вслух." },
-  { id: "e3", day: 3, date: "3 сентября", mood: "calm", level: 4, duration: "2:52", note: "Дыхательная практика перед сном помогла." },
-  { id: "e4", day: 4, date: "4 сентября", mood: "calm", level: 4, duration: "1:30", note: "Спокойный день, гуляла в парке." },
-  { id: "e5", day: 5, date: "5 сентября", mood: "joy", level: 5, duration: "3:00", note: "Хорошие новости на работе." },
-  { id: "e6", day: 6, date: "6 сентября", mood: "sadness", level: 2, duration: "2:05", note: "Скучаю по родным." },
-  { id: "e7", day: 7, date: "7 сентября", mood: "calm", level: 4, duration: "2:41", note: "Неделя подряд — серия держится." },
-];
-
 export const lifeStatuses = [
   { id: "parent", label: "Мама в декрете / Родитель", emoji: "🍼" },
   { id: "student", label: "Студент / Выпускник", emoji: "🎓" },
@@ -43,19 +23,6 @@ export const goals = [
   { id: "anxiety", label: "Уменьшить тревогу" },
   { id: "sleep", label: "Улучшить сон" },
   { id: "support", label: "Найти поддержку" },
-];
-
-export const buddies = [
-  { id: "b1", name: "Айнура", status: "burnout", online: true, bio: "Работаю в найме, восстанавливаюсь после выгорания." },
-  { id: "b2", name: "Дина", status: "parent", online: true, bio: "Мама двоих, ищу спокойные разговоры по вечерам." },
-  { id: "b3", name: "Мээрим", status: "career", online: false, bio: "Меняю профессию, учусь на аналитика." },
-];
-
-export const chatMessages = [
-  { id: "m1", from: "buddy" as const, text: "Привет! Как прошёл твой день?", time: "20:41" },
-  { id: "m2", from: "me" as const, text: "Привет 🌿 Тяжеловато, но записала дневник — стало легче.", time: "20:44" },
-  { id: "m3", from: "buddy" as const, text: "Это уже много. Я вчера тоже была на нуле, помогло дыхание 4-7-8.", time: "20:46" },
-  { id: "m4", from: "me" as const, text: "Спасибо, попробую сегодня перед сном.", time: "20:47" },
 ];
 
 export const careCategories = [
@@ -74,10 +41,6 @@ export const careCategories = [
     ],
     why: "Переключение внимания на органы чувств возвращает мозг из режима «тревога» в режим «здесь и сейчас».",
     important: null as string | null,
-    audio: [
-      { id: "a1", title: "Дыхание 4-7-8", duration: "4:10" },
-      { id: "a2", title: "Мягкое сканирование тела", duration: "7:25" },
-    ],
   },
   {
     id: "panic",
@@ -95,7 +58,6 @@ export const careCategories = [
     why: "Ровное дыхание и опора на тело помогают нервной системе выйти из режима тревоги.",
     important:
       "Если панические состояния повторяются часто, стоит обратиться к специалисту — подобрать психолога можно в разделе «Психологи».",
-    audio: [{ id: "a3", title: "Голос-опора при панике", duration: "5:00" }],
   },
   {
     id: "insomnia",
@@ -113,7 +75,6 @@ export const careCategories = [
     ],
     why: "Ритуал снижает уровень стимуляции и создаёт предсказуемость, которая нужна нервной системе перед сном.",
     important: null as string | null,
-    audio: [{ id: "a4", title: "Медитация перед сном", duration: "12:00" }],
   },
   {
     id: "burnout",
@@ -130,49 +91,5 @@ export const careCategories = [
     ],
     why: "Выгорание часто усиливается чувством вины за бездействие. Разрешение на минимум снижает это давление и постепенно возвращает энергию.",
     important: null as string | null,
-    audio: [{ id: "a5", title: "Практика бережности к себе", duration: "8:30" }],
   },
 ];
-
-
-export const coinRules = [
-  { emoji: "🎥", text: "Запись видео-дневника", value: "+10", note: "Один раз в день, независимо от длительности" },
-  { emoji: "🎯", text: "Эмоция и шкала интенсивности", value: "+5", note: "Если заполнены все поля записи" },
-  { emoji: "🧘", text: "Практика из «Ситуативных советов»", value: "+5", note: "За прохождение практики" },
-  { emoji: "💬", text: "Разговор с бадди", value: "+5", note: "За первое сообщение за день" },
-  { emoji: "🌱", text: "Первая запись после регистрации", value: "+20", note: "Приветственный бонус" },
-  { emoji: "👤", text: "Заполнение профиля: цель и статус", value: "+15", note: "Разовый бонус" },
-];
-
-export const dailyCoinLimit = 30;
-
-export const streakMilestones = [
-  { days: 3, bonus: 10, badge: null as string | null },
-  { days: 7, bonus: 30, badge: "Неделя заботы" },
-  { days: 14, bonus: 50, badge: "Две недели вместе" },
-  { days: 30, bonus: 100, badge: "Месяц баланса" },
-];
-
-export const symbolicRewards = [
-  { id: "s1", title: "Тёмная тема", desc: "Мягкое тёмное оформление интерфейса", cost: 50, emoji: "🌌" },
-  { id: "s2", title: "Дополнительные иконки настроения", desc: "Больше вариантов, чтобы точнее назвать состояние", cost: 30, emoji: "🎨" },
-  { id: "s3", title: "Бейджи за серию дней", desc: "Открываются сами за 7, 14 и 30 дней подряд", cost: 0, emoji: "🏅" },
-  { id: "s4", title: "Значок «Все категории советов»", desc: "За прохождение всех категорий практик", cost: 0, emoji: "✨" },
-];
-
-export const serviceRewards = [
-  { id: "v1", title: "Скидка 10% на первую консультацию", desc: "Психолог из раздела «Психологи»", cost: 150, emoji: "🎟️" },
-  { id: "v2", title: "Скидка 20% на консультацию", desc: "Действует на одну сессию", cost: 300, emoji: "🎫" },
-  { id: "v3", title: "Бесплатная 15-минутная встреча", desc: "Ознакомительная консультация", cost: 500, emoji: "🤝" },
-];
-
-export const rewards = [...symbolicRewards, ...serviceRewards];
-
-
-export const profile = {
-  name: "Айпери",
-  coins: 245,
-  streak: 12,
-  goal: "Уменьшить тревогу",
-  status: "burnout",
-};

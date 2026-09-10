@@ -19,7 +19,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { profile as demoProfile } from "@/data/demo";
 import { useIsAdmin, useProfile } from "@/hooks/useAuth";
 import { useBuddyNotifications, useBuddyUnread } from "@/hooks/useBuddyNotifications";
 import { NotificationsBell } from "@/components/NotificationsBell";
@@ -80,9 +79,10 @@ export function AppShell({
   useBuddyNotifications();
   const unread = useBuddyUnread();
   const nav: NavItem[] = isAdmin ? [...baseNav, moderationItem] : baseNav;
-  const profile = user
-    ? { name: real?.name || user.email?.split("@")[0] || "Вы", coins: real?.coins ?? 0 }
-    : demoProfile;
+  const profile = {
+    name: real?.name || user?.email?.split("@")[0] || "Вы",
+    coins: real?.coins ?? 0,
+  };
 
   useEffect(() => {
     setMenuOpen(false);
