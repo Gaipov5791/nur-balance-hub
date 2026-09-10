@@ -203,7 +203,7 @@ export function AppShell({
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
         <SheetContent
           side="bottom"
-          className="top-2 bottom-0 flex h-auto max-h-none flex-col overflow-x-hidden overflow-y-scroll overscroll-y-contain rounded-t-3xl px-4 [scrollbar-gutter:stable] [-webkit-overflow-scrolling:touch] lg:hidden"
+          className="top-2 bottom-0 flex h-auto max-h-none flex-col overflow-x-hidden overflow-y-scroll overscroll-y-contain rounded-t-3xl border-border/60 bg-background/85 px-4 backdrop-blur-xl [scrollbar-gutter:stable] [-webkit-overflow-scrolling:touch] lg:hidden"
           style={{ paddingBottom: "calc(6rem + env(safe-area-inset-bottom))" }}
         >
           <SheetHeader className="px-0 pt-2">
