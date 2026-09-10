@@ -120,6 +120,11 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="ru">
       <head>
         <HeadContent />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(localStorage.getItem('nur-theme')==='dark'){document.documentElement.classList.add('dark')}}catch(e){}`,
+          }}
+        />
       </head>
       <body>
         {children}
