@@ -203,7 +203,7 @@ export function AppShell({
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
         <SheetContent
           side="bottom"
-          className="flex max-h-[80dvh] flex-col overflow-y-auto overscroll-contain rounded-t-3xl px-4 lg:hidden"
+          className="flex h-[calc(100dvh-0.5rem)] max-h-[calc(100dvh-0.5rem)] flex-col overflow-hidden overscroll-contain rounded-t-3xl px-4 lg:hidden"
           style={{ paddingBottom: "calc(2rem + env(safe-area-inset-bottom))" }}
         >
           <SheetHeader className="px-0 pt-2">
@@ -223,7 +223,7 @@ export function AppShell({
               </span>
             </span>
           </Link>
-          <nav className="mt-4 grid gap-1">
+          <nav className="mt-4 grid min-h-0 flex-1 content-start gap-1 overflow-y-auto overscroll-contain pb-4 touch-pan-y">
             {nav.map((item) => {
               const active = pathname === item.to;
               return (
