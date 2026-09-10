@@ -203,7 +203,8 @@ export function AppShell({
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
         <SheetContent
           side="bottom"
-          className="max-h-[85vh] overflow-y-auto rounded-t-3xl px-4 pb-8 lg:hidden"
+          className="flex max-h-[80dvh] flex-col overflow-y-auto overscroll-contain rounded-t-3xl px-4 lg:hidden"
+          style={{ paddingBottom: "calc(2rem + env(safe-area-inset-bottom))" }}
         >
           <SheetHeader className="px-0 pt-2">
             <SheetTitle className="font-display text-lg">Меню</SheetTitle>
