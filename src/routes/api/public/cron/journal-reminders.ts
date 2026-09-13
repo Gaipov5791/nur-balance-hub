@@ -25,7 +25,7 @@ async function handle(request: Request) {
   }
 }
 
-export const Route = createFileRoute("/api/cron/journal-reminders")({
+export const Route = createFileRoute("/api/public/cron/journal-reminders")({
   server: {
     handlers: {
       GET: async ({ request }) => handle(request),
