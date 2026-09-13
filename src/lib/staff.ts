@@ -22,10 +22,13 @@ let assignedAdminSync: Promise<void> | null = null;
 
 function syncAssignedAdminsOnce() {
   if (!assignedAdminSync) {
-    assignedAdminSync = supabase.rpc("sync_assigned_admins").then(
-      () => undefined,
-      () => undefined,
-    );
+    assignedAdminSync = (async () => {
+      try {
+        await supabase.rpc("sync_assigned_admins");
+      } catch {
+        // Role sync is best-effort; access checks below fail closed anyway.
+      }
+    })();
   }
   return assignedAdminSync;
 }
