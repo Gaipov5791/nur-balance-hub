@@ -1,9 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 async function handle(request: Request) {
-  const { authenticateCronRequest } = await import("@/integrations/supabase/cron-auth");
-  const unauthorized = await authenticateCronRequest(request);
-  if (unauthorized) return unauthorized;
+  const scheduleSecret = process.env["REMINDER_CRON_SECRET"];
+  const token = /^Bearer ([^\s,]+)$/.exec(request.headers.get("authorization") ?? "")?.[1];
+  const scheduledCaller = Boolean(scheduleSecret && token && token === scheduleSecret);
+
+  if (!scheduledCaller) {
+    const { authenticateCronRequest } = await import("@/integrations/supabase/cron-auth");
+    const unauthorized = await authenticateCronRequest(request);
+    if (unauthorized) return unauthorized;
+  }
+
 
   try {
     const { runJournalReminders } = await import("@/lib/reminders.server");
@@ -18,7 +25,7 @@ async function handle(request: Request) {
   }
 }
 
-export const Route = createFileRoute("/api/cron/journal-reminders")({
+export const Route = createFileRoute("/api/public/cron/journal-reminders")({
   server: {
     handlers: {
       GET: async ({ request }) => handle(request),
