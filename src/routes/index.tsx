@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { calendarMonth, formatRuDay } from "@/lib/dates";
 import { listJournalEntries } from "@/lib/journal.functions";
 import { formatTime } from "@/components/VideoRecorder";
+import { browserTimeZone, localDateInZone } from "@/lib/reminders";
 
 export const Route = createFileRoute("/")({
   ssr: false,
@@ -73,6 +74,8 @@ function Dashboard() {
   const hour = today.getHours();
   const greeting =
     hour < 6 ? "Доброй ночи" : hour < 12 ? "Доброе утро" : hour < 18 ? "Добрый день" : "Добрый вечер";
+  const localToday = localDateInZone(today, browserTimeZone());
+  const needsTodayEntry = !entriesQuery.isPending && !!real && real.last_entry_date !== localToday;
 
   return (
     <AppShell
@@ -117,6 +120,26 @@ function Dashboard() {
           </div>
         </div>
       </section>
+
+      {needsTodayEntry ? (
+        <section className="surface mt-5 p-5 md:p-6">
+          <p className="font-display text-base">Как прошёл день?</p>
+          <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+            Можно записать короткое видео — когда будет удобно. Напоминание приходит письмом в выбранное
+            время, если за сегодня ещё нет записи.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Button asChild>
+              <Link to="/journal">
+                <Video className="size-4" /> Записать видео
+              </Link>
+            </Button>
+            <Button asChild variant="secondary">
+              <Link to="/settings">Время напоминания</Link>
+            </Button>
+          </div>
+        </section>
+      ) : null}
 
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
         <MoodCalendar

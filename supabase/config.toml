@@ -1,1 +1,4 @@
 project_id = "nqhftyhekagufkwygjcx"
+
+[functions.send-transactional-email]
+verify_jwt = true

@@ -30,6 +30,11 @@ import {
   hasJournalPin,
   setJournalPin,
 } from "@/lib/pin";
+import {
+  browserTimeZone,
+  DEFAULT_REMINDER_TIME,
+  normalizeReminderTime,
+} from "@/lib/reminders";
 
 
 export const Route = createFileRoute("/_authenticated/settings")({
@@ -39,7 +44,7 @@ export const Route = createFileRoute("/_authenticated/settings")({
       {
         name: "description",
         content:
-          "Цель, жизненный статус для подбора бадди, PIN-код на архив видео-дневников и оформление интерфейса.",
+          "Цель, жизненный статус для подбора бадди, ежедневное напоминание о дневнике, PIN-код на архив и оформление интерфейса.",
       },
       { property: "og:title", content: "Настройки — Nur Balance" },
       {
@@ -332,6 +337,7 @@ function SettingsPage() {
         </section>
 
         <section className="space-y-5">
+          {user ? <ReminderCard /> : null}
           {user ? <PinCard userId={user.id} /> : null}
 
           <div className="surface p-5">
@@ -364,6 +370,79 @@ function SettingsPage() {
         </section>
       </div>
     </AppShell>
+  );
+}
+
+function ReminderCard() {
+  const { user, profile } = useProfile();
+  const qc = useQueryClient();
+  const [enabled, setEnabled] = useState(profile?.reminder_enabled ?? true);
+  const [time, setTime] = useState(normalizeReminderTime(profile?.reminder_time ?? DEFAULT_REMINDER_TIME));
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!profile) return;
+    setEnabled(profile.reminder_enabled);
+    setTime(normalizeReminderTime(profile.reminder_time));
+  }, [profile]);
+
+  const save = async () => {
+    if (!user) return;
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          reminder_enabled: enabled,
+          reminder_time: normalizeReminderTime(time),
+          reminder_timezone: browserTimeZone(),
+        })
+        .eq("id", user.id);
+      if (error) throw error;
+      await qc.invalidateQueries({ queryKey: ["profile"] });
+      toast.success(
+        enabled
+          ? "Напоминание сохранено. Письмо придёт на email аккаунта, если за день ещё нет записи."
+          : "Напоминание выключено",
+      );
+    } catch (e) {
+      toast.error(
+        e instanceof Error ? e.message : "Не удалось сохранить напоминание",
+        { action: { label: "Повторить", onClick: () => void save() } },
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="surface p-5">
+      <h2 className="font-display text-base">Напоминание о дневнике</h2>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Раз в день в удобное время придёт письмо: «Как прошёл день? Запишите видео». Если запись за
+        сегодня уже есть, мы не потревожим.
+      </p>
+      <div className="mt-4 flex items-center justify-between gap-4 rounded-2xl bg-secondary/70 p-4">
+        <div>
+          <Label htmlFor="reminder-enabled">Присылать напоминание</Label>
+          <p className="mt-1 text-sm text-muted-foreground">На email {user?.email ?? "аккаунта"}</p>
+        </div>
+        <Switch id="reminder-enabled" checked={enabled} onCheckedChange={setEnabled} />
+      </div>
+      <div className="mt-4 space-y-2">
+        <Label htmlFor="reminder-time">Удобное время</Label>
+        <Input
+          id="reminder-time"
+          type="time"
+          value={time}
+          onChange={(e) => setTime(normalizeReminderTime(e.target.value))}
+          disabled={!enabled}
+        />
+      </div>
+      <Button className="mt-4" onClick={() => void save()} disabled={saving}>
+        {saving ? "Сохранение…" : "Сохранить напоминание"}
+      </Button>
+    </div>
   );
 }
 

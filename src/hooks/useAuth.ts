@@ -4,6 +4,10 @@ import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { loadStaffAccess, type StaffAccess } from "@/lib/staff";
 import { syncAssignedAdmins } from "@/lib/staff.functions";
+import {
+  DEFAULT_REMINDER_TIME,
+  DEFAULT_REMINDER_TIMEZONE,
+} from "@/lib/reminders";
 
 /** Client-side session state. `loading` is true until the first check finishes. */
 export function useAuth() {
@@ -40,6 +44,9 @@ export type ProfileRow = {
   streak: number;
   last_entry_date: string | null;
   onboarded: boolean;
+  reminder_enabled: boolean;
+  reminder_time: string;
+  reminder_timezone: string;
 };
 
 /** Current user's profile (browser client, RLS-scoped). `null` when signed out. */
@@ -49,13 +56,22 @@ export function useProfile() {
     queryKey: ["profile", user?.id ?? null],
     enabled: !!user,
     queryFn: async (): Promise<ProfileRow | null> => {
-      const { data, error } = await supabase
+      const reminderDefaults = {
+        reminder_enabled: true,
+        reminder_time: DEFAULT_REMINDER_TIME,
+        reminder_timezone: DEFAULT_REMINDER_TIMEZONE,
+      };
+      const full =
+        "id, name, goal, life_status, coins, streak, last_entry_date, onboarded, reminder_enabled, reminder_time, reminder_timezone";
+      const { data, error } = await supabase.from("profiles").select(full).eq("id", user!.id).maybeSingle();
+      if (!error) return data;
+      const fallback = await supabase
         .from("profiles")
         .select("id, name, goal, life_status, coins, streak, last_entry_date, onboarded")
         .eq("id", user!.id)
         .maybeSingle();
-      if (error) throw error;
-      return data;
+      if (fallback.error) throw error;
+      return fallback.data ? { ...fallback.data, ...reminderDefaults } : null;
     },
   });
   return { user, authLoading: loading, profile: query.data ?? null, ...query };

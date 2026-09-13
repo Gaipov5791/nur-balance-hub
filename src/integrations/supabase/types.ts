@@ -288,10 +288,14 @@ export type Database = {
           goal: string | null
           id: string
           last_entry_date: string | null
+          last_reminder_sent_on: string | null
           life_status: string | null
           name: string
           onboarded: boolean
           pin_code: string | null
+          reminder_enabled: boolean
+          reminder_time: string
+          reminder_timezone: string
           streak: number
           updated_at: string
         }
@@ -301,10 +305,14 @@ export type Database = {
           goal?: string | null
           id: string
           last_entry_date?: string | null
+          last_reminder_sent_on?: string | null
           life_status?: string | null
           name?: string
           onboarded?: boolean
           pin_code?: string | null
+          reminder_enabled?: boolean
+          reminder_time?: string
+          reminder_timezone?: string
           streak?: number
           updated_at?: string
         }
@@ -314,10 +322,14 @@ export type Database = {
           goal?: string | null
           id?: string
           last_entry_date?: string | null
+          last_reminder_sent_on?: string | null
           life_status?: string | null
           name?: string
           onboarded?: boolean
           pin_code?: string | null
+          reminder_enabled?: boolean
+          reminder_time?: string
+          reminder_timezone?: string
           streak?: number
           updated_at?: string
         }
@@ -587,6 +599,7 @@ export type Database = {
       }
       award_action: { Args: { _action: string }; Returns: Json }
       claim_first_admin: { Args: never; Returns: boolean }
+      claim_journal_reminder: { Args: { _local_date: string; _user_id: string }; Returns: boolean }
       sync_assigned_admins: { Args: never; Returns: boolean }
       clear_journal_pin: { Args: { _current: string }; Returns: boolean }
       find_or_queue_buddy: {

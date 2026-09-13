@@ -20,6 +20,7 @@ import { Route as AuthenticatedModerationRouteImport } from './routes/_authentic
 import { Route as AuthenticatedRewardsRouteImport } from './routes/_authenticated/rewards'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedTherapistsRouteImport } from './routes/_authenticated/therapists'
+import { Route as ApiCronJournalRemindersRouteImport } from './routes/api/cron/journal-reminders'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -75,6 +76,11 @@ const AuthenticatedTherapistsRoute = AuthenticatedTherapistsRouteImport.update({
   path: '/therapists',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiCronJournalRemindersRoute = ApiCronJournalRemindersRouteImport.update({
+  id: '/api/cron/journal-reminders',
+  path: '/api/cron/journal-reminders',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/rewards': typeof AuthenticatedRewardsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/therapists': typeof AuthenticatedTherapistsRoute
+  '/api/cron/journal-reminders': typeof ApiCronJournalRemindersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/rewards': typeof AuthenticatedRewardsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/therapists': typeof AuthenticatedTherapistsRoute
+  '/api/cron/journal-reminders': typeof ApiCronJournalRemindersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -113,6 +121,7 @@ export interface FileRoutesById {
   '/_authenticated/rewards': typeof AuthenticatedRewardsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/therapists': typeof AuthenticatedTherapistsRoute
+  '/api/cron/journal-reminders': typeof ApiCronJournalRemindersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -127,6 +136,7 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/settings'
     | '/therapists'
+    | '/api/cron/journal-reminders'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/settings'
     | '/therapists'
+    | '/api/cron/journal-reminders'
   id:
     | '__root__'
     | '/'
@@ -152,12 +163,14 @@ export interface FileRouteTypes {
     | '/_authenticated/rewards'
     | '/_authenticated/settings'
     | '/_authenticated/therapists'
+    | '/api/cron/journal-reminders'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiCronJournalRemindersRoute: typeof ApiCronJournalRemindersRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -239,6 +252,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTherapistsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/cron/journal-reminders': {
+      id: '/api/cron/journal-reminders'
+      path: '/api/cron/journal-reminders'
+      fullPath: '/api/cron/journal-reminders'
+      preLoaderRoute: typeof ApiCronJournalRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -271,6 +291,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiCronJournalRemindersRoute: ApiCronJournalRemindersRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
