@@ -83,7 +83,8 @@ export const createJournalEntry = createServerFn({ method: "POST" })
       _note: data.note,
       _duration: data.durationSeconds,
       _video_path: data.videoPath,
-      _thumbnail_path: data.thumbnailPath,
+      // The SQL function accepts NULL; generated types mark the param as string.
+      _thumbnail_path: data.thumbnailPath as string,
       _mime_type: data.mimeType ?? "",
       _file_size: data.fileSize,
     });

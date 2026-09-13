@@ -45,7 +45,7 @@ export function normalizeReminderTime(value: string | null | undefined): string 
 }
 
 export function parseTimeToMinutes(value: string | null | undefined): number {
-  const [hours, minutes] = normalizeReminderTime(value).split(":").map(Number);
+  const [hours = 0, minutes = 0] = normalizeReminderTime(value).split(":").map(Number);
   return hours * 60 + minutes;
 }
 
