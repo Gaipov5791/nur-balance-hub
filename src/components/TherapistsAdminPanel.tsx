@@ -51,6 +51,25 @@ export function TherapistsAdminPanel() {
   const qc = useQueryClient();
   const [form, setForm] = useState<FormState | null>(null);
   const [saving, setSaving] = useState(false);
+  const linkFn = useServerFn(linkTherapistAccount);
+
+  const linkAccount = async (row: TherapistAdminRow) => {
+    const email = window.prompt(
+      `Email аккаунта специалиста «${row.name}» (он уже должен быть зарегистрирован)`,
+      row.contact_email ?? "",
+    );
+    if (!email) return;
+    try {
+      await linkFn({ data: { therapistId: row.id, email: email.trim() } });
+      await qc.invalidateQueries({ queryKey: ["admin", "therapists"] });
+      toast.success("Аккаунт привязан — специалист увидит свои заявки");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Не удалось привязать аккаунт", {
+        action: { label: "Повторить", onClick: () => void linkAccount(row) },
+      });
+    }
+  };
+
 
   const list = useQuery({
     queryKey: ["admin", "therapists"],
