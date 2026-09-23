@@ -254,14 +254,18 @@ function TherapistsPage() {
       if (!user || !person) throw new Error("Выберите специалиста");
       if (!form.contact.trim()) throw new Error("Укажите телефон или email для связи");
       const slot = (slots.data ?? []).find((s) => s.id === slotId) ?? null;
+      if (slot && slot.duration_minutes < duration) {
+        throw new Error("Это окно короче выбранной длительности — выберите другое время");
+      }
       const { error } = await supabase.from("therapist_requests").insert({
         user_id: user.id,
         therapist_id: person.id,
         client_name: form.name.trim() || profile?.name || "",
         contact: form.contact.trim(),
-        preferred_time: slot ? formatSlot(slot.starts_at, slot.duration_minutes) : form.time.trim(),
+        preferred_time: slot ? formatSlot(slot.starts_at, duration) : form.time.trim(),
         topic: form.topic.trim(),
         status: "new",
+        duration_minutes: duration,
         slot_id: slot?.id ?? null,
         scheduled_at: slot?.starts_at ?? null,
       });
