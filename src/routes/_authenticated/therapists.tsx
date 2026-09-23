@@ -226,6 +226,8 @@ function TherapistsPage() {
     },
   });
 
+  const fittingSlots = (slots.data ?? []).filter((s) => s.duration_minutes >= duration);
+
   useEffect(() => {
     setSlotId(null);
   }, [person?.id]);
