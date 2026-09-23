@@ -1,4 +1,4 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Video } from "lucide-react";
@@ -52,6 +52,7 @@ function Dashboard() {
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .slice(0, 3);
   const name = real?.name || user?.email?.split("@")[0] || "Вы";
+  const navigate = useNavigate();
   const coins = real?.coins ?? 0;
   const streak = real?.streak ?? 0;
   const today = new Date();
@@ -148,6 +149,7 @@ function Dashboard() {
           today={month.today}
           year={month.year}
           month={month.month}
+          onSelectDay={(_iso, hasEntry) => navigate({ to: hasEntry ? "/archive" : "/journal" })}
         />
         <div className="surface p-5 lg:p-6">
           <div className="flex items-center justify-between">

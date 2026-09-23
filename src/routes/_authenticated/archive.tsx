@@ -1,8 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Loader2, Lock, Play, Trash2 } from "lucide-react";
+import { Loader2, Lock, Mic, Play, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { CoinsPanel, MoodCalendar } from "@/components/panels";
@@ -63,6 +63,7 @@ function formatDate(iso: string) {
 
 function ArchivePage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const listFn = useServerFn(listJournalEntries);
   const pinQuery = useQuery({
     queryKey: ["journal-pin"],
@@ -169,6 +170,17 @@ function ArchivePage() {
           today={month.today}
           year={month.year}
           month={month.month}
+          onSelectDay={(iso, hasEntry) => {
+            const dayEntries = groups.get(iso);
+            if (hasEntry && dayEntries?.length) {
+              setActive(dayEntries[0]!);
+              return;
+            }
+            toast("За этот день записи нет", {
+              description: formatDate(iso),
+              action: { label: "Записать", onClick: () => navigate({ to: "/journal" }) },
+            });
+          }}
         />
 
         <section className="surface p-5">
@@ -318,6 +330,21 @@ function PlaybackDialog({ entry, onClose }: { entry: JournalEntryDto | null; onC
                     <Button variant="secondary" className="mt-3" onClick={() => urlQuery.refetch()}>
                       Повторить
                     </Button>
+                  </div>
+                </div>
+              ) : urlQuery.data.mimeType?.startsWith("audio/") ? (
+                <div className="grid size-full place-items-center p-6 text-background/85">
+                  <div className="w-full max-w-sm text-center">
+                    <Mic className="mx-auto size-8" />
+                    <p className="mt-2 text-sm">Голосовая запись</p>
+                    <audio
+                      key={urlQuery.data.url}
+                      src={urlQuery.data.url}
+                      className="mt-4 w-full"
+                      controls
+                      autoPlay
+                      onError={() => toast.error("Запись не воспроизводится в этом браузере")}
+                    />
                   </div>
                 </div>
               ) : (

@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { goals, lifeStatuses } from "@/data/demo";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 
 const searchSchema = z.object({
   redirect: z.string().optional(),
@@ -24,7 +23,7 @@ export const Route = createFileRoute("/auth")({
       {
         name: "description",
         content:
-          "Войдите по email или через Google, выберите цель и жизненный статус, чтобы начать вести видео-дневник эмоций.",
+          "Войдите по email, выберите цель и жизненный статус, чтобы начать вести видео-дневник эмоций.",
       },
       { property: "og:title", content: "Вход в Nur Balance" },
       {
@@ -133,14 +132,6 @@ function AuthPage() {
       setMode("onboarding");
     });
 
-  const google = () =>
-    run(async () => {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: `${window.location.origin}/auth${dest !== "/" ? `?redirect=${encodeURIComponent(dest)}` : ""}`,
-      });
-      if ("error" in result && result.error) throw result.error;
-      if (!("redirected" in result && result.redirected)) await finish();
-    });
 
   const reset = () =>
     run(async () => {
@@ -208,7 +199,7 @@ function AuthPage() {
               <h2 className="text-2xl">{mode === "login" ? "Вход в Nur Balance" : "Регистрация"}</h2>
               <p className="mt-2 text-sm text-muted-foreground">
                 {mode === "login"
-                  ? "Введите email или продолжите через Google"
+                  ? "Введите email и пароль"
                   : "Аккаунт создаётся сразу, без подтверждения по почте"}
               </p>
               <form
@@ -246,9 +237,6 @@ function AuthPage() {
                   {mode === "login" ? "Войти" : "Создать аккаунт"}
                 </Button>
               </form>
-              <Button variant="secondary" className="mt-3 w-full" size="lg" onClick={google} disabled={pending}>
-                Продолжить с Google
-              </Button>
               <div className="mt-4 flex flex-col items-center gap-2 text-sm text-muted-foreground">
                 {mode === "login" ? (
                   <>

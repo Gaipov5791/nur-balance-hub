@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AlertTriangle, Camera, Circle, Pause, Play, RotateCcw, Square } from "lucide-react";
+import { AlertTriangle, Camera, Circle, Loader2, Mic, Pause, Play, RotateCcw, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export type RecordingResult = {
@@ -31,14 +31,16 @@ const STATE_LABEL: Record<RecorderState, string> = {
   error: "Ошибка",
 };
 
-function pickMimeType(): string {
-  const candidates = [
-    "video/webm;codecs=vp9,opus",
-    "video/webm;codecs=vp8,opus",
-    "video/webm",
-    "video/mp4;codecs=avc1,mp4a.40.2",
-    "video/mp4",
-  ];
+function pickMimeType(audioOnly: boolean): string {
+  const candidates = audioOnly
+    ? ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"]
+    : [
+        "video/webm;codecs=vp9,opus",
+        "video/webm;codecs=vp8,opus",
+        "video/webm",
+        "video/mp4;codecs=avc1,mp4a.40.2",
+        "video/mp4",
+      ];
   if (typeof MediaRecorder === "undefined") return "";
   return candidates.find((c) => MediaRecorder.isTypeSupported(c)) ?? "";
 }
@@ -79,9 +81,19 @@ type Props = {
   /** Lock the controls (e.g. while uploading). */
   locked?: boolean;
   onStateChange?: (state: RecorderState) => void;
+  /** "audio" records voice only (no camera). */
+  mode?: "video" | "audio";
 };
 
-export function VideoRecorder({ maxSeconds, onRecorded, onDiscard, locked, onStateChange }: Props) {
+export function VideoRecorder({
+  maxSeconds,
+  onRecorded,
+  onDiscard,
+  locked,
+  onStateChange,
+  mode = "video",
+}: Props) {
+  const audioOnly = mode === "audio";
   const [state, setStateRaw] = useState<RecorderState>("idle");
   const [error, setError] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
@@ -145,6 +157,7 @@ export function VideoRecorder({ maxSeconds, onRecorded, onDiscard, locked, onSta
   }, [previewUrl]);
 
   const attachLive = () => {
+    if (audioOnly) return;
     const v = videoRef.current;
     if (!v || !streamRef.current) return;
     if (v.srcObject !== streamRef.current) v.srcObject = streamRef.current;
@@ -157,19 +170,46 @@ export function VideoRecorder({ maxSeconds, onRecorded, onDiscard, locked, onSta
     if (state === "ready" || state === "recording" || state === "paused") attachLive();
   }, [state]);
 
+  // Switching between video and voice releases the current devices.
+  useEffect(() => {
+    stopTicker();
+    try {
+      if (recorderRef.current && recorderRef.current.state !== "inactive") recorderRef.current.stop();
+    } catch {
+      /* ignore */
+    }
+    recorderRef.current = null;
+    chunksRef.current = [];
+    thumbRef.current = null;
+    accumulatedRef.current = 0;
+    startedAtRef.current = 0;
+    setElapsed(0);
+    stopStream();
+    if (stateRef.current !== "unsupported") setState("idle");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
+
   const enableCamera = async () => {
     setError(null);
     setState("requesting");
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
-        audio: true,
-      });
+      const stream = await navigator.mediaDevices.getUserMedia(
+        audioOnly
+          ? { audio: true }
+          : {
+              video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
+              audio: true,
+            },
+      );
       streamRef.current = stream;
-      mimeRef.current = pickMimeType();
+      mimeRef.current = pickMimeType(audioOnly);
       if (!mimeRef.current) {
         stopStream();
-        setError("Этот браузер не умеет записывать видео. Попробуйте актуальный Chrome, Safari или Firefox.");
+        setError(
+          audioOnly
+            ? "Этот браузер не умеет записывать голос. Попробуйте актуальный Chrome, Safari или Firefox."
+            : "Этот браузер не умеет записывать видео. Попробуйте актуальный Chrome, Safari или Firefox.",
+        );
         setState("error");
         return;
       }
@@ -207,7 +247,7 @@ export function VideoRecorder({ maxSeconds, onRecorded, onDiscard, locked, onSta
     startedAtRef.current = 0;
     accumulatedRef.current = duration;
     setElapsed(duration);
-    const type = mimeRef.current.split(";")[0] || "video/webm";
+    const type = mimeRef.current.split(";")[0] || (audioOnly ? "audio/webm" : "video/webm");
     const blob = new Blob(chunksRef.current, { type });
     if (!blob.size) {
       setError("Запись получилась пустой. Попробуйте записать ещё раз.");
@@ -318,17 +358,46 @@ export function VideoRecorder({ maxSeconds, onRecorded, onDiscard, locked, onSta
 
   const showLive = state === "ready" || state === "recording" || state === "paused";
 
+  const hint =
+    state === "idle"
+      ? audioOnly
+        ? "Шаг 1 из 2: включите микрофон — браузер спросит разрешение"
+        : "Шаг 1 из 2: включите камеру — браузер спросит разрешение"
+      : state === "requesting"
+        ? "Ждём вашего разрешения в окне браузера…"
+        : state === "ready"
+          ? "Шаг 2 из 2: нажмите «Начать запись»"
+          : state === "recording"
+            ? "Идёт запись. Нажмите «Остановить», когда закончите"
+            : state === "paused"
+              ? "Пауза. Продолжите или остановите запись"
+              : state === "stopped"
+                ? audioOnly
+                  ? "Прослушайте запись и сохраните её справа"
+                  : "Посмотрите запись и сохраните её справа"
+                : "";
+
   return (
     <section className="surface overflow-hidden">
       <div className="relative aspect-[4/3] bg-foreground/90">
-        {showLive ? (
+        {showLive && !audioOnly ? (
           <video ref={videoRef} className="size-full object-cover" playsInline muted autoPlay />
         ) : null}
         {state === "stopped" && previewUrl ? (
-          <video src={previewUrl} className="size-full object-cover" playsInline controls />
+          audioOnly ? (
+            <div className="grid size-full place-items-center p-6">
+              <audio src={previewUrl} controls className="w-full max-w-sm" />
+            </div>
+          ) : (
+            <video src={previewUrl} className="size-full object-cover" playsInline controls />
+          )
         ) : null}
 
-        {(state === "idle" || state === "requesting" || state === "unsupported" || state === "error") && (
+        {(state === "idle" ||
+          state === "requesting" ||
+          state === "unsupported" ||
+          state === "error" ||
+          (audioOnly && showLive)) && (
           <div className="absolute inset-0 grid place-items-center p-6 text-center text-background/85">
             <div className="max-w-sm">
               {state === "error" || state === "unsupported" ? (
@@ -336,20 +405,45 @@ export function VideoRecorder({ maxSeconds, onRecorded, onDiscard, locked, onSta
                   <AlertTriangle className="mx-auto size-8 text-accent" />
                   <p className="mt-3 text-sm">
                     {error ??
-                      "Этот браузер не поддерживает запись видео. Откройте приложение в Chrome или Safari."}
+                      "Этот браузер не поддерживает запись. Откройте приложение в Chrome или Safari."}
                   </p>
                 </>
               ) : state === "requesting" ? (
                 <>
-                  <Camera className="mx-auto size-8 animate-pulse" />
-                  <p className="mt-3 text-sm">Разрешите доступ к камере и микрофону в окне браузера</p>
+                  {audioOnly ? (
+                    <Mic className="mx-auto size-8 animate-pulse" />
+                  ) : (
+                    <Camera className="mx-auto size-8 animate-pulse" />
+                  )}
+                  <p className="mt-3 text-sm">
+                    {audioOnly
+                      ? "Разрешите доступ к микрофону в окне браузера"
+                      : "Разрешите доступ к камере и микрофону в окне браузера"}
+                  </p>
+                </>
+              ) : audioOnly && showLive ? (
+                <>
+                  <Mic
+                    className={`mx-auto size-10 ${state === "recording" ? "animate-pulse text-accent" : ""}`}
+                  />
+                  <p className="mt-3 font-display text-lg tabular-nums">{formatTime(elapsed)}</p>
+                  <p className="mt-1 text-sm opacity-70">
+                    {state === "recording" ? "Говорите — вас слышно" : "Микрофон включён"}
+                  </p>
                 </>
               ) : (
                 <>
-                  <Camera className="mx-auto size-8" />
-                  <p className="mt-3 font-display text-lg">Камера выключена</p>
+                  {audioOnly ? (
+                    <Mic className="mx-auto size-8" />
+                  ) : (
+                    <Camera className="mx-auto size-8" />
+                  )}
+                  <p className="mt-3 font-display text-lg">
+                    {audioOnly ? "Микрофон выключен" : "Камера выключена"}
+                  </p>
                   <p className="mt-1 text-sm opacity-70">
-                    Включите камеру, чтобы записать до {Math.round(maxSeconds / 60)} минут о своём дне
+                    {audioOnly ? "Включите микрофон" : "Включите камеру"}, чтобы записать до{" "}
+                    {Math.round(maxSeconds / 60)} минут о своём дне
                   </p>
                 </>
               )}
@@ -376,51 +470,86 @@ export function VideoRecorder({ maxSeconds, onRecorded, onDiscard, locked, onSta
         </span>
       </div>
 
-      <div className="flex flex-wrap items-center justify-center gap-3 p-5">
-        {state === "idle" || state === "requesting" ? (
-          <Button size="lg" onClick={enableCamera} disabled={state === "requesting"} className="gap-2">
-            <Camera className="size-4" /> Включить камеру
-          </Button>
-        ) : null}
-
-        {state === "error" || state === "unsupported" ? (
-          <Button size="lg" onClick={retryAfterError} disabled={state === "unsupported"} className="gap-2">
-            <RotateCcw className="size-4" /> Попробовать снова
-          </Button>
-        ) : null}
-
-        {state === "ready" ? (
-          <Button size="lg" onClick={startRecording} className="gap-2">
-            <Circle className="size-4 fill-current" /> Начать запись
-          </Button>
-        ) : null}
-
-        {state === "recording" ? (
-          <>
-            <Button size="lg" variant="secondary" onClick={pauseRecording}>
-              <Pause className="size-4" /> Пауза
+      <div className="p-5">
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          {state === "idle" || state === "requesting" ? (
+            <Button
+              size="lg"
+              onClick={enableCamera}
+              disabled={state === "requesting"}
+              className="h-14 min-w-64 gap-2 text-base"
+            >
+              {state === "requesting" ? (
+                <Loader2 className="size-5 animate-spin" />
+              ) : audioOnly ? (
+                <Mic className="size-5" />
+              ) : (
+                <Camera className="size-5" />
+              )}
+              {state === "requesting"
+                ? "Ждём разрешения…"
+                : audioOnly
+                  ? "Разрешить микрофон"
+                  : "Разрешить камеру"}
             </Button>
-            <Button size="lg" onClick={stopRecording}>
-              <Square className="size-4 fill-current" /> Остановить
-            </Button>
-          </>
-        ) : null}
+          ) : null}
 
-        {state === "paused" ? (
-          <>
-            <Button size="lg" onClick={resumeRecording} className="gap-2">
-              <Play className="size-4 fill-current" /> Продолжить
+          {state === "error" || state === "unsupported" ? (
+            <Button
+              size="lg"
+              onClick={retryAfterError}
+              disabled={state === "unsupported"}
+              className="h-14 min-w-64 gap-2 text-base"
+            >
+              <RotateCcw className="size-5" /> Попробовать снова
             </Button>
-            <Button size="lg" variant="secondary" onClick={stopRecording}>
-              <Square className="size-4 fill-current" /> Остановить
-            </Button>
-          </>
-        ) : null}
+          ) : null}
 
-        {state === "stopped" ? (
-          <Button size="lg" variant="ghost" onClick={discard} disabled={locked}>
-            <RotateCcw className="size-4" /> Перезаписать
-          </Button>
+          {state === "ready" ? (
+            <Button size="lg" onClick={startRecording} className="h-14 min-w-64 gap-2 text-base">
+              <Circle className="size-5 fill-current" /> Начать запись
+            </Button>
+          ) : null}
+
+          {state === "recording" ? (
+            <>
+              <Button size="lg" variant="secondary" onClick={pauseRecording} className="h-14">
+                <Pause className="size-4" /> Пауза
+              </Button>
+              <Button size="lg" onClick={stopRecording} className="h-14 min-w-48 gap-2 text-base">
+                <Square className="size-5 fill-current" /> Остановить
+              </Button>
+            </>
+          ) : null}
+
+          {state === "paused" ? (
+            <>
+              <Button size="lg" onClick={resumeRecording} className="h-14 gap-2">
+                <Play className="size-4 fill-current" /> Продолжить
+              </Button>
+              <Button size="lg" variant="secondary" onClick={stopRecording} className="h-14">
+                <Square className="size-4 fill-current" /> Остановить
+              </Button>
+            </>
+          ) : null}
+
+          {state === "stopped" ? (
+            <Button size="lg" variant="ghost" onClick={discard} disabled={locked} className="h-14">
+              <RotateCcw className="size-4" /> Перезаписать
+            </Button>
+          ) : null}
+        </div>
+
+        {hint ? (
+          <p className="mt-3 flex items-center justify-center gap-2 text-center text-sm text-muted-foreground">
+            {state === "recording" ? (
+              <span className="size-2 animate-pulse rounded-full bg-destructive" />
+            ) : null}
+            {hint}
+            {state === "recording" ? (
+              <span className="tabular-nums font-semibold">{formatTime(elapsed)}</span>
+            ) : null}
+          </p>
         ) : null}
       </div>
     </section>

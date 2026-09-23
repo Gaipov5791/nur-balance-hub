@@ -35,6 +35,7 @@ import {
   DEFAULT_REMINDER_TIME,
   normalizeReminderTime,
 } from "@/lib/reminders";
+import { readTheme, saveTheme, THEMES, type ThemeId } from "@/lib/theme";
 
 
 export const Route = createFileRoute("/_authenticated/settings")({
@@ -211,10 +212,10 @@ function SettingsPage() {
   const [goal, setGoal] = useState(real?.goal ?? goals[0]!.id);
   const [status, setStatus] = useState(real?.life_status ?? "burnout");
   const [saving, setSaving] = useState(false);
-  const [dark, setDark] = useState(false);
+  const [theme, setTheme] = useState<ThemeId>("calm");
 
   useEffect(() => {
-    setDark(document.documentElement.classList.contains("dark"));
+    setTheme(readTheme());
   }, []);
 
   // Sync local state when profile loads
@@ -342,26 +343,31 @@ function SettingsPage() {
 
           <div className="surface p-5">
             <h2 className="font-display text-base">Оформление</h2>
-            <div className="mt-4 flex items-center justify-between gap-4 rounded-2xl bg-secondary/70 p-4">
-              <div>
-                <Label htmlFor="theme">Тёмная тема</Label>
-                <p className="mt-1 text-sm text-muted-foreground">Мягкий контраст для вечера</p>
-              </div>
-              <Switch
-                id="theme"
-                checked={dark}
-                onCheckedChange={(v) => {
-                  setDark(v);
-                  document.documentElement.classList.toggle("dark", v);
-                  try {
-                    localStorage.setItem("nur-theme", v ? "dark" : "light");
-                  } catch {
-                    /* ignore */
-                  }
-                }}
-              />
+            <p className="mt-2 text-sm text-muted-foreground">
+              Выберите тему — она применится сразу и запомнится на этом устройстве.
+            </p>
+            <div className="mt-4 grid gap-2">
+              {THEMES.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => {
+                    setTheme(t.id);
+                    saveTheme(t.id);
+                  }}
+                  className={`rounded-2xl border p-4 text-left transition-colors ${
+                    theme === t.id
+                      ? "border-primary bg-primary-soft"
+                      : "border-border bg-secondary/50 hover:bg-secondary"
+                  }`}
+                >
+                  <span className="block text-sm font-semibold">{t.label}</span>
+                  <span className="mt-1 block text-sm text-muted-foreground">{t.hint}</span>
+                </button>
+              ))}
             </div>
           </div>
+
 
           <PasswordCard />
 

@@ -2,10 +2,11 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { CheckCircle2, Download, Loader2, RefreshCw, Save } from "lucide-react";
+import { CheckCircle2, Download, Loader2, Mic, RefreshCw, Save, Video } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { CoinsPanel, TipPanel } from "@/components/panels";
+import { ReminderInline } from "@/components/ReminderInline";
 import { VideoRecorder, formatTime, type RecordingResult, type RecorderState } from "@/components/VideoRecorder";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -57,6 +58,11 @@ export const Route = createFileRoute("/_authenticated/journal")({
 type SaveStep = "idle" | "uploading" | "saving" | "done" | "failed";
 
 function extFor(mime: string) {
+  if (mime.startsWith("audio/")) {
+    if (mime.includes("mp4")) return "m4a";
+    if (mime.includes("ogg")) return "ogg";
+    return "weba";
+  }
   return mime.includes("mp4") ? "mp4" : "webm";
 }
 
@@ -66,6 +72,7 @@ function JournalPage() {
   const qc = useQueryClient();
   const createEntry = useServerFn(createJournalEntry);
 
+  const [recordMode, setRecordMode] = useState<"video" | "audio">("video");
   const [recorderState, setRecorderState] = useState<RecorderState>("idle");
   const [recording, setRecording] = useState<RecordingResult | null>(null);
   const [mood, setMood] = useState<MoodKey | null>(null);
@@ -177,7 +184,34 @@ function JournalPage() {
     >
       <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
         <div className="space-y-4">
+          <div className="surface flex flex-wrap items-center gap-2 p-2">
+            {([
+              { id: "video" as const, label: "Видео", icon: Video },
+              { id: "audio" as const, label: "Только голос", icon: Mic },
+            ]).map((opt) => (
+              <button
+                key={opt.id}
+                type="button"
+                disabled={busy}
+                onClick={() => {
+                  if (recordMode === opt.id) return;
+                  setRecordMode(opt.id);
+                  resetForm();
+                }}
+                className={`flex min-w-0 flex-1 items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-medium transition-colors ${
+                  recordMode === opt.id
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary/60 text-secondary-foreground hover:bg-secondary"
+                }`}
+              >
+                <opt.icon className="size-4 shrink-0" />
+                <span className="truncate">{opt.label}</span>
+              </button>
+            ))}
+          </div>
           <VideoRecorder
+            key={recordMode}
+            mode={recordMode}
             maxSeconds={MAX_RECORD_SECONDS}
             locked={busy}
             onStateChange={setRecorderState}
@@ -189,6 +223,7 @@ function JournalPage() {
             }}
             onDiscard={resetForm}
           />
+          <ReminderInline />
           {step === "failed" && saveError ? (
             <div className="surface border-destructive/40 p-4">
               <p className="text-sm font-semibold text-destructive">Не удалось сохранить запись</p>
@@ -201,7 +236,7 @@ function JournalPage() {
                   <RefreshCw className="size-4" /> Повторить
                 </Button>
                 <Button size="sm" variant="secondary" onClick={downloadRecording}>
-                  <Download className="size-4" /> Скачать видео
+                  <Download className="size-4" /> Скачать запись
                 </Button>
               </div>
             </div>
@@ -286,7 +321,9 @@ function JournalPage() {
                 {!recording
                   ? recorderState === "recording" || recorderState === "paused"
                     ? "Остановите запись, чтобы сохранить её"
-                    : "Сначала запишите видео"
+                    : recordMode === "audio"
+                      ? "Сначала запишите голос"
+                      : "Сначала запишите видео"
                   : !mood
                     ? "Выберите эмоцию, чтобы сохранить"
                     : "Записи видны только вам."}{" "}
@@ -306,7 +343,8 @@ function JournalPage() {
             <AlertDialogDescription asChild>
               <div className="space-y-1 text-sm">
                 <p>
-                  Видео {recording ? formatTime(recording.durationSeconds) : ""}
+                  {recordMode === "audio" ? "Голосовая запись" : "Видео"}{" "}
+                  {recording ? formatTime(recording.durationSeconds) : ""}
                   {recording ? ` · ${(recording.blob.size / 1024 / 1024).toFixed(1)} МБ` : ""}
                 </p>
                 <p>

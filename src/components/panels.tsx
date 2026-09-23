@@ -95,6 +95,7 @@ export function MoodCalendar({
   today,
   year,
   month,
+  onSelectDay,
 }: {
   compact?: boolean;
   entries?: CalendarEntry[];
@@ -103,6 +104,8 @@ export function MoodCalendar({
   year?: number;
   /** 0-based month */
   month?: number;
+  /** Called with the ISO date and whether that day has an entry. */
+  onSelectDay?: (isoDate: string, hasEntry: boolean) => void;
 }) {
   const fallback = calendarMonth();
   const resolvedYear = year ?? fallback.year;
@@ -113,6 +116,8 @@ export function MoodCalendar({
   const daysInMonth = new Date(resolvedYear, resolvedMonth + 1, 0).getDate();
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const offset = (new Date(resolvedYear, resolvedMonth, 1).getDay() + 6) % 7;
+  const isoFor = (day: number) =>
+    `${resolvedYear}-${String(resolvedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 
   return (
     <div className={compact ? "surface p-5" : "surface p-5 lg:p-6"}>
@@ -132,16 +137,35 @@ export function MoodCalendar({
         {days.map((day) => {
           const entry = byDay.get(day);
           const mood = entry ? moods[entry.mood] : null;
+          const className = `grid aspect-square place-items-center rounded-xl text-sm ${
+            mood ? mood.tint : "bg-secondary/60 text-muted-foreground"
+          } ${day === resolvedToday ? "ring-2 ring-primary" : ""} ${
+            onSelectDay
+              ? mood
+                ? "cursor-pointer transition-transform hover:scale-105"
+                : "cursor-pointer opacity-60 transition-opacity hover:opacity-100"
+              : ""
+          }`;
+          const title = entry ? `${entry.date} — ${moods[entry.mood].label}` : String(day);
+          const content = mood ? <span className="text-base">{mood.emoji}</span> : day;
+
+          if (!onSelectDay) {
+            return (
+              <div key={day} className={className} title={title}>
+                {content}
+              </div>
+            );
+          }
           return (
-            <div
+            <button
               key={day}
-              className={`grid aspect-square place-items-center rounded-xl text-sm ${
-                mood ? mood.tint : "bg-secondary/60 text-muted-foreground"
-              } ${day === resolvedToday ? "ring-2 ring-primary" : ""}`}
-              title={entry ? `${entry.date} — ${moods[entry.mood].label}` : String(day)}
+              type="button"
+              className={className}
+              title={entry ? title : `${day} — записи нет`}
+              onClick={() => onSelectDay(isoFor(day), !!entry)}
             >
-              {mood ? <span className="text-base">{mood.emoji}</span> : day}
-            </div>
+              {content}
+            </button>
           );
         })}
       </div>
