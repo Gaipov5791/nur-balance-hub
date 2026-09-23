@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Pencil, Plus, UserRound } from "lucide-react";
+import { Link as LinkIcon, Pencil, Plus, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import { linkTherapistAccount } from "@/lib/therapist-accounts.functions";
 
 type TherapistAdminRow = {
   id: string;
