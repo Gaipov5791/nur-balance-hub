@@ -155,6 +155,7 @@ function TherapistsPage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", contact: "", time: "", topic: "" });
   const [slotId, setSlotId] = useState<string | null>(null);
+  const [duration, setDuration] = useState<number>(50);
 
   const list = useQuery({
     queryKey: ["therapists"],
@@ -225,6 +226,8 @@ function TherapistsPage() {
     },
   });
 
+  const fittingSlots = (slots.data ?? []).filter((s) => s.duration_minutes >= duration);
+
   useEffect(() => {
     setSlotId(null);
   }, [person?.id]);
@@ -253,14 +256,18 @@ function TherapistsPage() {
       if (!user || !person) throw new Error("Выберите специалиста");
       if (!form.contact.trim()) throw new Error("Укажите телефон или email для связи");
       const slot = (slots.data ?? []).find((s) => s.id === slotId) ?? null;
+      if (slot && slot.duration_minutes < duration) {
+        throw new Error("Это окно короче выбранной длительности — выберите другое время");
+      }
       const { error } = await supabase.from("therapist_requests").insert({
         user_id: user.id,
         therapist_id: person.id,
         client_name: form.name.trim() || profile?.name || "",
         contact: form.contact.trim(),
-        preferred_time: slot ? formatSlot(slot.starts_at, slot.duration_minutes) : form.time.trim(),
+        preferred_time: slot ? formatSlot(slot.starts_at, duration) : form.time.trim(),
         topic: form.topic.trim(),
         status: "new",
+        duration_minutes: duration,
         slot_id: slot?.id ?? null,
         scheduled_at: slot?.starts_at ?? null,
       });
@@ -502,16 +509,40 @@ function TherapistsPage() {
               required
             />
             <div>
+              <p className="text-sm font-medium">Длительность консультации</p>
+              <div className="mt-2 flex gap-2">
+                {[30, 50, 60].map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => {
+                      setDuration(d);
+                      const slot = (slots.data ?? []).find((s) => s.id === slotId);
+                      if (slot && slot.duration_minutes < d) setSlotId(null);
+                    }}
+                    className={`h-11 flex-1 rounded-xl text-sm font-semibold transition-colors ${
+                      duration === d
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-secondary text-secondary-foreground hover:bg-primary-soft"
+                    }`}
+                  >
+                    {d} мин
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
               <p className="text-sm font-medium">Свободное время специалиста</p>
               {slots.isLoading ? (
                 <p className="mt-2 text-sm text-muted-foreground">Загружаем расписание…</p>
-              ) : (slots.data ?? []).length === 0 ? (
+              ) : fittingSlots.length === 0 ? (
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Свободных слотов пока нет — напишите удобное время ниже.
+                  На {duration} минут свободных окон пока нет — выберите другую длительность или
+                  напишите удобное время ниже.
                 </p>
               ) : (
                 <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                  {(slots.data ?? []).map((s) => (
+                  {fittingSlots.map((s) => (
                     <button
                       key={s.id}
                       type="button"
@@ -524,12 +555,15 @@ function TherapistsPage() {
                     >
                       <span className="block font-medium">{formatSlot(s.starts_at)}</span>
                       <span className="block text-xs text-muted-foreground">
-                        {s.duration_minutes} мин · {s.format === "offline" ? "офлайн" : "онлайн"}
+                        {duration} мин · {s.format === "offline" ? "офлайн" : "онлайн"}
                       </span>
                     </button>
                   ))}
                 </div>
               )}
+              <p className="mt-2 text-xs text-muted-foreground">
+                Время закрепляется за вами после подтверждения специалистом.
+              </p>
             </div>
             <Input
               placeholder={slotId ? "Комментарий ко времени (необязательно)" : "Удобные день и время"}

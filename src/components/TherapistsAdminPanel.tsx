@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Pencil, Plus, UserRound } from "lucide-react";
+import { Link as LinkIcon, Pencil, Plus, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import { linkTherapistAccount } from "@/lib/therapist-accounts.functions";
 
 type TherapistAdminRow = {
   id: string;
@@ -49,6 +51,25 @@ export function TherapistsAdminPanel() {
   const qc = useQueryClient();
   const [form, setForm] = useState<FormState | null>(null);
   const [saving, setSaving] = useState(false);
+  const linkFn = useServerFn(linkTherapistAccount);
+
+  const linkAccount = async (row: TherapistAdminRow) => {
+    const email = window.prompt(
+      `Email аккаунта специалиста «${row.name}» (он уже должен быть зарегистрирован)`,
+      row.contact_email ?? "",
+    );
+    if (!email) return;
+    try {
+      await linkFn({ data: { therapistId: row.id, email: email.trim() } });
+      await qc.invalidateQueries({ queryKey: ["admin", "therapists"] });
+      toast.success("Аккаунт привязан — специалист увидит свои заявки");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Не удалось привязать аккаунт", {
+        action: { label: "Повторить", onClick: () => void linkAccount(row) },
+      });
+    }
+  };
+
 
   const list = useQuery({
     queryKey: ["admin", "therapists"],
@@ -240,7 +261,7 @@ export function TherapistsAdminPanel() {
                   {[t.spec, t.experience, t.price_label].filter(Boolean).join(" · ")}
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Button
                   size="sm"
                   variant="secondary"
@@ -250,6 +271,9 @@ export function TherapistsAdminPanel() {
                 </Button>
                 <Button size="sm" variant="secondary" onClick={() => void toggleActive(t)}>
                   {t.is_active ? "Скрыть" : "Показать"}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => void linkAccount(t)}>
+                  <LinkIcon className="size-4" /> Привязать вход
                 </Button>
               </div>
             </li>

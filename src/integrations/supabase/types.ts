@@ -403,6 +403,7 @@ export type Database = {
           client_name: string
           contact: string
           created_at: string
+          duration_minutes: number
           id: string
           preferred_time: string
           scheduled_at: string | null
@@ -418,6 +419,7 @@ export type Database = {
           client_name?: string
           contact?: string
           created_at?: string
+          duration_minutes?: number
           id?: string
           preferred_time?: string
           scheduled_at?: string | null
@@ -433,6 +435,7 @@ export type Database = {
           client_name?: string
           contact?: string
           created_at?: string
+          duration_minutes?: number
           id?: string
           preferred_time?: string
           scheduled_at?: string | null
@@ -647,6 +650,14 @@ export type Database = {
       }
       is_match_participant: {
         Args: { _match_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_own_therapist_card: {
+        Args: { _therapist_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_request_therapist: {
+        Args: { _request_id: string; _user_id: string }
         Returns: boolean
       }
       leave_buddy_match: {
