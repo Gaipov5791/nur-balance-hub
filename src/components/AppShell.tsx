@@ -78,6 +78,7 @@ const baseNav: NavItem[] = [
 ];
 
 const moderationItem: NavItem = { to: "/moderation", label: "Модерация", icon: ShieldCheck };
+const deskItem: NavItem = { to: "/therapist-desk", label: "Кабинет специалиста", icon: BriefcaseMedical };
 
 const mobileNav = baseNav.filter((n) => ["/", "/journal", "/buddy", "/care"].includes(n.to));
 
