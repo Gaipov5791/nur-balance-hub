@@ -69,3 +69,4 @@
 - Календарь: `MoodCalendar` в `src/components/panels.tsx` получает `onSelectDay`; `archive.tsx` открывает запись по дате.
 - Темы: три набора токенов в `src/styles.css` через `data-theme`, выбор в настройках и ранний скрипт в `__root.tsx`.
 - PWA: `public/manifest.webmanifest`, иконки, `<link rel="manifest">` в `__root.tsx`, компонент подсказки установки с `beforeinstallprompt` и iOS-веткой.
+- Бронирование: `therapist_slots` → окна доступности + поле `duration_minutes` на заявке; статусы `pending_confirmation`/`confirmed`/`declined`; уникальный индекс на пересечение времени, серверная функция подтверждения с проверкой роли `therapist`/`admin`; отдельный экран `/_authenticated/therapist-desk` для роли `therapist`.
