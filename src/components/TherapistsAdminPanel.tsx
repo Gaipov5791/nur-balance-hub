@@ -240,7 +240,7 @@ export function TherapistsAdminPanel() {
                   {[t.spec, t.experience, t.price_label].filter(Boolean).join(" · ")}
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Button
                   size="sm"
                   variant="secondary"
@@ -250,6 +250,9 @@ export function TherapistsAdminPanel() {
                 </Button>
                 <Button size="sm" variant="secondary" onClick={() => void toggleActive(t)}>
                   {t.is_active ? "Скрыть" : "Показать"}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => void linkAccount(t)}>
+                  <LinkIcon className="size-4" /> Привязать вход
                 </Button>
               </div>
             </li>
