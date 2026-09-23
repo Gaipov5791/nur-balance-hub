@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import {
   Home,
   Video,
+  BriefcaseMedical,
   CalendarDays,
   HeartHandshake,
   Trophy,
@@ -12,6 +13,8 @@ import {
   Menu,
   type LucideIcon,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   Sheet,
