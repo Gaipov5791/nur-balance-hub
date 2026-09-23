@@ -155,6 +155,7 @@ function TherapistsPage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", contact: "", time: "", topic: "" });
   const [slotId, setSlotId] = useState<string | null>(null);
+  const [duration, setDuration] = useState<number>(50);
 
   const list = useQuery({
     queryKey: ["therapists"],
