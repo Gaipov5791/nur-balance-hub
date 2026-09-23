@@ -112,8 +112,24 @@ export function AppShell({
   const isAdmin = canAccessModeration(staffAccess);
   useBuddyNotifications();
   const unread = useBuddyUnread();
+  const myCard = useQuery({
+    queryKey: ["my-therapist-card", user?.id ?? null],
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("therapists")
+        .select("id, name")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      return data;
+    },
+  });
   const mainNav = baseNav;
-  const staffNav: NavItem[] = isAdmin ? [moderationItem] : [];
+  const staffNav: NavItem[] = [
+    ...(myCard.data ? [deskItem] : []),
+    ...(isAdmin ? [moderationItem] : []),
+  ];
   const profile = {
     name: real?.name || user?.email?.split("@")[0] || "Вы",
     coins: real?.coins ?? 0,
