@@ -137,7 +137,7 @@ function PasswordCard() {
         {busy ? "Обновляем…" : "Изменить пароль"}
       </Button>
       <p className="mt-3 text-xs text-muted-foreground">
-        Если вы входите через Google, пароль задавать не нужно.
+        Новый пароль должен быть не короче 6 символов.
       </p>
     </div>
   );
