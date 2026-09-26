@@ -362,6 +362,86 @@ export type Database = {
         }
         Relationships: []
       }
+      therapist_chats: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          request_id: string
+          therapist_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          request_id: string
+          therapist_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          request_id?: string
+          therapist_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "therapist_chats_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: true
+            referencedRelation: "therapist_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "therapist_chats_therapist_id_fkey"
+            columns: ["therapist_id"]
+            isOneToOne: false
+            referencedRelation: "therapists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      therapist_messages: {
+        Row: {
+          body: string
+          chat_id: string
+          created_at: string
+          duration_seconds: number
+          id: string
+          kind: string
+          media_path: string | null
+          sender_id: string
+        }
+        Insert: {
+          body?: string
+          chat_id: string
+          created_at?: string
+          duration_seconds?: number
+          id?: string
+          kind?: string
+          media_path?: string | null
+          sender_id: string
+        }
+        Update: {
+          body?: string
+          chat_id?: string
+          created_at?: string
+          duration_seconds?: number
+          id?: string
+          kind?: string
+          media_path?: string | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "therapist_messages_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "therapist_chats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       therapist_request_events: {
         Row: {
           changed_by: string | null
@@ -646,6 +726,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_chat_participant: {
+        Args: { _chat_id: string; _user_id: string }
         Returns: boolean
       }
       is_match_participant: {
