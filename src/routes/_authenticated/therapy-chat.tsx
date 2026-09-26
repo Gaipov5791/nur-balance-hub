@@ -227,7 +227,7 @@ function TherapyChatPage() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate({ to: "/therapy-chat" })}
+              onClick={() => navigate({ to: "/therapy-chat", search: { chat: undefined } })}
             >
               <ArrowLeft className="size-4" />
             </Button>
