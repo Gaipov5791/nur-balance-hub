@@ -23,13 +23,15 @@ export const Route = createFileRoute("/_authenticated/moderation")({
   },
   head: () => ({
     meta: [
-      { title: "Модерация жалоб — Nur Balance" },
+       { title: "Модерация психологов и заявок — Nur Balance" },
       {
         name: "description",
-        content: "Панель модерации: жалобы из чата поддержки и переписка спорной комнаты.",
+         content: "Панель администратора: специалисты и служебные контакты, заявки, консультации и жалобы.",
       },
-      { property: "og:title", content: "Модерация жалоб — Nur Balance" },
-      { property: "og:description", content: "Разбор жалоб из чата взаимоподдержки." },
+       { property: "og:title", content: "Модерация психологов и заявок — Nur Balance" },
+       { property: "og:description", content: "Служебные контакты специалистов, заявки и учёт консультаций." },
+       { property: "og:type", content: "website" },
+       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: ModerationPage,

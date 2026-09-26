@@ -401,6 +401,41 @@ export type Database = {
           },
         ]
       }
+      therapist_contacts: {
+        Row: {
+          created_at: string
+          email: string
+          instagram: string
+          phone: string
+          therapist_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string
+          instagram?: string
+          phone?: string
+          therapist_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          instagram?: string
+          phone?: string
+          therapist_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "therapist_contacts_therapist_id_fkey"
+            columns: ["therapist_id"]
+            isOneToOne: true
+            referencedRelation: "therapists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       therapist_messages: {
         Row: {
           body: string

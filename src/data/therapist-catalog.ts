@@ -5,9 +5,6 @@ export const DARYA_TAKMAKOVA = {
   experience: "3 года практики",
   bio: `Судебная сфера: гражданские и уголовные дела с детьми и родителями. Частная практика, проект «Психолог в люди».
 
-Для записи: +7 776 270 82 44
-Почта: d.takmakova@icloud.com
-
 Специализация:
 • Травма, подавленные / сложное проявление эмоций, болезненные отношения, повторяющиеся сценарии
 • Неуверенность в себе и низкая самооценка
@@ -16,12 +13,6 @@ export const DARYA_TAKMAKOVA = {
   price_label: "онлайн 10 000 ₸ · офлайн 13 000 ₸",
   languages: "Русский",
   photo_url: "/therapists/darya-takmakova.jpg",
-  contact_email: "d.takmakova@icloud.com",
   is_verified: true,
   is_active: true,
-} as const;
-
-export const ALIYA_CONTACTS = {
-  instagram: "@aliya.psiholog",
-  phone: "+7 707 111 60 20",
 } as const;

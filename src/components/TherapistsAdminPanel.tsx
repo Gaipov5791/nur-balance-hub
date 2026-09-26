@@ -19,13 +19,13 @@ type TherapistAdminRow = {
   price_label: string;
   languages: string;
   photo_url: string | null;
-  contact_email: string | null;
   is_verified: boolean;
   is_active: boolean;
   sort_order: number;
 };
 
-type FormState = Omit<TherapistAdminRow, "id"> & { id: string | null };
+type TherapistContact = { therapist_id: string; email: string; phone: string; instagram: string };
+type FormState = Omit<TherapistAdminRow, "id"> & { id: string | null; email: string; phone: string; instagram: string };
 
 const EMPTY: FormState = {
   id: null,
@@ -37,14 +37,16 @@ const EMPTY: FormState = {
   price_label: "",
   languages: "Русский, Казахский",
   photo_url: "",
-  contact_email: "",
+  email: "",
+  phone: "",
+  instagram: "",
   is_verified: false,
   is_active: true,
   sort_order: 0,
 };
 
 const SELECT =
-  "id, name, initials, spec, experience, bio, price_label, languages, photo_url, contact_email, is_verified, is_active, sort_order";
+  "id, name, initials, spec, experience, bio, price_label, languages, photo_url, is_verified, is_active, sort_order";
 
 /** Admin CRUD for the therapist catalog: create, edit, hide cards. */
 export function TherapistsAdminPanel() {
@@ -56,7 +58,7 @@ export function TherapistsAdminPanel() {
   const linkAccount = async (row: TherapistAdminRow) => {
     const email = window.prompt(
       `Email аккаунта специалиста «${row.name}» (он уже должен быть зарегистрирован)`,
-      row.contact_email ?? "",
+      contacts.data?.find((c) => c.therapist_id === row.id)?.email ?? "",
     );
     if (!email) return;
     try {
@@ -83,8 +85,20 @@ export function TherapistsAdminPanel() {
     },
   });
 
+  const contacts = useQuery({
+    queryKey: ["admin", "therapist-contacts"],
+    queryFn: async (): Promise<TherapistContact[]> => {
+      const { data, error } = await supabase
+        .from("therapist_contacts")
+        .select("therapist_id, email, phone, instagram");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   const refresh = async () => {
     await qc.invalidateQueries({ queryKey: ["admin", "therapists"] });
+    await qc.invalidateQueries({ queryKey: ["admin", "therapist-contacts"] });
     await qc.invalidateQueries({ queryKey: ["therapists"] });
   };
 
@@ -104,20 +118,34 @@ export function TherapistsAdminPanel() {
       price_label: form.price_label.trim(),
       languages: form.languages.trim(),
       photo_url: form.photo_url?.trim() ? form.photo_url.trim() : null,
-      contact_email: form.contact_email?.trim() ? form.contact_email.trim() : null,
       is_verified: form.is_verified,
       is_active: form.is_active,
       sort_order: Number(form.sort_order) || 0,
     };
-    const { error } = form.id
-      ? await supabase.from("therapists").update(payload).eq("id", form.id)
-      : await supabase.from("therapists").insert(payload);
+    const result = form.id
+      ? await supabase.from("therapists").update(payload).eq("id", form.id).select("id").single()
+      : await supabase.from("therapists").insert(payload).select("id").single();
+    const { error } = result;
     setSaving(false);
     if (error) {
       toast.error("Не удалось сохранить карточку", {
         action: { label: "Повторить", onClick: () => void save() },
       });
       return;
+    }
+    if (result.data) {
+      const { error: contactError } = await supabase.from("therapist_contacts").upsert({
+        therapist_id: result.data.id,
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        instagram: form.instagram.trim(),
+      });
+      if (contactError) {
+        toast.error("Карточка сохранена, но контакты не сохранились", {
+          action: { label: "Повторить", onClick: () => void save() },
+        });
+        return;
+      }
     }
     setForm(null);
     await refresh();
@@ -187,11 +215,9 @@ export function TherapistsAdminPanel() {
             value={form.languages}
             onChange={(e) => setForm({ ...form, languages: e.target.value })}
           />
-          <Input
-            placeholder="Email для связи"
-            value={form.contact_email ?? ""}
-            onChange={(e) => setForm({ ...form, contact_email: e.target.value })}
-          />
+          <Input placeholder="Служебный email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          <Input placeholder="Служебный телефон" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+          <Input placeholder="Служебный Instagram" value={form.instagram} onChange={(e) => setForm({ ...form, instagram: e.target.value })} />
           <Input
             className="sm:col-span-2"
             placeholder="Ссылка на фото, например /therapists/name.jpg"
@@ -200,7 +226,7 @@ export function TherapistsAdminPanel() {
           />
           <Textarea
             className="min-h-24 sm:col-span-2"
-            placeholder="Описание, формат работы, цены"
+            placeholder="Описание, формат работы, цены (без контактов)"
             value={form.bio}
             onChange={(e) => setForm({ ...form, bio: e.target.value })}
           />
@@ -237,8 +263,10 @@ export function TherapistsAdminPanel() {
         </form>
       ) : null}
 
-      {list.isLoading ? (
+      {list.isLoading || contacts.isLoading ? (
         <p className="mt-4 text-sm text-muted-foreground">Загружаем…</p>
+      ) : list.isError || contacts.isError ? (
+        <div className="mt-4 text-sm">Не удалось загрузить каталог или контакты. <Button variant="secondary" size="sm" onClick={() => { void list.refetch(); void contacts.refetch(); }}>Повторить</Button></div>
       ) : (list.data ?? []).length === 0 ? (
         <p className="mt-4 text-sm text-muted-foreground">Каталог пока пуст.</p>
       ) : (
@@ -260,12 +288,20 @@ export function TherapistsAdminPanel() {
                 <p className="mt-1 text-xs text-muted-foreground">
                   {[t.spec, t.experience, t.price_label].filter(Boolean).join(" · ")}
                 </p>
+                {(() => {
+                  const contact = contacts.data?.find((c) => c.therapist_id === t.id);
+                  const details = [contact?.email, contact?.phone, contact?.instagram].filter(Boolean);
+                  return details.length > 0 ? <p className="mt-2 break-words text-xs text-muted-foreground">Служебные контакты: {details.join(" · ")}</p> : null;
+                })()}
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button
                   size="sm"
                   variant="secondary"
-                  onClick={() => setForm({ ...t, photo_url: t.photo_url ?? "", contact_email: t.contact_email ?? "" })}
+                  onClick={() => {
+                    const contact = contacts.data?.find((c) => c.therapist_id === t.id);
+                    setForm({ ...t, photo_url: t.photo_url ?? "", email: contact?.email ?? "", phone: contact?.phone ?? "", instagram: contact?.instagram ?? "" });
+                  }}
                 >
                   <Pencil className="size-4" /> Изменить
                 </Button>
