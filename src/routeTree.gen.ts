@@ -21,6 +21,7 @@ import { Route as AuthenticatedRewardsRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedTherapistDeskRouteImport } from './routes/_authenticated/therapist-desk'
 import { Route as AuthenticatedTherapistsRouteImport } from './routes/_authenticated/therapists'
+import { Route as AuthenticatedTherapyChatRouteImport } from './routes/_authenticated/therapy-chat'
 import { Route as ApiPublicCronJournalRemindersRouteImport } from './routes/api/public/cron/journal-reminders'
 
 const IndexRoute = IndexRouteImport.update({
@@ -83,6 +84,12 @@ const AuthenticatedTherapistsRoute = AuthenticatedTherapistsRouteImport.update({
   path: '/therapists',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedTherapyChatRoute =
+  AuthenticatedTherapyChatRouteImport.update({
+    id: '/therapy-chat',
+    path: '/therapy-chat',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicCronJournalRemindersRoute =
   ApiPublicCronJournalRemindersRouteImport.update({
     id: '/api/public/cron/journal-reminders',
@@ -102,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/therapist-desk': typeof AuthenticatedTherapistDeskRoute
   '/therapists': typeof AuthenticatedTherapistsRoute
+  '/therapy-chat': typeof AuthenticatedTherapyChatRoute
   '/api/public/cron/journal-reminders': typeof ApiPublicCronJournalRemindersRoute
 }
 export interface FileRoutesByTo {
@@ -116,6 +124,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/therapist-desk': typeof AuthenticatedTherapistDeskRoute
   '/therapists': typeof AuthenticatedTherapistsRoute
+  '/therapy-chat': typeof AuthenticatedTherapyChatRoute
   '/api/public/cron/journal-reminders': typeof ApiPublicCronJournalRemindersRoute
 }
 export interface FileRoutesById {
@@ -132,6 +141,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/therapist-desk': typeof AuthenticatedTherapistDeskRoute
   '/_authenticated/therapists': typeof AuthenticatedTherapistsRoute
+  '/_authenticated/therapy-chat': typeof AuthenticatedTherapyChatRoute
   '/api/public/cron/journal-reminders': typeof ApiPublicCronJournalRemindersRoute
 }
 export interface FileRouteTypes {
@@ -148,6 +158,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/therapist-desk'
     | '/therapists'
+    | '/therapy-chat'
     | '/api/public/cron/journal-reminders'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -162,6 +173,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/therapist-desk'
     | '/therapists'
+    | '/therapy-chat'
     | '/api/public/cron/journal-reminders'
   id:
     | '__root__'
@@ -177,6 +189,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/therapist-desk'
     | '/_authenticated/therapists'
+    | '/_authenticated/therapy-chat'
     | '/api/public/cron/journal-reminders'
   fileRoutesById: FileRoutesById
 }
@@ -273,6 +286,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTherapistsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/therapy-chat': {
+      id: '/_authenticated/therapy-chat'
+      path: '/therapy-chat'
+      fullPath: '/therapy-chat'
+      preLoaderRoute: typeof AuthenticatedTherapyChatRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/cron/journal-reminders': {
       id: '/api/public/cron/journal-reminders'
       path: '/api/public/cron/journal-reminders'
@@ -293,6 +313,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTherapistDeskRoute: typeof AuthenticatedTherapistDeskRoute
   AuthenticatedTherapistsRoute: typeof AuthenticatedTherapistsRoute
+  AuthenticatedTherapyChatRoute: typeof AuthenticatedTherapyChatRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -305,6 +326,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTherapistDeskRoute: AuthenticatedTherapistDeskRoute,
   AuthenticatedTherapistsRoute: AuthenticatedTherapistsRoute,
+  AuthenticatedTherapyChatRoute: AuthenticatedTherapyChatRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
