@@ -129,6 +129,8 @@ function TherapistsPage() {
   const [form, setForm] = useState({ name: "", contact: "", time: "", topic: "" });
   const [slotId, setSlotId] = useState<string | null>(null);
   const [duration, setDuration] = useState<number>(50);
+  const chats = useTherapyChats();
+  const chatByRequest = new Map((chats.data ?? []).map((c) => [c.request_id, c.id]));
 
   const list = useQuery({
     queryKey: ["therapists"],
@@ -412,11 +414,20 @@ function TherapistsPage() {
                           </details>
                         ) : null}
                       </div>
-                      {r.status === "new" || r.status === "in_progress" || r.status === "scheduled" ? (
-                        <Button variant="secondary" size="sm" onClick={() => void cancel(r.id)}>
-                          Отменить
-                        </Button>
-                      ) : null}
+                      <div className="flex flex-wrap gap-2">
+                        {r.status === "scheduled" && chatByRequest.get(r.id) ? (
+                          <Button asChild size="sm">
+                            <Link to="/therapy-chat" search={{ chat: chatByRequest.get(r.id) }}>
+                              <MessageCircle className="size-4" /> Написать специалисту
+                            </Link>
+                          </Button>
+                        ) : null}
+                        {r.status === "new" || r.status === "in_progress" || r.status === "scheduled" ? (
+                          <Button variant="secondary" size="sm" onClick={() => void cancel(r.id)}>
+                            Отменить
+                          </Button>
+                        ) : null}
+                      </div>
                     </li>
                   );
                 })}
@@ -458,7 +469,7 @@ function TherapistsPage() {
               ))}
             </div>
           ) : null}
-          {person ? <TherapistContacts person={person} /> : null}
+          {person ? <ChatHint /> : null}
           {person?.bio ? (
             <p className="mt-3 max-h-40 overflow-y-auto whitespace-pre-line text-sm leading-relaxed">
               {person.bio}
