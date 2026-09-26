@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BadgeCheck, Instagram, Loader2, Mail, Phone } from "lucide-react";
+import { BadgeCheck, Loader2, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { CoinsPanel } from "@/components/panels";
@@ -10,7 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useAuth";
-import { extractInstagram, extractPhone, priceParts, specItems, toTelHref } from "@/lib/therapists";
+import { useTherapyChats } from "@/hooks/useTherapyChat";
+import { priceParts, specItems } from "@/lib/therapists";
 import { ensureTherapistCatalog } from "@/lib/therapist-catalog.functions";
 
 export const Route = createFileRoute("/_authenticated/therapists")({
@@ -44,7 +45,6 @@ type TherapistRow = {
   price_label: string;
   languages: string;
   photo_url: string | null;
-  contact_email: string | null;
   is_verified: boolean;
 };
 
@@ -112,39 +112,12 @@ function TherapistPhoto({
   );
 }
 
-function TherapistContacts({ person }: { person: TherapistRow }) {
-  const phone = extractPhone(`${person.bio} ${person.price_label}`);
-  const instagram = extractInstagram(person.bio);
-  const email = person.contact_email?.trim() || null;
-  if (!phone && !email && !instagram) return null;
-
+function ChatHint() {
   return (
-    <div className="mt-3 flex flex-wrap gap-2">
-      {phone ? (
-        <Button asChild size="sm" variant="secondary">
-          <a href={`tel:${toTelHref(phone)}`}>
-            <Phone className="size-3.5" />
-            {phone}
-          </a>
-        </Button>
-      ) : null}
-      {email ? (
-        <Button asChild size="sm" variant="secondary">
-          <a href={`mailto:${email}`}>
-            <Mail className="size-3.5" />
-            Написать
-          </a>
-        </Button>
-      ) : null}
-      {instagram ? (
-        <Button asChild size="sm" variant="secondary">
-          <a href={`https://instagram.com/${instagram}`} target="_blank" rel="noreferrer">
-            <Instagram className="size-3.5" />
-            @{instagram}
-          </a>
-        </Button>
-      ) : null}
-    </div>
+    <p className="mt-3 rounded-2xl bg-primary-soft px-3 py-2 text-xs text-primary">
+      Общение со специалистом — в чате приложения: он открывается автоматически после подтверждения
+      записи.
+    </p>
   );
 }
 
@@ -156,6 +129,8 @@ function TherapistsPage() {
   const [form, setForm] = useState({ name: "", contact: "", time: "", topic: "" });
   const [slotId, setSlotId] = useState<string | null>(null);
   const [duration, setDuration] = useState<number>(50);
+  const chats = useTherapyChats();
+  const chatByRequest = new Map((chats.data ?? []).map((c) => [c.request_id, c.id]));
 
   const list = useQuery({
     queryKey: ["therapists"],
@@ -167,7 +142,7 @@ function TherapistsPage() {
       }
       const { data, error } = await supabase
         .from("therapists")
-        .select("id, name, initials, spec, experience, bio, price_label, languages, photo_url, contact_email, is_verified")
+        .select("id, name, initials, spec, experience, bio, price_label, languages, photo_url, is_verified")
         .eq("is_active", true)
         .order("sort_order", { ascending: true });
       if (error) throw error;
@@ -306,7 +281,8 @@ function TherapistsPage() {
   return (
     <AppShell title="Психологи" aside={<CoinsPanel />}>
       <p className="mb-4 text-sm text-muted-foreground">
-        Выберите специалиста: можно записаться через форму или связаться напрямую по телефону, почте или Instagram.
+        Выберите специалиста и отправьте заявку — после подтверждения записи откроется личный чат в
+        приложении.
       </p>
       <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.95fr)]">
         <section className="min-w-0 space-y-3">
@@ -438,11 +414,20 @@ function TherapistsPage() {
                           </details>
                         ) : null}
                       </div>
-                      {r.status === "new" || r.status === "in_progress" || r.status === "scheduled" ? (
-                        <Button variant="secondary" size="sm" onClick={() => void cancel(r.id)}>
-                          Отменить
-                        </Button>
-                      ) : null}
+                      <div className="flex flex-wrap gap-2">
+                        {r.status === "scheduled" && chatByRequest.get(r.id) ? (
+                          <Button asChild size="sm">
+                            <Link to="/therapy-chat" search={{ chat: chatByRequest.get(r.id) }}>
+                              <MessageCircle className="size-4" /> Написать специалисту
+                            </Link>
+                          </Button>
+                        ) : null}
+                        {r.status === "new" || r.status === "in_progress" || r.status === "scheduled" ? (
+                          <Button variant="secondary" size="sm" onClick={() => void cancel(r.id)}>
+                            Отменить
+                          </Button>
+                        ) : null}
+                      </div>
                     </li>
                   );
                 })}
@@ -484,7 +469,7 @@ function TherapistsPage() {
               ))}
             </div>
           ) : null}
-          {person ? <TherapistContacts person={person} /> : null}
+          {person ? <ChatHint /> : null}
           {person?.bio ? (
             <p className="mt-3 max-h-40 overflow-y-auto whitespace-pre-line text-sm leading-relaxed">
               {person.bio}
@@ -582,8 +567,8 @@ function TherapistsPage() {
             </Button>
           </form>
           <p className="mt-3 text-xs text-muted-foreground">
-            Заявка сохраняется в приложении: статус обновляется здесь, а специалист свяжется с вами по
-            указанному контакту. Оплата консультации проходит по ссылке от специалиста.
+            Заявка сохраняется в приложении: статус обновляется здесь, а после подтверждения записи
+            откроется личный чат со специалистом. Оплата консультации проходит по ссылке от специалиста.
           </p>
         </section>
       </div>

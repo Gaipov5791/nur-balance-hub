@@ -1,8 +1,8 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ClipboardList, ShieldCheck } from "lucide-react";
+import { Calculator, ClipboardList, ShieldCheck } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { TherapistsAdminPanel } from "@/components/TherapistsAdminPanel";
 import { TherapistSlotsAdminPanel } from "@/components/TherapistSlotsAdminPanel";
@@ -122,6 +122,7 @@ function ModerationPage() {
       <TherapistsAdminPanel />
       <TherapistSlotsAdminPanel />
       <TherapistRequestsPanel />
+      <ConsultationsAccountingPanel />
       <div className="surface mt-5 p-5">
         <h2 className="flex items-center gap-2 font-display text-base">
           <ShieldCheck className="size-4 text-primary" /> Жалобы из чата поддержки
@@ -426,6 +427,153 @@ function TherapistRequestsPanel() {
             </li>
           ))}
         </ul>
+      )}
+    </div>
+  );
+}
+
+type ConsultationRow = {
+  id: string;
+  therapist_id: string;
+  client_name: string;
+  status: string;
+  scheduled_at: string | null;
+  duration_minutes: number;
+  created_at: string;
+  therapists: { name: string } | null;
+};
+
+/** Учёт подтверждённых и проведённых консультаций для расчёта комиссии. */
+function ConsultationsAccountingPanel() {
+  const now = new Date();
+  const [month, setMonth] = useState(
+    `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`,
+  );
+  const [therapistFilter, setTherapistFilter] = useState("all");
+
+  const consultations = useQuery({
+    queryKey: ["moderation", "consultations"],
+    queryFn: async (): Promise<ConsultationRow[]> => {
+      const { data, error } = await supabase
+        .from("therapist_requests")
+        .select(
+          "id, therapist_id, client_name, status, scheduled_at, duration_minutes, created_at, therapists(name)",
+        )
+        .in("status", ["scheduled", "done"])
+        .order("scheduled_at", { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return (data ?? []) as unknown as ConsultationRow[];
+    },
+  });
+
+  const all = consultations.data ?? [];
+  const therapistOptions = Array.from(
+    new Map(all.map((r) => [r.therapist_id, r.therapists?.name ?? "Специалист"])).entries(),
+  );
+
+  const rows = useMemo(
+    () =>
+      all.filter((r) => {
+        const when = r.scheduled_at ?? r.created_at;
+        if (month && !when.startsWith(month)) return false;
+        if (therapistFilter !== "all" && r.therapist_id !== therapistFilter) return false;
+        return true;
+      }),
+    [all, month, therapistFilter],
+  );
+
+  const totalMinutes = rows.reduce((sum, r) => sum + (r.duration_minutes || 0), 0);
+  const totalHours = Math.floor(totalMinutes / 60);
+  const restMinutes = totalMinutes % 60;
+
+  return (
+    <div className="surface mt-5 p-5">
+      <h2 className="flex items-center gap-2 font-display text-base">
+        <Calculator className="size-4 text-primary" /> Учёт консультаций
+      </h2>
+      <p className="mt-1 text-xs text-muted-foreground">
+        Подтверждённые и проведённые консультации — для расчёта комиссии за месяц.
+      </p>
+
+      <div className="mt-4 grid gap-2 sm:grid-cols-3">
+        <Input type="month" value={month} onChange={(e) => setMonth(e.target.value)} />
+        <select
+          className="h-10 rounded-xl border border-border bg-card px-3 text-sm"
+          value={therapistFilter}
+          onChange={(e) => setTherapistFilter(e.target.value)}
+        >
+          <option value="all">Все специалисты</option>
+          {therapistOptions.map(([id, name]) => (
+            <option key={id} value={id}>
+              {name}
+            </option>
+          ))}
+        </select>
+        <div className="flex items-center gap-3 rounded-xl bg-primary-soft px-3 py-2 text-sm">
+          <span className="font-semibold">{rows.length}</span> консультаций ·
+          <span className="font-semibold">
+            {totalHours > 0 ? `${totalHours} ч ` : ""}
+            {restMinutes} мин
+          </span>
+        </div>
+      </div>
+
+      {consultations.isLoading ? (
+        <p className="mt-4 text-sm text-muted-foreground">Загружаем…</p>
+      ) : consultations.isError ? (
+        <div className="mt-4">
+          <p className="text-sm">Не удалось загрузить консультации.</p>
+          <Button className="mt-3" variant="secondary" onClick={() => void consultations.refetch()}>
+            Повторить
+          </Button>
+        </div>
+      ) : rows.length === 0 ? (
+        <p className="mt-4 text-sm text-muted-foreground">
+          За выбранный период консультаций нет.
+        </p>
+      ) : (
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full min-w-[34rem] text-sm">
+            <thead>
+              <tr className="border-b border-border text-left text-xs text-muted-foreground">
+                <th className="py-2 pr-3 font-medium">Психолог</th>
+                <th className="py-2 pr-3 font-medium">Клиент</th>
+                <th className="py-2 pr-3 font-medium">Дата и время</th>
+                <th className="py-2 pr-3 font-medium">Длительность</th>
+                <th className="py-2 font-medium">Статус</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.id} className="border-b border-border/60 last:border-0">
+                  <td className="py-2 pr-3 font-medium">{r.therapists?.name ?? "Специалист"}</td>
+                  <td className="py-2 pr-3">{r.client_name || "—"}</td>
+                  <td className="py-2 pr-3">
+                    {r.scheduled_at
+                      ? new Date(r.scheduled_at).toLocaleString("ru-RU", {
+                          day: "numeric",
+                          month: "long",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "—"}
+                  </td>
+                  <td className="py-2 pr-3">{r.duration_minutes} мин</td>
+                  <td className="py-2">
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[11px] ${
+                        r.status === "done" ? "bg-secondary" : "bg-primary-soft text-primary"
+                      }`}
+                    >
+                      {REQUEST_STATUS_LABEL[r.status] ?? r.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

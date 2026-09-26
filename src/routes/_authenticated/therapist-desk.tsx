@@ -1,10 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarClock, CheckCircle2, Loader2, XCircle } from "lucide-react";
+import { CalendarClock, CheckCircle2, Loader2, MessageCircle, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { useProfile } from "@/hooks/useAuth";
+import { useTherapyChats } from "@/hooks/useTherapyChat";
 import { supabase } from "@/integrations/supabase/client";
 import { formatSlot } from "@/routes/_authenticated/therapists";
 
@@ -51,6 +52,8 @@ const STATUS_LABEL: Record<string, string> = {
 function TherapistDeskPage() {
   const { user } = useProfile();
   const qc = useQueryClient();
+  const chats = useTherapyChats();
+  const chatByRequest = new Map((chats.data ?? []).map((c) => [c.request_id, c.id]));
 
   const card = useQuery({
     queryKey: ["my-therapist-card", user?.id ?? null],
@@ -165,6 +168,13 @@ function TherapistDeskPage() {
                     </div>
                   ) : r.status === "scheduled" ? (
                     <div className="mt-3 flex flex-wrap gap-2">
+                      {chatByRequest.get(r.id) ? (
+                        <Button asChild size="sm">
+                          <Link to="/therapy-chat" search={{ chat: chatByRequest.get(r.id) }}>
+                            <MessageCircle className="size-4" /> Открыть чат
+                          </Link>
+                        </Button>
+                      ) : null}
                       <Button size="sm" variant="secondary" onClick={() => void setStatus(r.id, "done")}>
                         Консультация состоялась
                       </Button>
