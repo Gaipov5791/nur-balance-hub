@@ -19,7 +19,7 @@ import { uploadWithRetry } from "@/lib/upload";
 
 export const Route = createFileRoute("/_authenticated/therapy-chat")({
   validateSearch: (search: Record<string, unknown>) => ({
-    chat: typeof search.chat === "string" ? search.chat : undefined,
+    chat: typeof search["chat"] === "string" ? (search["chat"] as string) : undefined,
   }),
   head: () => ({
     meta: [
@@ -216,7 +216,7 @@ function TherapyChatPage() {
           <Button
             className="mt-4"
             variant="secondary"
-            onClick={() => navigate({ to: "/therapy-chat" })}
+            onClick={() => navigate({ to: "/therapy-chat", search: { chat: undefined } })}
           >
             <ArrowLeft className="size-4" /> К списку чатов
           </Button>
