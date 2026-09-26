@@ -49,7 +49,7 @@ export function LaunchIntro() {
       role="dialog"
       aria-modal="true"
       aria-label="Заставка Nur Balance"
-      className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-background"
+      className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-intro-backdrop"
     >
       <video
         ref={videoRef}
