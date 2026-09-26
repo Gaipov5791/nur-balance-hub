@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Volume2, VolumeX, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import introVideo from "@/assets/nur-balance-intro.mp4.asset.json";
+import introWebm from "@/assets/nur-balance-intro.webm.asset.json";
 import introPoster from "@/assets/nur-balance-intro-poster.jpg.asset.json";
 
 const SESSION_KEY = "nur-balance-intro-seen";
@@ -52,7 +53,6 @@ export function LaunchIntro() {
     >
       <video
         ref={videoRef}
-        src={introVideo.url}
         poster={introPoster.url}
         autoPlay
         muted={muted}
@@ -60,13 +60,12 @@ export function LaunchIntro() {
         preload="auto"
         onEnded={dismiss}
         onError={dismiss}
-        onPlay={() => {
-          // Some browsers reject autoplay even with muted and playsInline.
-          // The fallback timer above ensures the app remains available.
-        }}
         className="h-full w-full object-contain"
         aria-label="Анимация логотипа Nur Balance"
-      />
+      >
+        <source src={introWebm.url} type="video/webm" />
+        <source src={introVideo.url} type="video/mp4" />
+      </video>
       <div className="absolute right-4 top-[max(1rem,env(safe-area-inset-top))] flex items-center gap-2">
         <Button
           type="button"
