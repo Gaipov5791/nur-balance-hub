@@ -1,8 +1,8 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ClipboardList, ShieldCheck } from "lucide-react";
+import { Calculator, ClipboardList, ShieldCheck } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { TherapistsAdminPanel } from "@/components/TherapistsAdminPanel";
 import { TherapistSlotsAdminPanel } from "@/components/TherapistSlotsAdminPanel";
@@ -122,6 +122,7 @@ function ModerationPage() {
       <TherapistsAdminPanel />
       <TherapistSlotsAdminPanel />
       <TherapistRequestsPanel />
+      <ConsultationsAccountingPanel />
       <div className="surface mt-5 p-5">
         <h2 className="flex items-center gap-2 font-display text-base">
           <ShieldCheck className="size-4 text-primary" /> Жалобы из чата поддержки
