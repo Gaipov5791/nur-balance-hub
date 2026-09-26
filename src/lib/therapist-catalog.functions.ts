@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { ALIYA_CONTACTS, DARYA_TAKMAKOVA } from "@/data/therapist-catalog";
+import { DARYA_TAKMAKOVA } from "@/data/therapist-catalog";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 /**
@@ -12,20 +12,11 @@ export const ensureTherapistCatalog = createServerFn({ method: "POST" })
   .handler(async () => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const { data: byEmail, error: emailError } = await supabaseAdmin
+    const { data: byName, error: nameError } = await supabaseAdmin
       .from("therapists")
       .select("id")
-      .eq("contact_email", DARYA_TAKMAKOVA.contact_email)
+      .eq("name", DARYA_TAKMAKOVA.name)
       .limit(1);
-    if (emailError) throw new Error("Не удалось проверить каталог психологов");
-
-    const { data: byName, error: nameError } = byEmail?.length
-      ? { data: byEmail, error: null }
-      : await supabaseAdmin
-          .from("therapists")
-          .select("id")
-          .eq("name", DARYA_TAKMAKOVA.name)
-          .limit(1);
     if (nameError) throw new Error("Не удалось проверить каталог психологов");
 
     if (!byName?.length) {
@@ -40,22 +31,6 @@ export const ensureTherapistCatalog = createServerFn({ method: "POST" })
         sort_order: (last?.sort_order ?? 0) + 10,
       });
       if (insertError) throw new Error("Не удалось добавить карточку специалиста");
-    }
-
-    const { data: aliyas, error: aliyaError } = await supabaseAdmin
-      .from("therapists")
-      .select("id, bio")
-      .ilike("name", "%Алия%");
-    if (aliyaError) throw new Error("Не удалось обновить контакты специалиста");
-
-    const suffix = `\n\nInstagram: ${ALIYA_CONTACTS.instagram}\nНомер: ${ALIYA_CONTACTS.phone}`;
-    for (const row of aliyas ?? []) {
-      if (row.bio.toLowerCase().includes("aliya.psiholog")) continue;
-      const { error: updateError } = await supabaseAdmin
-        .from("therapists")
-        .update({ bio: `${row.bio.trim()}${suffix}` })
-        .eq("id", row.id);
-      if (updateError) throw new Error("Не удалось обновить контакты специалиста");
     }
 
     return { ok: true as const };
