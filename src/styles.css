@@ -15,6 +15,7 @@
   --font-display: "Unbounded", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --color-background: var(--background);
+  --color-intro-backdrop: var(--intro-backdrop);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
@@ -56,6 +57,7 @@
 
 :root {
   --radius: 0.75rem;
+  --intro-backdrop: oklch(0.77 0.044 72);
   --background: oklch(0.977 0.012 85);
   --foreground: oklch(0.26 0.03 155);
   --card: oklch(0.995 0.005 90);
