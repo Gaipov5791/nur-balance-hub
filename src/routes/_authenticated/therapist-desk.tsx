@@ -52,6 +52,8 @@ const STATUS_LABEL: Record<string, string> = {
 function TherapistDeskPage() {
   const { user } = useProfile();
   const qc = useQueryClient();
+  const chats = useTherapyChats();
+  const chatByRequest = new Map((chats.data ?? []).map((c) => [c.request_id, c.id]));
 
   const card = useQuery({
     queryKey: ["my-therapist-card", user?.id ?? null],
@@ -166,6 +168,13 @@ function TherapistDeskPage() {
                     </div>
                   ) : r.status === "scheduled" ? (
                     <div className="mt-3 flex flex-wrap gap-2">
+                      {chatByRequest.get(r.id) ? (
+                        <Button asChild size="sm">
+                          <Link to="/therapy-chat" search={{ chat: chatByRequest.get(r.id) }}>
+                            <MessageCircle className="size-4" /> Открыть чат
+                          </Link>
+                        </Button>
+                      ) : null}
                       <Button size="sm" variant="secondary" onClick={() => void setStatus(r.id, "done")}>
                         Консультация состоялась
                       </Button>
