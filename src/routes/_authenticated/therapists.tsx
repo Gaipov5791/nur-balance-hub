@@ -45,7 +45,6 @@ type TherapistRow = {
   price_label: string;
   languages: string;
   photo_url: string | null;
-  contact_email: string | null;
   is_verified: boolean;
 };
 
@@ -141,7 +140,7 @@ function TherapistsPage() {
       }
       const { data, error } = await supabase
         .from("therapists")
-        .select("id, name, initials, spec, experience, bio, price_label, languages, photo_url, contact_email, is_verified")
+        .select("id, name, initials, spec, experience, bio, price_label, languages, photo_url, is_verified")
         .eq("is_active", true)
         .order("sort_order", { ascending: true });
       if (error) throw error;
@@ -280,7 +279,8 @@ function TherapistsPage() {
   return (
     <AppShell title="Психологи" aside={<CoinsPanel />}>
       <p className="mb-4 text-sm text-muted-foreground">
-        Выберите специалиста: можно записаться через форму или связаться напрямую по телефону, почте или Instagram.
+        Выберите специалиста и отправьте заявку — после подтверждения записи откроется личный чат в
+        приложении.
       </p>
       <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.95fr)]">
         <section className="min-w-0 space-y-3">
