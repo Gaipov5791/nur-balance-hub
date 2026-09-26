@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BadgeCheck, Instagram, Loader2, Mail, Phone } from "lucide-react";
+import { BadgeCheck, Loader2, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { CoinsPanel } from "@/components/panels";
@@ -10,7 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useAuth";
-import { extractInstagram, extractPhone, priceParts, specItems, toTelHref } from "@/lib/therapists";
+import { useTherapyChats } from "@/hooks/useTherapyChat";
+import { priceParts, specItems } from "@/lib/therapists";
 import { ensureTherapistCatalog } from "@/lib/therapist-catalog.functions";
 
 export const Route = createFileRoute("/_authenticated/therapists")({
@@ -112,39 +113,12 @@ function TherapistPhoto({
   );
 }
 
-function TherapistContacts({ person }: { person: TherapistRow }) {
-  const phone = extractPhone(`${person.bio} ${person.price_label}`);
-  const instagram = extractInstagram(person.bio);
-  const email = person.contact_email?.trim() || null;
-  if (!phone && !email && !instagram) return null;
-
+function ChatHint() {
   return (
-    <div className="mt-3 flex flex-wrap gap-2">
-      {phone ? (
-        <Button asChild size="sm" variant="secondary">
-          <a href={`tel:${toTelHref(phone)}`}>
-            <Phone className="size-3.5" />
-            {phone}
-          </a>
-        </Button>
-      ) : null}
-      {email ? (
-        <Button asChild size="sm" variant="secondary">
-          <a href={`mailto:${email}`}>
-            <Mail className="size-3.5" />
-            Написать
-          </a>
-        </Button>
-      ) : null}
-      {instagram ? (
-        <Button asChild size="sm" variant="secondary">
-          <a href={`https://instagram.com/${instagram}`} target="_blank" rel="noreferrer">
-            <Instagram className="size-3.5" />
-            @{instagram}
-          </a>
-        </Button>
-      ) : null}
-    </div>
+    <p className="mt-3 rounded-2xl bg-primary-soft px-3 py-2 text-xs text-primary">
+      Общение со специалистом — в чате приложения: он открывается автоматически после подтверждения
+      записи.
+    </p>
   );
 }
 
