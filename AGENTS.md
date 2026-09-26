@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+Therapist contact details live only in admin-restricted `therapist_contacts`, never in public `therapists.bio` or `contact_email`, because signed-in clients can read full catalog rows directly.
