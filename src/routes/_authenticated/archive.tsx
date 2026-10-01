@@ -42,7 +42,7 @@ export const Route = createFileRoute("/_authenticated/archive")({
     <AppShell title="Календарь и архив">
       <div className="surface p-6 text-center">
         <p className="font-semibold">Архив не загрузился</p>
-        <p className="mt-1 text-sm text-muted-foreground">{error.message}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{error instanceof Error ? error.message : String(error)}</p>
         <Button className="mt-4" onClick={reset}>
           Попробовать снова
         </Button>

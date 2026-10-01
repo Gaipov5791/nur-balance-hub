@@ -46,7 +46,7 @@ export const Route = createFileRoute("/_authenticated/journal")({
     <AppShell title="Видео-дневник">
       <div className="surface p-6 text-center">
         <p className="font-semibold">Страница дневника не загрузилась</p>
-        <p className="mt-1 text-sm text-muted-foreground">{error.message}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{error instanceof Error ? error.message : String(error)}</p>
         <Button className="mt-4" onClick={reset}>
           Попробовать снова
         </Button>
