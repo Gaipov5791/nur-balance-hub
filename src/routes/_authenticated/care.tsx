@@ -117,7 +117,7 @@ function CarePage() {
             ) : (
               <CheckCircle2 className="size-4" />
             )}{" "}
-            Я выполнила упражнение
+            Упражнение выполнено
           </Button>
         </section>
 
