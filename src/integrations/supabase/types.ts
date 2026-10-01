@@ -742,6 +742,7 @@ export type Database = {
           started_at: string
         }[]
       }
+      admin_user_stats: { Args: never; Returns: Json }
       award_action: { Args: { _action: string }; Returns: Json }
       claim_journal_reminder: {
         Args: { _local_date: string; _user_id: string }

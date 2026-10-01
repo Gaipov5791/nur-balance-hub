@@ -86,7 +86,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "Nur Balance — приложение для ментального здоровья: видео-дневник эмоций, Nur-Coins и поддержка от подруги по ситуации.",
+          "Nur Balance — приложение для ментального здоровья: видео-дневник эмоций, Nur-Coins и поддержка от людей с похожим опытом.",
       },
       { property: "og:title", content: "Nur Balance" },
       {
@@ -116,7 +116,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
-  errorComponent: ErrorComponent,
+  errorComponent: ErrorComponent as never,
 });
 
 function RootShell({ children }: { children: ReactNode }) {

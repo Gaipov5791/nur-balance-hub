@@ -56,15 +56,15 @@ export function BuddyPanel() {
   return (
     <div className="surface p-5">
       <p className="flex items-center gap-2 text-sm font-semibold">
-        <Users className="size-4 text-primary" /> Поддержи подругу
+        <Users className="size-4 text-primary" /> Круг поддержки
       </p>
       <p className="mt-2 text-sm text-muted-foreground">
         {status
           ? `Ваша категория: ${status.emoji} ${status.label}`
-          : "Укажите жизненный статус в настройках — так проще найти собеседницу с похожим опытом."}
+          : "Укажите жизненный статус в настройках — так проще найти собеседника с похожим опытом."}
       </p>
       <Button asChild className="mt-4 w-full">
-        <Link to="/buddy">Найти собеседницу</Link>
+        <Link to="/buddy">Найти собеседника</Link>
       </Button>
     </div>
   );

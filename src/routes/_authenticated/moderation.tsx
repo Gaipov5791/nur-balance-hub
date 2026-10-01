@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Calculator, ClipboardList, ShieldCheck } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { TherapistsAdminPanel } from "@/components/TherapistsAdminPanel";
+import { UserStatsPanel } from "@/components/UserStatsPanel";
 import { TherapistSlotsAdminPanel } from "@/components/TherapistSlotsAdminPanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -121,6 +122,7 @@ function ModerationPage() {
 
   return (
     <AppShell title="Модерация">
+      <UserStatsPanel />
       <TherapistsAdminPanel />
       <TherapistSlotsAdminPanel />
       <TherapistRequestsPanel />
