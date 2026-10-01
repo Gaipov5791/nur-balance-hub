@@ -28,7 +28,7 @@ export const Route = createFileRoute("/auth")({
       { property: "og:title", content: "Вход в Nur Balance" },
       {
         property: "og:description",
-        content: "Начните вести видео-дневник и находить поддержку от подруги по ситуации.",
+        content: "Начните вести видео-дневник и находить поддержку от людей с похожим опытом.",
       },
     ],
   }),
@@ -178,7 +178,7 @@ function AuthPage() {
           <h1 className="max-w-sm text-3xl leading-tight">Три минуты в день, чтобы услышать себя</h1>
           <p className="mt-4 max-w-sm text-sm opacity-85">
             Видео-дневник эмоций, календарь настроений, монеты за заботу о себе и поддержка от
-            собеседницы с похожим опытом.
+            собеседника с похожим опытом.
           </p>
         </div>
         <p className="text-xs opacity-70">Записи хранятся приватно и видны только вам</p>

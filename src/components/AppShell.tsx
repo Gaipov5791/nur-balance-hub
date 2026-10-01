@@ -73,7 +73,7 @@ const baseNav: NavItem[] = [
   { to: "/", label: "Главная", icon: Home },
   { to: "/journal", label: "Дневник", icon: Video, primaryMobile: true },
   { to: "/archive", label: "Календарь", icon: CalendarDays },
-  { to: "/buddy", label: "Поддержка", icon: HeartHandshake },
+  { to: "/buddy", label: "Круг поддержки", icon: HeartHandshake },
   { to: "/rewards", label: "Достижения", icon: Trophy },
   { to: "/care", label: "Советы", icon: LifeBuoy },
   { to: "/therapists", label: "Психологи", icon: Stethoscope },

@@ -27,12 +27,12 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Nur Balance: видео-дневник эмоций, календарь настроений, Nur-Coins за заботу о себе и поддержка от собеседницы с похожим опытом.",
+          "Nur Balance: видео-дневник эмоций, календарь настроений, Nur-Coins за заботу о себе и поддержка от собеседника с похожим опытом.",
       },
       { property: "og:title", content: "Nur Balance — забота о ментальном здоровье" },
       {
         property: "og:description",
-        content: "Видео-дневник, серия дней, Nur-Coins и поддержка от подруги по ситуации.",
+        content: "Видео-дневник, серия дней, Nur-Coins и поддержка от людей с похожим опытом.",
       },
     ],
   }),

@@ -42,16 +42,16 @@ import { awardCoins } from "@/lib/coins.functions";
 export const Route = createFileRoute("/_authenticated/buddy")({
   head: () => ({
     meta: [
-      { title: "Поддержи подругу — живой чат взаимоподдержки | Nur Balance" },
+      { title: "Круг поддержки — живой чат взаимоподдержки | Nur Balance" },
       {
         name: "description",
         content:
-          "Подбор собеседницы с похожим жизненным статусом и приватный чат 1-на-1: текст, голосовые и видео-сообщения, жалобы и модерация.",
+          "Подбор собеседника с похожим жизненным статусом и приватный чат 1-на-1: текст, голосовые и видео-сообщения, жалобы и модерация.",
       },
-      { property: "og:title", content: "Поддержи подругу — Nur Balance" },
+      { property: "og:title", content: "Круг поддержки — Nur Balance" },
       {
         property: "og:description",
-        content: "Живой подбор собеседницы и приватная комната с поддержкой в реальном времени.",
+        content: "Живой подбор собеседника и приватная комната с поддержкой в реальном времени.",
       },
     ],
   }),
@@ -115,7 +115,7 @@ function BuddyPage() {
   useEffect(() => {
     if (match && searching) {
       setSearching(false);
-      toast.success(`Мы нашли собеседницу: ${match.partner_name}`);
+      toast.success(`Мы нашли собеседника: ${match.partner_name}`);
     }
   }, [match, searching]);
 
@@ -135,7 +135,7 @@ function BuddyPage() {
         await refreshMatch();
         setSearching(false);
       } else {
-        toast("Вы в очереди — как только появится собеседница, мы соединим вас");
+        toast("Вы в очереди — как только появится собеседник, мы соединим вас");
       }
     } catch {
       setSearching(false);
@@ -164,7 +164,7 @@ function BuddyPage() {
       });
       if (error) throw error;
       await refreshMatch();
-      toast("Разговор завершён. Можно найти новую собеседницу");
+      toast("Разговор завершён. Можно найти новую собеседника");
     } catch {
       toast.error("Не удалось завершить разговор");
     }
@@ -240,7 +240,7 @@ function BuddyPage() {
       setReportOpen(false);
       setReportDetails("");
       await refreshMatch();
-      toast.success("Жалоба отправлена на модерацию. Разговор завершён, эта собеседница больше не встретится");
+      toast.success("Жалоба отправлена на модерацию. Разговор завершён, этот участник больше не встретится");
     } catch {
       toast.error("Не удалось отправить жалобу. Попробуйте ещё раз");
     }
@@ -249,7 +249,7 @@ function BuddyPage() {
   const partnerStatus = lifeStatuses.find((s) => s.id === match?.partner_status);
 
   return (
-    <AppShell title="Поддержи подругу" aside={<CoinsPanel />}>
+    <AppShell title="Круг поддержки" aside={<CoinsPanel />}>
       <div className="grid gap-5 lg:grid-cols-[320px_1fr]">
         <section className="surface min-w-0 p-5">
           <h2 className="font-display text-base">Категория поддержки</h2>
@@ -280,18 +280,18 @@ function BuddyPage() {
             </Button>
           ) : (
             <Button className="mt-4 w-full" onClick={() => void startSearch()}>
-              <Search className="size-4" /> Найти собеседницу
+              <Search className="size-4" /> Найти собеседника
             </Button>
           )}
 
           <p className="mt-3 text-xs text-muted-foreground">
-            Сначала подбираем собеседницу с таким же жизненным статусом. Если сейчас никого нет,
+            Сначала подбираем собеседника с таким же жизненным статусом. Если сейчас никого нет,
             поиск автоматически расширяется на смежные статусы.
           </p>
 
           <div className="mt-6 rounded-xl bg-secondary p-3 text-xs text-muted-foreground">
             Разговоры приватные. Жалоба сразу завершает разговор и отправляет переписку модерации,
-            а собеседница больше не появится в подборе.
+            а этот участник больше не появится в подборе.
           </div>
         </section>
 
@@ -303,7 +303,7 @@ function BuddyPage() {
               </span>
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold">
-                  {match ? match.partner_name : "Собеседница не выбрана"}
+                  {match ? match.partner_name : "Собеседник не выбран"}
                 </p>
                 <p className="truncate text-xs text-muted-foreground">
                   {match
@@ -338,8 +338,8 @@ function BuddyPage() {
                   <p className="font-display text-lg">Здесь появится ваш разговор</p>
                   <p className="mt-2 text-sm text-muted-foreground">
                     {searching
-                      ? "Ищем собеседницу с похожим опытом. Можно оставить страницу открытой — мы соединим вас автоматически."
-                      : "Выберите категорию слева и нажмите «Найти собеседницу»."}
+                      ? "Ищем собеседника с похожим опытом. Можно оставить страницу открытой — мы соединим вас автоматически."
+                      : "Выберите категорию слева и нажмите «Найти собеседника»."}
                   </p>
                 </div>
               </div>
@@ -417,7 +417,7 @@ function BuddyPage() {
             <Input
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder={match ? "Напишите слова поддержки…" : "Сначала найдите собеседницу"}
+              placeholder={match ? "Напишите слова поддержки…" : "Сначала найдите собеседника"}
               disabled={!match || sending}
               className="flex-1"
             />
@@ -436,9 +436,9 @@ function BuddyPage() {
       <Dialog open={reportOpen} onOpenChange={setReportOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Пожаловаться на собеседницу</DialogTitle>
+            <DialogTitle>Пожаловаться на собеседника</DialogTitle>
             <DialogDescription>
-              Разговор будет завершён, а жалоба уйдёт модерации. Эта собеседница больше не появится
+              Разговор будет завершён, а жалоба уйдёт модерации. Этот участник больше не появится
               в подборе.
             </DialogDescription>
           </DialogHeader>
