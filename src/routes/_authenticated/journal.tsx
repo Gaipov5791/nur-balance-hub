@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { CoinsPanel, TipPanel } from "@/components/panels";
 import { ReminderInline } from "@/components/ReminderInline";
+import { DailyQuestionCard } from "@/components/DailyQuestionCard";
 import { VideoRecorder, formatTime, type RecordingResult, type RecorderState } from "@/components/VideoRecorder";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -209,6 +210,7 @@ function JournalPage() {
               </button>
             ))}
           </div>
+          <DailyQuestionCard compact />
           <VideoRecorder
             key={recordMode}
             mode={recordMode}

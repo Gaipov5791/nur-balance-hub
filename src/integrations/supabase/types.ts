@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_usage: {
+        Row: {
+          count: number
+          day: string
+          user_id: string
+        }
+        Insert: {
+          count?: number
+          day: string
+          user_id: string
+        }
+        Update: {
+          count?: number
+          day?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       buddy_blocks: {
         Row: {
           blocked_user_id: string
@@ -202,6 +244,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      daily_questions: {
+        Row: {
+          active: boolean
+          bank: string
+          created_at: string
+          id: string
+          sort: number
+          text: string
+          topic: string
+        }
+        Insert: {
+          active?: boolean
+          bank: string
+          created_at?: string
+          id?: string
+          sort?: number
+          text: string
+          topic?: string
+        }
+        Update: {
+          active?: boolean
+          bank?: string
+          created_at?: string
+          id?: string
+          sort?: number
+          text?: string
+          topic?: string
+        }
+        Relationships: []
       }
       journal_entries: {
         Row: {
@@ -743,12 +815,15 @@ export type Database = {
         }[]
       }
       admin_user_stats: { Args: never; Returns: Json }
+      ai_daily_limit: { Args: { _user_id: string }; Returns: number }
+      ai_usage_today: { Args: never; Returns: Json }
       award_action: { Args: { _action: string }; Returns: Json }
       claim_journal_reminder: {
         Args: { _local_date: string; _user_id: string }
         Returns: boolean
       }
       clear_journal_pin: { Args: { _current: string }; Returns: boolean }
+      consume_ai_message: { Args: never; Returns: Json }
       find_or_queue_buddy: {
         Args: { _life_status: string }
         Returns: {

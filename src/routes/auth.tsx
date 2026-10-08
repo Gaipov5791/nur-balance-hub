@@ -35,7 +35,7 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
-type Mode = "login" | "signup" | "reset" | "update" | "onboarding";
+type Mode = "login" | "signup" | "reset" | "update" | "onboarding" | "confirm";
 
 function safeRedirect(r?: string) {
   return r && r.startsWith("/") && !r.startsWith("//") ? r : "/";
@@ -109,10 +109,29 @@ function AuthPage() {
     }
   };
 
+  const resendConfirmation = async () => {
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/auth` },
+    });
+    if (error) toast.error(humanAuthError(error.message));
+    else toast.success("Письмо отправлено ещё раз. Проверьте почту и папку «Спам»");
+  };
+
   const signIn = () =>
     run(async () => {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
+      if (error) {
+        if (error.message.toLowerCase().includes("not confirmed")) {
+          toast.error("Email ещё не подтверждён. Откройте письмо и перейдите по ссылке", {
+            action: { label: "Отправить ещё раз", onClick: () => void resendConfirmation() },
+            duration: 10_000,
+          });
+          return;
+        }
+        throw error;
+      }
       await finish();
     });
 
@@ -121,12 +140,14 @@ function AuthPage() {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { name: name.trim() || email.split("@")[0] } },
+        options: {
+          data: { name: name.trim() || email.split("@")[0] },
+          emailRedirectTo: `${window.location.origin}/auth`,
+        },
       });
       if (error) throw error;
       if (!data.session) {
-        toast.info("Проверьте почту, чтобы подтвердить регистрацию");
-        setMode("login");
+        setMode("confirm");
         return;
       }
       setMode("onboarding");
@@ -200,7 +221,7 @@ function AuthPage() {
               <p className="mt-2 text-sm text-muted-foreground">
                 {mode === "login"
                   ? "Введите email и пароль"
-                  : "Аккаунт создаётся сразу, без подтверждения по почте"}
+                  : "После регистрации пришлём письмо для подтверждения email"}
               </p>
               <form
                 className="mt-6 space-y-3"
@@ -259,6 +280,21 @@ function AuthPage() {
                   </span>
                 )}
               </div>
+            </>
+          ) : mode === "confirm" ? (
+            <>
+              <h2 className="text-2xl">Подтвердите email</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Мы отправили письмо на <span className="font-medium text-foreground">{email}</span>.
+                Перейдите по ссылке в письме, чтобы подтвердить адрес и войти. Если письма нет —
+                проверьте папку «Спам».
+              </p>
+              <Button className="mt-6 w-full" size="lg" variant="secondary" onClick={() => void resendConfirmation()}>
+                Отправить письмо ещё раз
+              </Button>
+              <button type="button" className="mt-4 w-full text-center text-sm text-primary hover:underline" onClick={() => setMode("login")}>
+                Почта подтверждена — войти
+              </button>
             </>
           ) : mode === "reset" ? (
             <>
