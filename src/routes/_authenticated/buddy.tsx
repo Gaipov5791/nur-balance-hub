@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import {
   Loader2,
@@ -275,14 +275,24 @@ function BuddyPage() {
               <Shuffle className="size-4" /> Завершить разговор
             </Button>
           ) : searching ? (
-            <Button variant="secondary" className="mt-4 w-full" onClick={() => void cancelSearch()}>
-              <Loader2 className="size-4 animate-spin" /> Ищем… отменить
-            </Button>
+            <>
+              <Button variant="secondary" className="mt-4 w-full" onClick={() => void cancelSearch()}>
+                <Loader2 className="size-4 animate-spin" /> Ищем… отменить
+              </Button>
+              <p className="mt-3 rounded-xl bg-primary-soft p-3 text-xs">
+                Пока никого нет рядом? Можно поговорить с ИИ-помощником, пока ищем человека.
+              </p>
+            </>
           ) : (
             <Button className="mt-4 w-full" onClick={() => void startSearch()}>
               <Search className="size-4" /> Найти собеседника
             </Button>
           )}
+          {!match ? (
+            <Button asChild variant="outline" className="mt-2 w-full">
+              <Link to="/nur-ai">Поговорить с НурAI</Link>
+            </Button>
+          ) : null}
 
           <p className="mt-3 text-xs text-muted-foreground">
             Сначала подбираем собеседника с таким же жизненным статусом. Если сейчас никого нет,

@@ -5,7 +5,8 @@ import { ArrowRight, Video } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { BuddyPanel, CoinsPanel, MoodCalendar, TipPanel } from "@/components/panels";
 import { Button } from "@/components/ui/button";
-import { careCategories, moods } from "@/data/demo";
+import { moods } from "@/data/demo";
+import { DailyQuestionCard } from "@/components/DailyQuestionCard";
 import { useProfile } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { calendarMonth, formatRuDay } from "@/lib/dates";
@@ -197,22 +198,9 @@ function Dashboard() {
         <BuddyPanel />
       </div>
 
-      <section className="mt-5">
-        <h2 className="mb-3 font-display text-base">Ситуативные советы</h2>
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {careCategories.map((c) => (
-            <Link
-              key={c.id}
-              to="/care"
-              className="surface p-4 transition-shadow hover:shadow-lift"
-            >
-              <span className="text-2xl">{c.emoji}</span>
-              <p className="mt-2 font-semibold">{c.title}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{c.summary}</p>
-            </Link>
-          ))}
-        </div>
-      </section>
+      <div className="mt-5">
+        <DailyQuestionCard />
+      </div>
     </AppShell>
   );
 }

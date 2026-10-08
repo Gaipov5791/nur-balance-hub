@@ -17,11 +17,13 @@ import { Route as AuthenticatedBuddyRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedCareRouteImport } from './routes/_authenticated/care'
 import { Route as AuthenticatedJournalRouteImport } from './routes/_authenticated/journal'
 import { Route as AuthenticatedModerationRouteImport } from './routes/_authenticated/moderation'
+import { Route as AuthenticatedNurAiRouteImport } from './routes/_authenticated/nur-ai'
 import { Route as AuthenticatedRewardsRouteImport } from './routes/_authenticated/rewards'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedTherapistDeskRouteImport } from './routes/_authenticated/therapist-desk'
 import { Route as AuthenticatedTherapistsRouteImport } from './routes/_authenticated/therapists'
 import { Route as AuthenticatedTherapyChatRouteImport } from './routes/_authenticated/therapy-chat'
+import { Route as ApiPublicNurAiRouteImport } from './routes/api/public/nur-ai'
 import { Route as ApiPublicCronJournalRemindersRouteImport } from './routes/api/public/cron/journal-reminders'
 
 const IndexRoute = IndexRouteImport.update({
@@ -63,6 +65,11 @@ const AuthenticatedModerationRoute = AuthenticatedModerationRouteImport.update({
   path: '/moderation',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedNurAiRoute = AuthenticatedNurAiRouteImport.update({
+  id: '/nur-ai',
+  path: '/nur-ai',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedRewardsRoute = AuthenticatedRewardsRouteImport.update({
   id: '/rewards',
   path: '/rewards',
@@ -90,6 +97,11 @@ const AuthenticatedTherapyChatRoute =
     path: '/therapy-chat',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicNurAiRoute = ApiPublicNurAiRouteImport.update({
+  id: '/api/public/nur-ai',
+  path: '/api/public/nur-ai',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicCronJournalRemindersRoute =
   ApiPublicCronJournalRemindersRouteImport.update({
     id: '/api/public/cron/journal-reminders',
@@ -105,11 +117,13 @@ export interface FileRoutesByFullPath {
   '/care': typeof AuthenticatedCareRoute
   '/journal': typeof AuthenticatedJournalRoute
   '/moderation': typeof AuthenticatedModerationRoute
+  '/nur-ai': typeof AuthenticatedNurAiRoute
   '/rewards': typeof AuthenticatedRewardsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/therapist-desk': typeof AuthenticatedTherapistDeskRoute
   '/therapists': typeof AuthenticatedTherapistsRoute
   '/therapy-chat': typeof AuthenticatedTherapyChatRoute
+  '/api/public/nur-ai': typeof ApiPublicNurAiRoute
   '/api/public/cron/journal-reminders': typeof ApiPublicCronJournalRemindersRoute
 }
 export interface FileRoutesByTo {
@@ -120,11 +134,13 @@ export interface FileRoutesByTo {
   '/care': typeof AuthenticatedCareRoute
   '/journal': typeof AuthenticatedJournalRoute
   '/moderation': typeof AuthenticatedModerationRoute
+  '/nur-ai': typeof AuthenticatedNurAiRoute
   '/rewards': typeof AuthenticatedRewardsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/therapist-desk': typeof AuthenticatedTherapistDeskRoute
   '/therapists': typeof AuthenticatedTherapistsRoute
   '/therapy-chat': typeof AuthenticatedTherapyChatRoute
+  '/api/public/nur-ai': typeof ApiPublicNurAiRoute
   '/api/public/cron/journal-reminders': typeof ApiPublicCronJournalRemindersRoute
 }
 export interface FileRoutesById {
@@ -137,11 +153,13 @@ export interface FileRoutesById {
   '/_authenticated/care': typeof AuthenticatedCareRoute
   '/_authenticated/journal': typeof AuthenticatedJournalRoute
   '/_authenticated/moderation': typeof AuthenticatedModerationRoute
+  '/_authenticated/nur-ai': typeof AuthenticatedNurAiRoute
   '/_authenticated/rewards': typeof AuthenticatedRewardsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/therapist-desk': typeof AuthenticatedTherapistDeskRoute
   '/_authenticated/therapists': typeof AuthenticatedTherapistsRoute
   '/_authenticated/therapy-chat': typeof AuthenticatedTherapyChatRoute
+  '/api/public/nur-ai': typeof ApiPublicNurAiRoute
   '/api/public/cron/journal-reminders': typeof ApiPublicCronJournalRemindersRoute
 }
 export interface FileRouteTypes {
@@ -154,11 +172,13 @@ export interface FileRouteTypes {
     | '/care'
     | '/journal'
     | '/moderation'
+    | '/nur-ai'
     | '/rewards'
     | '/settings'
     | '/therapist-desk'
     | '/therapists'
     | '/therapy-chat'
+    | '/api/public/nur-ai'
     | '/api/public/cron/journal-reminders'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -169,11 +189,13 @@ export interface FileRouteTypes {
     | '/care'
     | '/journal'
     | '/moderation'
+    | '/nur-ai'
     | '/rewards'
     | '/settings'
     | '/therapist-desk'
     | '/therapists'
     | '/therapy-chat'
+    | '/api/public/nur-ai'
     | '/api/public/cron/journal-reminders'
   id:
     | '__root__'
@@ -185,11 +207,13 @@ export interface FileRouteTypes {
     | '/_authenticated/care'
     | '/_authenticated/journal'
     | '/_authenticated/moderation'
+    | '/_authenticated/nur-ai'
     | '/_authenticated/rewards'
     | '/_authenticated/settings'
     | '/_authenticated/therapist-desk'
     | '/_authenticated/therapists'
     | '/_authenticated/therapy-chat'
+    | '/api/public/nur-ai'
     | '/api/public/cron/journal-reminders'
   fileRoutesById: FileRoutesById
 }
@@ -197,6 +221,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPublicNurAiRoute: typeof ApiPublicNurAiRoute
   ApiPublicCronJournalRemindersRoute: typeof ApiPublicCronJournalRemindersRoute
 }
 
@@ -258,6 +283,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedModerationRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/nur-ai': {
+      id: '/_authenticated/nur-ai'
+      path: '/nur-ai'
+      fullPath: '/nur-ai'
+      preLoaderRoute: typeof AuthenticatedNurAiRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/rewards': {
       id: '/_authenticated/rewards'
       path: '/rewards'
@@ -293,6 +325,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTherapyChatRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/nur-ai': {
+      id: '/api/public/nur-ai'
+      path: '/api/public/nur-ai'
+      fullPath: '/api/public/nur-ai'
+      preLoaderRoute: typeof ApiPublicNurAiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/cron/journal-reminders': {
       id: '/api/public/cron/journal-reminders'
       path: '/api/public/cron/journal-reminders'
@@ -309,6 +348,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCareRoute: typeof AuthenticatedCareRoute
   AuthenticatedJournalRoute: typeof AuthenticatedJournalRoute
   AuthenticatedModerationRoute: typeof AuthenticatedModerationRoute
+  AuthenticatedNurAiRoute: typeof AuthenticatedNurAiRoute
   AuthenticatedRewardsRoute: typeof AuthenticatedRewardsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTherapistDeskRoute: typeof AuthenticatedTherapistDeskRoute
@@ -322,6 +362,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCareRoute: AuthenticatedCareRoute,
   AuthenticatedJournalRoute: AuthenticatedJournalRoute,
   AuthenticatedModerationRoute: AuthenticatedModerationRoute,
+  AuthenticatedNurAiRoute: AuthenticatedNurAiRoute,
   AuthenticatedRewardsRoute: AuthenticatedRewardsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTherapistDeskRoute: AuthenticatedTherapistDeskRoute,
@@ -336,6 +377,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPublicNurAiRoute: ApiPublicNurAiRoute,
   ApiPublicCronJournalRemindersRoute: ApiPublicCronJournalRemindersRoute,
 }
 export const routeTree = rootRouteImport
