@@ -56,6 +56,27 @@ export type Database = {
         }
         Relationships: []
       }
+      app_feedback: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       buddy_blocks: {
         Row: {
           blocked_user_id: string
@@ -245,6 +266,33 @@ export type Database = {
           },
         ]
       }
+      custom_tags: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: string
+          kind: string
+          label: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          kind: string
+          label: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          kind?: string
+          label?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_questions: {
         Row: {
           active: boolean
@@ -317,6 +365,39 @@ export type Database = {
           thumbnail_path?: string | null
           user_id?: string
           video_path?: string | null
+        }
+        Relationships: []
+      }
+      mood_checkins: {
+        Row: {
+          activities: string[]
+          created_at: string
+          emotions: string[]
+          id: string
+          level: number
+          note: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activities?: string[]
+          created_at?: string
+          emotions?: string[]
+          id?: string
+          level: number
+          note?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          activities?: string[]
+          created_at?: string
+          emotions?: string[]
+          id?: string
+          level?: number
+          note?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
