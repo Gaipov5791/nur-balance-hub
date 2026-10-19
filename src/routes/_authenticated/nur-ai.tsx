@@ -154,7 +154,7 @@ function NurAiPage() {
               <p className="font-semibold">Привет! Я НурAI.</p>
               <p className="mt-1">Можно рассказать, что на душе, или спросить, как устроено приложение.</p>
               <div className="mt-3 flex flex-wrap gap-2">
-                {["Мне тревожно, не могу уснуть", "Как записаться к психологу?", "Как заработать Nur-Coins?"].map((s) => (
+                {["Мне тревожно, не могу уснуть", "Как записаться к психологу?", "Как работают Нур-Коины?"].map((s) => (
                   <Button key={s} size="sm" variant="secondary" className="bg-background" onClick={() => void send(s)}>
                     {s}
                   </Button>

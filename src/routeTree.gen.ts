@@ -12,9 +12,11 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedAnalysisRouteImport } from './routes/_authenticated/analysis'
 import { Route as AuthenticatedArchiveRouteImport } from './routes/_authenticated/archive'
 import { Route as AuthenticatedBuddyRouteImport } from './routes/_authenticated/buddy'
 import { Route as AuthenticatedCareRouteImport } from './routes/_authenticated/care'
+import { Route as AuthenticatedCoinsRouteImport } from './routes/_authenticated/coins'
 import { Route as AuthenticatedJournalRouteImport } from './routes/_authenticated/journal'
 import { Route as AuthenticatedModerationRouteImport } from './routes/_authenticated/moderation'
 import { Route as AuthenticatedMoodRouteImport } from './routes/_authenticated/mood'
@@ -43,6 +45,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAnalysisRoute = AuthenticatedAnalysisRouteImport.update({
+  id: '/analysis',
+  path: '/analysis',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedArchiveRoute = AuthenticatedArchiveRouteImport.update({
   id: '/archive',
   path: '/archive',
@@ -56,6 +63,11 @@ const AuthenticatedBuddyRoute = AuthenticatedBuddyRouteImport.update({
 const AuthenticatedCareRoute = AuthenticatedCareRouteImport.update({
   id: '/care',
   path: '/care',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCoinsRoute = AuthenticatedCoinsRouteImport.update({
+  id: '/coins',
+  path: '/coins',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedJournalRoute = AuthenticatedJournalRouteImport.update({
@@ -130,9 +142,11 @@ const ApiPublicCronJournalRemindersRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/analysis': typeof AuthenticatedAnalysisRoute
   '/archive': typeof AuthenticatedArchiveRoute
   '/buddy': typeof AuthenticatedBuddyRoute
   '/care': typeof AuthenticatedCareRoute
+  '/coins': typeof AuthenticatedCoinsRoute
   '/journal': typeof AuthenticatedJournalRoute
   '/moderation': typeof AuthenticatedModerationRoute
   '/mood': typeof AuthenticatedMoodRoute
@@ -150,9 +164,11 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/analysis': typeof AuthenticatedAnalysisRoute
   '/archive': typeof AuthenticatedArchiveRoute
   '/buddy': typeof AuthenticatedBuddyRoute
   '/care': typeof AuthenticatedCareRoute
+  '/coins': typeof AuthenticatedCoinsRoute
   '/journal': typeof AuthenticatedJournalRoute
   '/moderation': typeof AuthenticatedModerationRoute
   '/mood': typeof AuthenticatedMoodRoute
@@ -172,9 +188,11 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/analysis': typeof AuthenticatedAnalysisRoute
   '/_authenticated/archive': typeof AuthenticatedArchiveRoute
   '/_authenticated/buddy': typeof AuthenticatedBuddyRoute
   '/_authenticated/care': typeof AuthenticatedCareRoute
+  '/_authenticated/coins': typeof AuthenticatedCoinsRoute
   '/_authenticated/journal': typeof AuthenticatedJournalRoute
   '/_authenticated/moderation': typeof AuthenticatedModerationRoute
   '/_authenticated/mood': typeof AuthenticatedMoodRoute
@@ -194,9 +212,11 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/analysis'
     | '/archive'
     | '/buddy'
     | '/care'
+    | '/coins'
     | '/journal'
     | '/moderation'
     | '/mood'
@@ -214,9 +234,11 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/analysis'
     | '/archive'
     | '/buddy'
     | '/care'
+    | '/coins'
     | '/journal'
     | '/moderation'
     | '/mood'
@@ -235,9 +257,11 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/analysis'
     | '/_authenticated/archive'
     | '/_authenticated/buddy'
     | '/_authenticated/care'
+    | '/_authenticated/coins'
     | '/_authenticated/journal'
     | '/_authenticated/moderation'
     | '/_authenticated/mood'
@@ -284,6 +308,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/analysis': {
+      id: '/_authenticated/analysis'
+      path: '/analysis'
+      fullPath: '/analysis'
+      preLoaderRoute: typeof AuthenticatedAnalysisRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/archive': {
       id: '/_authenticated/archive'
       path: '/archive'
@@ -303,6 +334,13 @@ declare module '@tanstack/react-router' {
       path: '/care'
       fullPath: '/care'
       preLoaderRoute: typeof AuthenticatedCareRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/coins': {
+      id: '/_authenticated/coins'
+      path: '/coins'
+      fullPath: '/coins'
+      preLoaderRoute: typeof AuthenticatedCoinsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/journal': {
@@ -400,9 +438,11 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAnalysisRoute: typeof AuthenticatedAnalysisRoute
   AuthenticatedArchiveRoute: typeof AuthenticatedArchiveRoute
   AuthenticatedBuddyRoute: typeof AuthenticatedBuddyRoute
   AuthenticatedCareRoute: typeof AuthenticatedCareRoute
+  AuthenticatedCoinsRoute: typeof AuthenticatedCoinsRoute
   AuthenticatedJournalRoute: typeof AuthenticatedJournalRoute
   AuthenticatedModerationRoute: typeof AuthenticatedModerationRoute
   AuthenticatedMoodRoute: typeof AuthenticatedMoodRoute
@@ -417,9 +457,11 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAnalysisRoute: AuthenticatedAnalysisRoute,
   AuthenticatedArchiveRoute: AuthenticatedArchiveRoute,
   AuthenticatedBuddyRoute: AuthenticatedBuddyRoute,
   AuthenticatedCareRoute: AuthenticatedCareRoute,
+  AuthenticatedCoinsRoute: AuthenticatedCoinsRoute,
   AuthenticatedJournalRoute: AuthenticatedJournalRoute,
   AuthenticatedModerationRoute: AuthenticatedModerationRoute,
   AuthenticatedMoodRoute: AuthenticatedMoodRoute,

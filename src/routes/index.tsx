@@ -30,12 +30,12 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Nur Balance: видео-дневник эмоций, календарь настроений, Nur-Coins за заботу о себе и поддержка от собеседника с похожим опытом.",
+          "Nur Balance: видео-дневник эмоций, календарь настроений, ИИ-анализ состояния и поддержка от собеседника с похожим опытом.",
       },
       { property: "og:title", content: "Nur Balance — забота о ментальном здоровье" },
       {
         property: "og:description",
-        content: "Видео-дневник, серия дней, Nur-Coins и поддержка от людей с похожим опытом.",
+        content: "Видео-дневник, отметки настроения, ИИ-анализ и поддержка от людей с похожим опытом.",
       },
     ],
   }),
@@ -116,7 +116,7 @@ function Dashboard() {
           </div>
           <div className="grid w-full shrink-0 grid-cols-3 gap-3 md:w-72">
             <Stat value={`${streak}`} label="дней подряд" />
-            <Stat value={`${coins}`} label="Nur-Coins" />
+            <Stat value={`${coins}`} label="Нур-Коины" />
             <Stat
               value={entriesQuery.isPending ? "…" : `${entries.length}`}
               label="записей"

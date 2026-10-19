@@ -1,14 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/AppShell";
 import { CoinsPanel, TipPanel } from "@/components/panels";
 import { Button } from "@/components/ui/button";
 import { careCategories } from "@/data/demo";
-import { awardCoins } from "@/lib/coins.functions";
 
 export const Route = createFileRoute("/_authenticated/care")({
   head: () => ({
@@ -32,31 +29,6 @@ export const Route = createFileRoute("/_authenticated/care")({
 function CarePage() {
   const [activeId, setActiveId] = useState(careCategories[0]!.id);
   const active = careCategories.find((c) => c.id === activeId)!;
-  const [saving, setSaving] = useState(false);
-  const award = useServerFn(awardCoins);
-  const qc = useQueryClient();
-
-  const completePractice = async () => {
-    setSaving(true);
-    try {
-      const res = await award({ data: { action: "practice" } });
-      await qc.invalidateQueries({ queryKey: ["profile"] });
-      if (res.reason === "granted") {
-        toast.success(`Упражнение выполнено. +${res.granted} Nur-Coins`);
-      } else if (res.reason === "already") {
-        toast.success("Упражнение отмечено. Монеты за практику уже начислены сегодня");
-      } else {
-        toast.success("Упражнение отмечено. Дневной лимит монет уже достигнут");
-      }
-    } catch {
-      toast.error("Не удалось сохранить. Проверь соединение", {
-        action: { label: "Повторить", onClick: () => void completePractice() },
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
-
 
   return (
     <AppShell
@@ -111,13 +83,11 @@ function CarePage() {
               <p className="mt-1">{active.important}</p>
             </div>
           ) : null}
-          <Button className="mt-5" disabled={saving} onClick={() => void completePractice()}>
-            {saving ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <CheckCircle2 className="size-4" />
-            )}{" "}
-            Упражнение выполнено
+          <Button
+            className="mt-5"
+            onClick={() => toast.success("Отлично! Время для себя — это важно 💚")}
+          >
+            <CheckCircle2 className="size-4" /> Упражнение выполнено
           </Button>
         </section>
 

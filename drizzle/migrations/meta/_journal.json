@@ -15,6 +15,13 @@
       "when": 1792408377049,
       "tag": "0001_mood_checkins_feedback",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792420467516,
+      "tag": "0002_ai_analyzer_coins",
+      "breakpoints": true
     }
   ]
 }

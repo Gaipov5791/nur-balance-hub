@@ -35,3 +35,40 @@ describe("economy SQL hardening", () => {
     expect(sql).toContain("GRANT EXECUTE ON FUNCTION public.verify_journal_pin(text)");
   });
 });
+
+const stageB = readFileSync(join(root, "drizzle/migrations/0002_ai_analyzer_coins.sql"), "utf8");
+
+describe("refill and AI analysis SQL", () => {
+  it("removes the old earning and reward RPCs", () => {
+    expect(stageB).toContain("DROP FUNCTION IF EXISTS public.award_action(text)");
+    expect(stageB).toContain("DROP FUNCTION IF EXISTS public.redeem_catalog_reward(text)");
+    expect(stageB).not.toMatch(/_economy_insert\(.*'journal_daily/);
+  });
+
+  it("guards the refill anchor like the balance", () => {
+    expect(stageB).toContain("NEW.coins_refilled_at IS DISTINCT FROM OLD.coins_refilled_at");
+    expect(stageB).toMatch(/claim_coin_refill[\s\S]*FOR UPDATE[\s\S]*259200/);
+  });
+
+  it("keeps analyses and subscriptions read-only for clients", () => {
+    expect(stageB).toContain("GRANT SELECT ON public.ai_analyses TO authenticated;");
+    expect(stageB).toContain("GRANT SELECT ON public.subscriptions TO authenticated;");
+    expect(stageB).not.toMatch(/GRANT (INSERT|UPDATE|DELETE|ALL)[^;]*ON public\.(ai_analyses|subscriptions) TO authenticated/);
+  });
+
+  it("charges atomically and only refunds pending runs once", () => {
+    expect(stageB).toMatch(/start_ai_analysis[\s\S]*FOR UPDATE[\s\S]*'insufficient'/);
+    expect(stageB).toMatch(/_analysis_refund[\s\S]*status = 'pending'[\s\S]*RETURNING cost/);
+  });
+
+  it("does not expose internal helpers", () => {
+    for (const fn of [
+      "has_active_subscription(uuid)",
+      "_analysis_free_used(uuid, date)",
+      "_analysis_refund(uuid, uuid)",
+    ]) {
+      expect(stageB).toContain(`REVOKE ALL ON FUNCTION public.${fn} FROM PUBLIC, anon, authenticated`);
+      expect(stageB).not.toContain(`GRANT EXECUTE ON FUNCTION public.${fn}`);
+    }
+  });
+});

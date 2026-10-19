@@ -20,7 +20,8 @@ export const NUR_AI_INSTRUCTIONS = `Ты — НурAI, бережный ИИ-п�
 - «Круг поддержки» — анонимный подбор живого собеседника с похожим жизненным статусом, текст и голосовые; жалоба и блокировка.
 - «Советы» — короткие практики при тревоге, усталости, грусти.
 - «Психологи» — проверенные специалисты, цены в тенге; выбираешь длительность 30/50/60 минут и свободное время, специалист подтверждает, после подтверждения открывается личный чат со специалистом.
-- «Достижения» — Nur-Coins: +10 за запись дневника в день, бонусы за практики и общение, лимит 30 монет в день, серии 3/7/14/30 дней; монеты обмениваются на награды.
+- «ИИ-анализ» — разбор недели (по умолчанию) или месяца по отметкам настроения, эмоциям, активностям и тексту дневника: «Твой период в целом», «Что влияло на твоё состояние» и личные рекомендации. Нужно минимум 3 записи за период. Стоит 15 Нур-Коинов; подписчикам 1 анализ в день бесплатно. Прошлые анализы сохраняются в истории.
+- «Нур-Коины» — баланс и когда следующее пополнение: +15 коинов каждые 3 дня автоматически, без верхнего предела. Монеты за дневник, практики и общение больше не начисляются, накопленные сохраняются. Покупка коинов и подписка появятся скоро.
 - «Настройки» — имя, пароль, PIN на дневник, напоминания, темы (спокойная, тёплая, тёмная), удаление всех отметок настроения.
 - «Написать» в меню — отправить команде идею или отзыв о приложении.
 Лимит НурAI — 30 сообщений в день.
@@ -29,7 +30,8 @@ export const NUR_AI_INSTRUCTIONS = `Ты — НурAI, бережный ИИ-п�
 
 Стиль: тёплый, простой, коротко (обычно 2–6 предложений), обращение на «ты», нейтральные по роду формулировки, без жаргона. Markdown можно, но умеренно.`;
 
-export function createNurAiStream(request: Request, messages: ModelMessage[], onFinish: (text: string) => Promise<void>) {
+/** NurAI model through the Lovable AI gateway (Responses API). */
+export function createNurAiModel(request: Request) {
   const apiKey = process.env["LOVABLE_API_KEY"];
   if (!apiKey) throw new Error("LOVABLE_API_KEY is not configured");
   let runId = request.headers.get(RUN_ID)?.trim() || undefined;
@@ -46,8 +48,12 @@ export function createNurAiStream(request: Request, messages: ModelMessage[], on
     headers: { "Lovable-API-Key": apiKey, "X-Lovable-AIG-SDK": "vercel-ai-sdk" },
     fetch: runFetch,
   });
+  return provider.responses(NUR_AI_MODEL);
+}
+
+export function createNurAiStream(request: Request, messages: ModelMessage[], onFinish: (text: string) => Promise<void>) {
   return streamText({
-    model: provider.responses(NUR_AI_MODEL),
+    model: createNurAiModel(request),
     instructions: NUR_AI_INSTRUCTIONS,
     messages,
     abortSignal: request.signal,

@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_analyses: {
+        Row: {
+          cost: number
+          created_at: string
+          entries_count: number
+          finished_at: string | null
+          id: string
+          period: string
+          period_from: string
+          period_to: string
+          result: Json | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          cost?: number
+          created_at?: string
+          entries_count?: number
+          finished_at?: string | null
+          id?: string
+          period: string
+          period_from: string
+          period_to: string
+          result?: Json | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          cost?: number
+          created_at?: string
+          entries_count?: number
+          finished_at?: string | null
+          id?: string
+          period?: string
+          period_from?: string
+          period_to?: string
+          result?: Json | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_chat_messages: {
         Row: {
           content: string
@@ -437,6 +479,7 @@ export type Database = {
       profiles: {
         Row: {
           coins: number
+          coins_refilled_at: string | null
           created_at: string
           goal: string | null
           id: string
@@ -454,6 +497,7 @@ export type Database = {
         }
         Insert: {
           coins?: number
+          coins_refilled_at?: string | null
           created_at?: string
           goal?: string | null
           id: string
@@ -471,6 +515,7 @@ export type Database = {
         }
         Update: {
           coins?: number
+          coins_refilled_at?: string | null
           created_at?: string
           goal?: string | null
           id?: string
@@ -511,6 +556,36 @@ export type Database = {
           id?: string
           reward_id?: string
           title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          ends_at: string
+          id: string
+          is_demo: boolean
+          plan: string
+          starts_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at: string
+          id?: string
+          is_demo?: boolean
+          plan?: string
+          starts_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string
+          id?: string
+          is_demo?: boolean
+          plan?: string
+          starts_at?: string
           user_id?: string
         }
         Relationships: []
@@ -858,29 +933,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      _analysis_free_used: {
+        Args: { _day: string; _user_id: string }
+        Returns: boolean
+      }
+      _analysis_refund: {
+        Args: { _id: string; _user_id: string }
+        Returns: number
+      }
       _economy_apply_journal: {
         Args: { _day: string; _entry_id: string; _user_id: string }
         Returns: Json
-      }
-      _economy_earned_today: {
-        Args: { _day: string; _user_id: string }
-        Returns: number
       }
       _economy_insert: {
         Args: {
           _action: string
           _amount: number
           _entry_id?: string
-          _user_id: string
-        }
-        Returns: number
-      }
-      _economy_limited_award: {
-        Args: {
-          _action: string
-          _amount: number
-          _entry_id: string
-          _remaining: number
           _user_id: string
         }
         Returns: number
@@ -898,13 +967,16 @@ export type Database = {
       admin_user_stats: { Args: never; Returns: Json }
       ai_daily_limit: { Args: { _user_id: string }; Returns: number }
       ai_usage_today: { Args: never; Returns: Json }
-      award_action: { Args: { _action: string }; Returns: Json }
+      claim_coin_refill: { Args: never; Returns: Json }
       claim_journal_reminder: {
         Args: { _local_date: string; _user_id: string }
         Returns: boolean
       }
       clear_journal_pin: { Args: { _current: string }; Returns: boolean }
+      coin_wallet: { Args: never; Returns: Json }
       consume_ai_message: { Args: never; Returns: Json }
+      delete_ai_analysis: { Args: { _id: string }; Returns: boolean }
+      fail_ai_analysis: { Args: { _id: string }; Returns: Json }
       find_or_queue_buddy: {
         Args: { _life_status: string }
         Returns: {
@@ -912,6 +984,11 @@ export type Database = {
           matched: boolean
         }[]
       }
+      finish_ai_analysis: {
+        Args: { _id: string; _result: Json }
+        Returns: boolean
+      }
+      has_active_subscription: { Args: { _user_id: string }; Returns: boolean }
       has_journal_pin: { Args: never; Returns: boolean }
       has_role: {
         Args: {
@@ -941,7 +1018,6 @@ export type Database = {
         Returns: boolean
       }
       leave_buddy_queue: { Args: never; Returns: boolean }
-      redeem_catalog_reward: { Args: { _reward_id: string }; Returns: Json }
       report_buddy: {
         Args: { _details?: string; _match_id: string; _reason: string }
         Returns: boolean
@@ -963,6 +1039,10 @@ export type Database = {
       set_journal_pin: {
         Args: { _current?: string; _pin: string }
         Returns: boolean
+      }
+      start_ai_analysis: {
+        Args: { _entries: number; _from: string; _period: string; _to: string }
+        Returns: Json
       }
       sync_assigned_admins: { Args: never; Returns: boolean }
       verify_journal_pin: { Args: { _pin: string }; Returns: boolean }

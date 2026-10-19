@@ -213,7 +213,7 @@ function ArchivePage() {
               <span className="text-3xl">🎥</span>
               <p className="mt-3 font-semibold">Пока нет записей</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Первая запись принесёт +20 Nur-Coins и начнёт твою серию дней.
+                Первая запись начнёт твою серию дней.
               </p>
               <Button asChild className="mt-4">
                 <Link to="/journal">Записать первое видео</Link>

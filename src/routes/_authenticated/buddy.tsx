@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/AppShell";
 import { CoinsPanel } from "@/components/panels";
 import { Button } from "@/components/ui/button";
@@ -37,7 +36,6 @@ import {
 } from "@/hooks/useBuddyChat";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadWithRetry } from "@/lib/upload";
-import { awardCoins } from "@/lib/coins.functions";
 
 export const Route = createFileRoute("/_authenticated/buddy")({
   head: () => ({
@@ -93,7 +91,6 @@ function BuddyPage() {
   const { user } = useAuth();
   const { profile } = useProfile();
   const qc = useQueryClient();
-  const award = useServerFn(awardCoins);
 
   const [status, setStatus] = useState(profile?.life_status ?? "other");
   const [searching, setSearching] = useState(false);
@@ -170,16 +167,6 @@ function BuddyPage() {
     }
   };
 
-  const grantCoins = async () => {
-    try {
-      const res = await award({ data: { action: "buddy" } });
-      await qc.invalidateQueries({ queryKey: ["profile"] });
-      if (res.reason === "granted") toast.success(`+${res.granted} Nur-Coins за поддержку`);
-    } catch {
-      /* монеты не критичны для отправки сообщения */
-    }
-  };
-
   const sendText = async (value: string) => {
     if (!match || !user) return;
     setSending(true);
@@ -193,7 +180,6 @@ function BuddyPage() {
       if (error) throw error;
       setText("");
       await qc.invalidateQueries({ queryKey: ["buddy", "messages", match.match_id] });
-      void grantCoins();
     } catch {
       toast.error("Сообщение не отправлено", {
         action: { label: "Повторить", onClick: () => void sendText(value) },
@@ -220,7 +206,6 @@ function BuddyPage() {
       if (error) throw error;
       setRecorder(null);
       await qc.invalidateQueries({ queryKey: ["buddy", "messages", match.match_id] });
-      void grantCoins();
     } catch {
       toast.error("Не удалось отправить сообщение. Запись сохранена — попробуй ещё раз");
     } finally {

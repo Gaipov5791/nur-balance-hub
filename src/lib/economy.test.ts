@@ -1,20 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
-  COIN_BUDDY,
-  COIN_FIRST_ENTRY,
-  COIN_JOURNAL,
-  COIN_MOOD,
-  COIN_PRACTICE,
-  COIN_PROFILE,
-  DAILY_COIN_LIMIT,
+  ANALYSIS_COST,
+  REFILL_AMOUNT,
+  coinActionLabel,
+  coinsWord,
   daysBetween,
-  earnedTodayFrom,
+  formatRefillIn,
   nextStreak,
-  planActionAward,
-  planJournalAwards,
-  REWARD_COST,
-  rewards,
-  STREAK_BONUS,
+  planAnalysisCharge,
+  planRefill,
 } from "@/lib/economy";
 
 describe("daysBetween", () => {
@@ -45,107 +39,94 @@ describe("nextStreak", () => {
   });
 });
 
-describe("planJournalAwards", () => {
-  it("grants journal, mood and first-entry bonuses", () => {
-    const result = planJournalAwards({
-      day: "2026-09-10",
-      done: new Set(),
-      earnedToday: 0,
-      lastEntryDate: null,
-      streak: 0,
+describe("planRefill", () => {
+  const start = "2026-10-01T10:00:00.000Z";
+
+  it("pays 15 coins on the very first claim", () => {
+    const now = new Date(start);
+    expect(planRefill(null, now)).toEqual({
+      granted: REFILL_AMOUNT,
+      refilledAt: start,
+      nextRefillAt: "2026-10-04T10:00:00.000Z",
     });
-    expect(result.total).toBe(COIN_JOURNAL + COIN_MOOD + COIN_FIRST_ENTRY);
-    expect(result.awards.map((a) => a.action)).toEqual([
-      "journal_daily:2026-09-10",
-      "mood:2026-09-10",
-      "first_entry",
-    ]);
-    expect(result.streak).toBe(1);
+    expect(REFILL_AMOUNT).toBe(15);
   });
 
-  it("caps limited awards at the daily limit and still pays first-entry", () => {
-    const result = planJournalAwards({
-      day: "2026-09-10",
-      done: new Set(),
-      earnedToday: 28,
-      lastEntryDate: null,
-      streak: 0,
-    });
-    expect(result.awards.find((a) => a.action.startsWith("journal_daily"))?.amount).toBe(2);
-    expect(result.awards.some((a) => a.action.startsWith("mood:"))).toBe(false);
-    expect(result.awards.find((a) => a.action === "first_entry")?.amount).toBe(COIN_FIRST_ENTRY);
+  it("pays nothing before 3 full days pass", () => {
+    const r = planRefill(start, new Date("2026-10-04T09:59:59.000Z"));
+    expect(r.granted).toBe(0);
+    expect(r.refilledAt).toBe(start);
+    expect(r.nextRefillAt).toBe("2026-10-04T10:00:00.000Z");
   });
 
-  it("adds a streak milestone once", () => {
-    const result = planJournalAwards({
-      day: "2026-09-10",
-      done: new Set(["first_entry"]),
-      earnedToday: 0,
-      lastEntryDate: "2026-09-09",
-      streak: 6,
+  it("pays exactly at 3 days and keeps the 3-day rhythm", () => {
+    const r = planRefill(start, new Date("2026-10-05T18:00:00.000Z"));
+    expect(r.granted).toBe(15);
+    expect(r.refilledAt).toBe("2026-10-04T10:00:00.000Z");
+    expect(r.nextRefillAt).toBe("2026-10-07T10:00:00.000Z");
+  });
+
+  it("pays every missed period without an upper limit", () => {
+    const r = planRefill(start, new Date("2026-10-31T10:00:00.000Z"));
+    expect(r.granted).toBe(150);
+    expect(r.refilledAt).toBe("2026-10-31T10:00:00.000Z");
+  });
+});
+
+describe("planAnalysisCharge", () => {
+  it("costs 15 coins without a subscription", () => {
+    expect(planAnalysisCharge({ coins: 15, subscribed: false, freeUsedToday: false })).toEqual({
+      cost: ANALYSIS_COST,
+      allowed: true,
     });
-    expect(result.streak).toBe(7);
-    expect(result.awards.some((a) => a.action === "streak:7" && a.amount === STREAK_BONUS[7])).toBe(
-      true,
+    expect(ANALYSIS_COST).toBe(15);
+  });
+
+  it("refuses when coins are short", () => {
+    expect(planAnalysisCharge({ coins: 14, subscribed: false, freeUsedToday: false }).allowed).toBe(
+      false,
     );
   });
 
-  it("does not double-pay completed actions", () => {
-    const result = planJournalAwards({
-      day: "2026-09-10",
-      done: new Set(["journal_daily:2026-09-10", "mood:2026-09-10", "first_entry"]),
-      earnedToday: 15,
-      lastEntryDate: "2026-09-10",
-      streak: 1,
+  it("gives subscribers one free analysis per day, then charges as usual", () => {
+    expect(planAnalysisCharge({ coins: 0, subscribed: true, freeUsedToday: false })).toEqual({
+      cost: 0,
+      allowed: true,
     });
-    expect(result.awards).toEqual([]);
-    expect(result.total).toBe(0);
-  });
-});
-
-describe("planActionAward", () => {
-  it("grants a one-time profile bonus", () => {
-    const result = planActionAward("profile_complete", "2026-09-10", new Set(), 0);
-    expect(result.reason).toBe("granted");
-    expect(result.award?.amount).toBe(COIN_PROFILE);
-  });
-
-  it("respects already and daily limit for practice/buddy", () => {
-    expect(planActionAward("practice", "2026-09-10", new Set(["practice:2026-09-10"]), 0).reason).toBe(
-      "already",
-    );
-    expect(planActionAward("buddy", "2026-09-10", new Set(), DAILY_COIN_LIMIT).reason).toBe("limit");
-    expect(planActionAward("practice", "2026-09-10", new Set(), 0).award?.amount).toBe(COIN_PRACTICE);
-    expect(planActionAward("buddy", "2026-09-10", new Set(), 0).award?.amount).toBe(COIN_BUDDY);
-  });
-});
-
-describe("earnedTodayFrom", () => {
-  it("sums only limited actions for that day", () => {
-    expect(
-      earnedTodayFrom(
-        [
-          { action: "journal_daily:2026-09-10", amount: 10 },
-          { action: "first_entry", amount: 20 },
-          { action: "practice:2026-09-09", amount: 5 },
-        ],
-        "2026-09-10",
-      ),
-    ).toBe(10);
-  });
-});
-
-describe("reward catalog", () => {
-  it("matches the SQL catalog ids and costs", () => {
-    expect(REWARD_COST).toEqual({
-      s1: 50,
-      s2: 30,
-      s3: 0,
-      s4: 0,
-      v1: 150,
-      v2: 300,
-      v3: 500,
+    expect(planAnalysisCharge({ coins: 0, subscribed: true, freeUsedToday: true })).toEqual({
+      cost: ANALYSIS_COST,
+      allowed: false,
     });
-    expect(rewards.map((r) => r.id)).toEqual(["s1", "s2", "s3", "s4", "v1", "v2", "v3"]);
+  });
+});
+
+describe("formatRefillIn", () => {
+  const now = new Date("2026-10-19T12:00:00.000Z");
+
+  it("formats days, hours and minutes in Russian", () => {
+    expect(formatRefillIn("2026-10-21T17:00:00.000Z", now)).toBe("через 2 дня 5 часов");
+    expect(formatRefillIn("2026-10-20T12:00:00.000Z", now)).toBe("через 1 день");
+    expect(formatRefillIn("2026-10-19T13:30:00.000Z", now)).toBe("через 1 час");
+    expect(formatRefillIn("2026-10-19T12:40:00.000Z", now)).toBe("через 40 минут");
+    expect(formatRefillIn("2026-10-19T11:00:00.000Z", now)).toBe("уже сейчас");
+  });
+});
+
+describe("labels", () => {
+  it("names ledger actions", () => {
+    expect(coinActionLabel("refill:1792420467")).toBe("Пополнение");
+    expect(coinActionLabel("analysis:3f2a")).toBe("ИИ-анализ");
+    expect(coinActionLabel("refund:3f2a")).toBe("Возврат за анализ");
+    expect(coinActionLabel("journal_daily:2026-09-10")).toBe("Запись дневника");
+    expect(coinActionLabel("streak:7")).toBe("Серия 7 дней");
+    expect(coinActionLabel("something")).toBe("Начисление");
+  });
+
+  it("pluralizes coins", () => {
+    expect(coinsWord(1)).toBe("коин");
+    expect(coinsWord(3)).toBe("коина");
+    expect(coinsWord(15)).toBe("коинов");
+    expect(coinsWord(21)).toBe("коин");
+    expect(coinsWord(-15)).toBe("коинов");
   });
 });

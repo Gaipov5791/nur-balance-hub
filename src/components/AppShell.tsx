@@ -7,7 +7,8 @@ import {
   CalendarHeart,
   ChartLine,
   HeartHandshake,
-  Trophy,
+  Coins,
+  Sparkles,
   LifeBuoy,
   Plus,
   Stethoscope,
@@ -27,6 +28,8 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useStaffAccess, useProfile } from "@/hooks/useAuth";
+import { useCoinRefill } from "@/hooks/useCoins";
+import { nurCoinsLabel } from "@/lib/economy";
 import { canAccessModeration } from "@/lib/staff";
 import { useBuddyNotifications, useBuddyUnread } from "@/hooks/useBuddyNotifications";
 import { NotificationsBell } from "@/components/NotificationsBell";
@@ -77,10 +80,11 @@ const baseNav: NavItem[] = [
   { to: "/", label: "Главная", icon: Home },
   { to: "/my-day", label: "Мой день", icon: CalendarHeart },
   { to: "/stats", label: "Статистика", icon: ChartLine },
+  { to: "/analysis", label: "ИИ-анализ", icon: Sparkles },
   { to: "/journal", label: "Дневник", icon: Video },
   { to: "/archive", label: "Архив дневника", icon: CalendarDays },
   { to: "/buddy", label: "Круг поддержки", icon: HeartHandshake },
-  { to: "/rewards", label: "Достижения", icon: Trophy },
+  { to: "/coins", label: "Нур-Коины", icon: Coins },
   { to: "/care", label: "Советы", icon: LifeBuoy },
   { to: "/therapists", label: "Психологи", icon: Stethoscope },
   { to: "/settings", label: "Настройки", icon: Settings },
@@ -134,6 +138,7 @@ export function AppShell({
   const staffAccess = useStaffAccess();
   const isAdmin = canAccessModeration(staffAccess);
   useBuddyNotifications();
+  useCoinRefill();
   const unread = useBuddyUnread();
   const myCard = useQuery({
     queryKey: ["my-therapist-card", user?.id ?? null],
@@ -201,7 +206,7 @@ export function AppShell({
             <span className="min-w-0">
               <span className="block truncate text-sm font-semibold">{profile.name}</span>
               <span className="block text-xs text-muted-foreground">
-                {profile.coins} Nur-Coins
+                {nurCoinsLabel(profile.coins)}
               </span>
             </span>
           </Link>
@@ -211,9 +216,13 @@ export function AppShell({
           <header className="mb-5 flex items-center justify-between gap-3 lg:hidden">
             <Logo />
             <div className="flex items-center gap-2">
-              <span className="rounded-full bg-coin/30 px-3 py-1.5 text-sm font-semibold text-coin-foreground">
+              <Link
+                to="/coins"
+                aria-label={nurCoinsLabel(profile.coins)}
+                className="rounded-full bg-coin/30 px-3 py-1.5 text-sm font-semibold text-coin-foreground"
+              >
                 🪙 {profile.coins}
-              </span>
+              </Link>
               <NotificationsBell />
             </div>
           </header>
@@ -284,7 +293,7 @@ export function AppShell({
             <span className="min-w-0">
               <span className="block truncate text-sm font-semibold">{profile.name}</span>
               <span className="block text-xs text-muted-foreground">
-                {profile.coins} Nur-Coins
+                {nurCoinsLabel(profile.coins)}
               </span>
             </span>
           </Link>

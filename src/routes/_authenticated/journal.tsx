@@ -33,7 +33,7 @@ export const Route = createFileRoute("/_authenticated/journal")({
       {
         name: "description",
         content:
-          "Запиши короткое видео о своём дне, отметь эмоцию по шкале от 1 до 5 и получи +10 Nur-Coins.",
+          "Запиши короткое видео о своём дне и отметь эмоцию по шкале от 1 до 5 — текст дневника учитывается в ИИ-анализе.",
       },
       { property: "og:title", content: "Видео-дневник эмоций — Nur Balance" },
       {
@@ -146,7 +146,7 @@ function JournalPage() {
 
       setStep("saving");
       setProgressText("Сохраняем запись…");
-      const result = await createEntry({
+      await createEntry({
         data: {
           entryDate: localDateString(),
           mood,
@@ -162,11 +162,7 @@ function JournalPage() {
       setStep("done");
       qc.invalidateQueries({ queryKey: ["profile"] });
       qc.invalidateQueries({ queryKey: ["journal"] });
-      toast.success(
-        result.total > 0
-          ? `Запись сохранена. +${result.total} Nur-Coins`
-          : "Запись сохранена. Дневной лимит монет уже набран",
-      );
+      toast.success("Запись сохранена");
     } catch (err) {
       setStep("failed");
       setSaveError(err instanceof Error ? err.message : "Неизвестная ошибка");

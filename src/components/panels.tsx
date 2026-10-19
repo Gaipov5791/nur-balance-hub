@@ -1,20 +1,18 @@
 import { Link } from "@tanstack/react-router";
-import { Flame, Sparkles, Users } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { CalendarClock, Sparkles, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { lifeStatuses, moods, type MoodKey } from "@/data/demo";
 import { useProfile } from "@/hooks/useAuth";
+import { useCoinWallet } from "@/hooks/useCoins";
 import { calendarMonth } from "@/lib/dates";
-import { STREAK_MILESTONES } from "@/lib/economy";
+import { ANALYSIS_COST, REFILL_AMOUNT, REFILL_INTERVAL_DAYS, formatRefillIn } from "@/lib/economy";
 import { LEGACY_MOOD_LEVEL, moodLevel } from "@/lib/mood";
 
-const EMPTY_BALANCE = { coins: 0, streak: 0 };
-
 export function CoinsPanel() {
-  const { profile: real } = useProfile();
-  const profile = real ? { coins: real.coins, streak: real.streak } : EMPTY_BALANCE;
-  const next = STREAK_MILESTONES.map((m) => m.days).find((m) => m > profile.streak) ?? null;
-  const left = next ? next - profile.streak : 0;
+  const { profile } = useProfile();
+  const wallet = useCoinWallet();
+  const coins = wallet.data?.coins ?? profile?.coins ?? 0;
+  const free = wallet.data?.freeAnalysisAvailable ?? false;
   return (
     <div className="surface p-5">
       <div className="flex items-start justify-between">
@@ -22,30 +20,30 @@ export function CoinsPanel() {
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Баланс
           </p>
-          <p className="mt-1 font-display text-3xl">{profile.coins}</p>
-          <p className="text-sm text-muted-foreground">Nur-Coins</p>
+          <p className="mt-1 font-display text-3xl">{coins}</p>
+          <p className="text-sm text-muted-foreground">Нур-Коины</p>
         </div>
         <span className="grid size-12 place-items-center rounded-2xl bg-coin/40 text-2xl">🪙</span>
       </div>
-      <div className="mt-5 rounded-2xl bg-secondary p-4">
-        <div className="flex items-center justify-between text-sm font-medium">
-          <span className="flex items-center gap-1.5">
-            <Flame className="size-4 text-accent" /> Серия {profile.streak} дней
+      <div className="mt-5 flex items-start gap-2.5 rounded-2xl bg-secondary p-4 text-sm">
+        <CalendarClock className="mt-0.5 size-4 shrink-0 text-accent" />
+        <p className="min-w-0">
+          <span className="block font-medium">
+            +{REFILL_AMOUNT}{" "}
+            {wallet.data ? formatRefillIn(wallet.data.nextRefillAt, new Date()) : "скоро"}
           </span>
-          <span className="text-muted-foreground">{next ? `до ${next}` : "все этапы"}</span>
-        </div>
-        <Progress
-          value={next ? Math.min(100, (profile.streak / next) * 100) : 100}
-          className="mt-3 h-2"
-        />
-        <p className="mt-2 text-xs text-muted-foreground">
-          {next
-            ? `Ещё ${left} дн. — и бонус за непрерывность`
-            : "Все этапы серии пройдены — так держать"}
+          <span className="block text-xs text-muted-foreground">
+            Коины пополняются сами каждые {REFILL_INTERVAL_DAYS} дня
+          </span>
         </p>
       </div>
-      <Button asChild variant="secondary" className="mt-4 w-full">
-        <Link to="/rewards">Каталог наград</Link>
+      <Button asChild className="mt-4 w-full">
+        <Link to="/analysis">
+          <Sparkles className="size-4" /> ИИ-анализ · {free ? "бесплатно" : `${ANALYSIS_COST} 🪙`}
+        </Link>
+      </Button>
+      <Button asChild variant="secondary" className="mt-2 w-full">
+        <Link to="/coins">Подробнее о Нур-Коинах</Link>
       </Button>
     </div>
   );
