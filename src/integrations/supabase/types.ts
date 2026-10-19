@@ -476,6 +476,56 @@ export type Database = {
         }
         Relationships: []
       }
+      payments: {
+        Row: {
+          amount_kzt: number
+          coins: number
+          created_at: string
+          external_id: string | null
+          id: string
+          paid_at: string | null
+          product: string
+          provider: string
+          status: string
+          subscription_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_kzt: number
+          coins?: number
+          created_at?: string
+          external_id?: string | null
+          id?: string
+          paid_at?: string | null
+          product: string
+          provider?: string
+          status?: string
+          subscription_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_kzt?: number
+          coins?: number
+          created_at?: string
+          external_id?: string | null
+          id?: string
+          paid_at?: string | null
+          product?: string
+          provider?: string
+          status?: string
+          subscription_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           coins: number
@@ -954,6 +1004,11 @@ export type Database = {
         }
         Returns: number
       }
+      _fulfill_payment: { Args: { _id: string }; Returns: Json }
+      _payment_block_reason: {
+        Args: { _product: string; _user_id: string }
+        Returns: string
+      }
       active_buddy_match: {
         Args: never
         Returns: {
@@ -974,7 +1029,9 @@ export type Database = {
       }
       clear_journal_pin: { Args: { _current: string }; Returns: boolean }
       coin_wallet: { Args: never; Returns: Json }
+      confirm_demo_payment: { Args: { _id: string }; Returns: Json }
       consume_ai_message: { Args: never; Returns: Json }
+      create_payment: { Args: { _product: string }; Returns: Json }
       delete_ai_analysis: { Args: { _id: string }; Returns: boolean }
       fail_ai_analysis: { Args: { _id: string }; Returns: Json }
       find_or_queue_buddy: {

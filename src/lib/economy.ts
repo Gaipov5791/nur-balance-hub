@@ -1,4 +1,4 @@
-/** Nur-Coin rules. SQL in drizzle/migrations/0002_ai_analyzer_coins.sql must stay in sync. */
+/** Nur-Coin rules. SQL in drizzle/migrations/0002_ai_analyzer_coins.sql and 0003_demo_payments.sql must stay in sync. */
 
 export const MAX_RECORD_SECONDS = 180;
 
@@ -76,9 +76,41 @@ export function nurCoinsLabel(n: number) {
   return `${n} ${pluralRu(Math.abs(n), ["Нур-Коин", "Нур-Коина", "Нур-Коинов"])}`;
 }
 
-/** Shown on the coins page; payment arrives in stage C. */
+/** Mirrors create_payment() and ai_daily_limit() in drizzle/migrations/0003_demo_payments.sql. */
 export const COIN_PACK = { coins: 230, priceKzt: 1890 } as const;
-export const SUBSCRIPTION_PRICE_KZT = 2150;
+export const SUBSCRIPTION = { priceKzt: 2150, days: 30 } as const;
+export const FREE_AI_DAILY_LIMIT = 30;
+export const SUBSCRIBER_AI_DAILY_LIMIT = 100;
+export const DEMO_COIN_PACKS_PER_DAY = 3;
+/** A subscription can be renewed while at most this many days remain. */
+export const SUBSCRIPTION_RENEW_WINDOW_DAYS = 30;
+
+export type Product = "coin_pack" | "subscription_month";
+
+export function aiDailyLimit(subscribed: boolean) {
+  return subscribed ? SUBSCRIBER_AI_DAILY_LIMIT : FREE_AI_DAILY_LIMIT;
+}
+
+/** Mirrors _fulfill_payment(): an active subscription is extended by 30 days, otherwise it starts now. */
+export function planSubscriptionEnd(currentEndsAt: string | null, now: Date) {
+  const nowMs = now.getTime();
+  const current = currentEndsAt ? Date.parse(currentEndsAt) : Number.NaN;
+  const base = Number.isFinite(current) && current > nowMs ? current : nowMs;
+  return new Date(base + SUBSCRIPTION.days * DAY_MS).toISOString();
+}
+
+/** Mirrors _payment_block_reason(). */
+export function purchaseBlockReason(
+  product: Product,
+  input: { demoPacksToday: number; subscriptionEndsAt: string | null; now: Date },
+): "demo_limit" | "too_early" | null {
+  if (product === "coin_pack") {
+    return input.demoPacksToday >= DEMO_COIN_PACKS_PER_DAY ? "demo_limit" : null;
+  }
+  const ends = input.subscriptionEndsAt ? Date.parse(input.subscriptionEndsAt) : Number.NaN;
+  const windowEnd = input.now.getTime() + SUBSCRIPTION_RENEW_WINDOW_DAYS * DAY_MS;
+  return Number.isFinite(ends) && ends > windowEnd ? "too_early" : null;
+}
 
 /** "через 2 дня 5 часов", "через 40 минут", "уже сейчас". */
 export function formatRefillIn(nextRefillAt: string, now: Date) {
@@ -112,6 +144,7 @@ export function coinActionLabel(action: string) {
   if (kind === "refill") return "Пополнение";
   if (kind === "analysis") return "ИИ-анализ";
   if (kind === "refund") return "Возврат за анализ";
+  if (kind === "purchase") return "Покупка коинов";
   if (kind === "streak") return `Серия ${rest} дней`;
   return LEGACY_LABELS[kind] ?? "Начисление";
 }

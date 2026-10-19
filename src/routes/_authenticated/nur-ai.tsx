@@ -8,6 +8,7 @@ import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
+import { useCoinWallet } from "@/hooks/useCoins";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/nur-ai")({
@@ -51,6 +52,8 @@ function NurAiPage() {
       return data as { used: number; limit: number };
     },
   });
+
+  const wallet = useCoinWallet();
 
   const [local, setLocal] = useState<Msg[]>([]);
   const [text, setText] = useState("");
@@ -123,6 +126,7 @@ function NurAiPage() {
     }
   };
 
+  const subscribed = wallet.data?.subscribed ?? false;
   const left = usage.data ? Math.max(0, usage.data.limit - usage.data.used) : null;
 
   return (
@@ -139,7 +143,11 @@ function NurAiPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {left !== null ? <span className="text-xs text-muted-foreground">Осталось сегодня: {left}</span> : null}
+            {subscribed ? (
+              <span className="text-xs text-muted-foreground">💎 Без лимита</span>
+            ) : left !== null ? (
+              <span className="text-xs text-muted-foreground">Осталось сегодня: {left}</span>
+            ) : null}
             <Button variant="ghost" size="sm" onClick={() => void clear()} disabled={busy || !(history.data ?? []).length}>
               <Trash2 className="size-4" /> Очистить
             </Button>
@@ -186,9 +194,16 @@ function NurAiPage() {
             <div className="rounded-xl border border-destructive/40 p-3 text-sm">
               <p className="text-destructive">{error}</p>
               {error.includes("лимит") ? (
-                <Button asChild size="sm" variant="secondary" className="mt-2">
-                  <Link to="/buddy">Найти собеседника</Link>
-                </Button>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <Button asChild size="sm" variant="secondary">
+                    <Link to="/buddy">Найти собеседника</Link>
+                  </Button>
+                  {subscribed ? null : (
+                    <Button asChild size="sm">
+                      <Link to="/coins">💎 Подписка без лимита</Link>
+                    </Button>
+                  )}
+                </div>
               ) : null}
             </div>
           ) : null}

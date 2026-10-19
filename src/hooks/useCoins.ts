@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 import { useAuth } from "@/hooks/useAuth";
 import { parseAnalysisResult, type AnalysisDto, type AnalysisPeriod } from "@/lib/analysis";
-import { coinsWord } from "@/lib/economy";
+import { coinsWord, type Product } from "@/lib/economy";
 
 export const coinKeys = {
   all: ["coins"] as const,
@@ -126,6 +126,62 @@ export function useAnalyses() {
             result,
           },
         ];
+      });
+    },
+  });
+}
+
+export type CheckoutResult =
+  | { ok: true; product: Product; coinsAdded: number; subscriptionEndsAt: string | null }
+  | { ok: false; reason: "demo_limit" | "too_early" };
+
+/** Hands a created payment to its provider. Kaspi Pay will redirect to its checkout here. */
+async function payWithProvider(id: string, provider: string) {
+  if (provider !== "demo") throw new Error("Этот способ оплаты пока недоступен");
+  const { data, error } = await supabase.rpc("confirm_demo_payment", { _id: id });
+  if (error) throw new Error("Не удалось провести оплату");
+  return data;
+}
+
+function asBlockReason(data: Json): "demo_limit" | "too_early" | null {
+  const reason = field(data, "reason");
+  return reason === "demo_limit" || reason === "too_early" ? reason : null;
+}
+
+export function useCheckout() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (product: Product): Promise<CheckoutResult> => {
+      const { data: created, error } = await supabase.rpc("create_payment", { _product: product });
+      if (error) throw new Error("Не удалось создать платёж");
+      if (field(created, "ok") !== true) {
+        const reason = asBlockReason(created);
+        if (!reason) throw new Error("Не удалось создать платёж");
+        return { ok: false, reason };
+      }
+      const paid = await payWithProvider(
+        String(field(created, "id")),
+        String(field(created, "provider")),
+      );
+      if (field(paid, "ok") !== true) {
+        const reason = asBlockReason(paid);
+        if (!reason) throw new Error("Оплата не прошла");
+        return { ok: false, reason };
+      }
+      const ends = field(paid, "subscriptionEndsAt");
+      return {
+        ok: true,
+        product,
+        coinsAdded: Number(field(paid, "coinsAdded") ?? 0),
+        subscriptionEndsAt: typeof ends === "string" ? ends : null,
+      };
+    },
+    onSettled: () => {
+      void qc.invalidateQueries({ queryKey: ["profile"] });
+      void qc.invalidateQueries({ queryKey: ["nur-ai-usage"] });
+      void qc.invalidateQueries({
+        queryKey: coinKeys.all,
+        predicate: (x) => x.queryKey[1] !== "refill",
       });
     },
   });

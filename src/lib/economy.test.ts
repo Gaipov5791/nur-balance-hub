@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   ANALYSIS_COST,
+  COIN_PACK,
   REFILL_AMOUNT,
+  SUBSCRIPTION,
+  aiDailyLimit,
   coinActionLabel,
   coinsWord,
   daysBetween,
@@ -9,6 +12,8 @@ import {
   nextStreak,
   planAnalysisCharge,
   planRefill,
+  planSubscriptionEnd,
+  purchaseBlockReason,
 } from "@/lib/economy";
 
 describe("daysBetween", () => {
@@ -100,6 +105,51 @@ describe("planAnalysisCharge", () => {
   });
 });
 
+describe("purchases", () => {
+  const now = new Date("2026-10-19T12:00:00.000Z");
+
+  it("keeps the approved prices", () => {
+    expect(COIN_PACK).toEqual({ coins: 230, priceKzt: 1890 });
+    expect(SUBSCRIPTION).toEqual({ priceKzt: 2150, days: 30 });
+  });
+
+  it("raises the NurAI limit to a quiet 100 for subscribers", () => {
+    expect(aiDailyLimit(false)).toBe(30);
+    expect(aiDailyLimit(true)).toBe(100);
+  });
+
+  it("starts a subscription now for 30 days, or extends an active one", () => {
+    expect(planSubscriptionEnd(null, now)).toBe("2026-11-18T12:00:00.000Z");
+    expect(planSubscriptionEnd("2026-10-10T00:00:00.000Z", now)).toBe("2026-11-18T12:00:00.000Z");
+    expect(planSubscriptionEnd("2026-10-25T12:00:00.000Z", now)).toBe("2026-11-24T12:00:00.000Z");
+  });
+
+  it("caps demo coin packs per day", () => {
+    const base = { subscriptionEndsAt: null, now };
+    expect(purchaseBlockReason("coin_pack", { ...base, demoPacksToday: 2 })).toBeNull();
+    expect(purchaseBlockReason("coin_pack", { ...base, demoPacksToday: 3 })).toBe("demo_limit");
+  });
+
+  it("allows renewal only within 30 days of the end", () => {
+    const base = { demoPacksToday: 0, now };
+    expect(
+      purchaseBlockReason("subscription_month", { ...base, subscriptionEndsAt: null }),
+    ).toBeNull();
+    expect(
+      purchaseBlockReason("subscription_month", {
+        ...base,
+        subscriptionEndsAt: "2026-11-18T12:00:00.000Z",
+      }),
+    ).toBeNull();
+    expect(
+      purchaseBlockReason("subscription_month", {
+        ...base,
+        subscriptionEndsAt: "2026-11-18T12:00:01.000Z",
+      }),
+    ).toBe("too_early");
+  });
+});
+
 describe("formatRefillIn", () => {
   const now = new Date("2026-10-19T12:00:00.000Z");
 
@@ -117,6 +167,7 @@ describe("labels", () => {
     expect(coinActionLabel("refill:1792420467")).toBe("Пополнение");
     expect(coinActionLabel("analysis:3f2a")).toBe("ИИ-анализ");
     expect(coinActionLabel("refund:3f2a")).toBe("Возврат за анализ");
+    expect(coinActionLabel("purchase:3f2a")).toBe("Покупка коинов");
     expect(coinActionLabel("journal_daily:2026-09-10")).toBe("Запись дневника");
     expect(coinActionLabel("streak:7")).toBe("Серия 7 дней");
     expect(coinActionLabel("something")).toBe("Начисление");

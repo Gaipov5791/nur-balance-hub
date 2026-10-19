@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CalendarClock, Sparkles } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { CheckoutDialog } from "@/components/coins/CheckoutDialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCoinHistory, useCoinWallet } from "@/hooks/useCoins";
@@ -9,9 +11,10 @@ import {
   COIN_PACK,
   REFILL_AMOUNT,
   REFILL_INTERVAL_DAYS,
-  SUBSCRIPTION_PRICE_KZT,
+  SUBSCRIPTION,
   coinActionLabel,
   formatRefillIn,
+  type Product,
 } from "@/lib/economy";
 
 export const Route = createFileRoute("/_authenticated/coins")({
@@ -53,7 +56,12 @@ const rules = [
   {
     emoji: "💎",
     text: "С подпиской — 1 анализ в день бесплатно",
-    note: "И НурAI без дневного лимита сообщений.",
+    note: `И НурAI без дневного лимита сообщений. Подписка действует ${SUBSCRIPTION.days} дней.`,
+  },
+  {
+    emoji: "🛒",
+    text: `Можно докупить ${COIN_PACK.coins} коинов`,
+    note: "Купленные коины не сгорают и копятся вместе с бесплатными.",
   },
   {
     emoji: "🪙",
@@ -66,6 +74,7 @@ function CoinsPage() {
   const wallet = useCoinWallet();
   const history = useCoinHistory();
   const w = wallet.data;
+  const [buying, setBuying] = useState<Product | null>(null);
 
   return (
     <AppShell title="Нур-Коины">
@@ -139,36 +148,45 @@ function CoinsPage() {
           <section className="surface p-5">
             <div className="flex items-center justify-between gap-2">
               <h2 className="font-display text-base">Пополнить</h2>
-              <span className="rounded-full bg-secondary px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
-                Скоро
+              <span className="rounded-full bg-coin/30 px-2.5 py-1 text-[11px] font-medium">
+                Демо-оплата
               </span>
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               <div className="flex flex-col rounded-2xl border border-border p-4">
                 <span className="text-2xl">🪙</span>
                 <p className="mt-2 font-semibold">{COIN_PACK.coins} коинов</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="flex-1 text-sm text-muted-foreground">
                   Хватит на {Math.floor(COIN_PACK.coins / ANALYSIS_COST)} анализов
                 </p>
-                <Button className="mt-4" variant="secondary" disabled>
+                <Button className="mt-4" variant="secondary" onClick={() => setBuying("coin_pack")}>
                   {tenge.format(COIN_PACK.priceKzt)} ₸
                 </Button>
               </div>
               <div className="flex flex-col rounded-2xl border border-primary/30 bg-primary-soft/40 p-4">
                 <span className="text-2xl">💎</span>
                 <p className="mt-2 font-semibold">Подписка на месяц</p>
-                <p className="text-sm text-muted-foreground">
-                  Анализ каждый день бесплатно и НурAI без лимита
+                <p className="flex-1 text-sm text-muted-foreground">
+                  {w?.subscribed && w.subscriptionEndsAt
+                    ? `Активна до ${formatWhen(w.subscriptionEndsAt)}`
+                    : "Анализ каждый день бесплатно и НурAI без лимита"}
                 </p>
-                <Button className="mt-4" variant="secondary" disabled>
-                  {tenge.format(SUBSCRIPTION_PRICE_KZT)} ₸ / мес
+                <Button className="mt-4" onClick={() => setBuying("subscription_month")}>
+                  {w?.subscribed ? "Продлить · " : ""}
+                  {tenge.format(SUBSCRIPTION.priceKzt)} ₸ / мес
                 </Button>
               </div>
             </div>
             <p className="mt-3 text-xs text-muted-foreground">
-              Покупка коинов и подписка появятся в ближайшем обновлении.
+              Сейчас оплата демонстрационная: деньги не списываются. Оплату через Kaspi Pay
+              подключим позже.
             </p>
           </section>
+          <CheckoutDialog
+            product={buying}
+            subscribed={w?.subscribed ?? false}
+            onOpenChange={(open) => (open ? null : setBuying(null))}
+          />
 
           <section className="surface p-5">
             <h2 className="font-display text-base">История</h2>

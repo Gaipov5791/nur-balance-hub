@@ -198,7 +198,7 @@ function AnalysisPage() {
                 {formatRefillIn(w.nextRefillAt, new Date())}.
               </p>
               <Button asChild size="sm" variant="secondary" className="mt-3">
-                <Link to="/coins">Нур-Коины</Link>
+                <Link to="/coins">Купить коины или подписку</Link>
               </Button>
             </div>
           ) : null}

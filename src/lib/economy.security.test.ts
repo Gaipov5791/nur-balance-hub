@@ -53,7 +53,9 @@ describe("refill and AI analysis SQL", () => {
   it("keeps analyses and subscriptions read-only for clients", () => {
     expect(stageB).toContain("GRANT SELECT ON public.ai_analyses TO authenticated;");
     expect(stageB).toContain("GRANT SELECT ON public.subscriptions TO authenticated;");
-    expect(stageB).not.toMatch(/GRANT (INSERT|UPDATE|DELETE|ALL)[^;]*ON public\.(ai_analyses|subscriptions) TO authenticated/);
+    expect(stageB).not.toMatch(
+      /GRANT (INSERT|UPDATE|DELETE|ALL)[^;]*ON public\.(ai_analyses|subscriptions) TO authenticated/,
+    );
   });
 
   it("charges atomically and only refunds pending runs once", () => {
@@ -67,8 +69,57 @@ describe("refill and AI analysis SQL", () => {
       "_analysis_free_used(uuid, date)",
       "_analysis_refund(uuid, uuid)",
     ]) {
-      expect(stageB).toContain(`REVOKE ALL ON FUNCTION public.${fn} FROM PUBLIC, anon, authenticated`);
+      expect(stageB).toContain(
+        `REVOKE ALL ON FUNCTION public.${fn} FROM PUBLIC, anon, authenticated`,
+      );
       expect(stageB).not.toContain(`GRANT EXECUTE ON FUNCTION public.${fn}`);
+    }
+  });
+});
+
+const stageC = readFileSync(join(root, "drizzle/migrations/0003_demo_payments.sql"), "utf8");
+
+describe("demo payments SQL", () => {
+  it("keeps payments read-only for clients", () => {
+    expect(stageC).toContain("GRANT SELECT ON public.payments TO authenticated;");
+    expect(stageC).not.toMatch(
+      /GRANT (INSERT|UPDATE|DELETE|ALL)[^;]*ON public\.payments TO authenticated/,
+    );
+  });
+
+  it("prices products on the server", () => {
+    expect(stageC).toMatch(
+      /create_payment[\s\S]*price := 1890;[\s\S]*pack := 230;[\s\S]*price := 2150;/,
+    );
+  });
+
+  it("fulfills a payment once, under locks", () => {
+    expect(stageC).toMatch(
+      /_fulfill_payment[\s\S]*FOR UPDATE[\s\S]*status <> 'pending'[\s\S]*FOR UPDATE/,
+    );
+  });
+
+  it("confirms only the caller's own demo payments", () => {
+    expect(stageC).toMatch(/confirm_demo_payment[\s\S]*p\.user_id <> me OR p\.provider <> 'demo'/);
+    expect(stageC).toMatch(/confirm_demo_payment[\s\S]*_payment_block_reason/);
+  });
+
+  it("raises the NurAI limit only through ai_daily_limit", () => {
+    expect(stageC).toContain(
+      "CASE WHEN public.has_active_subscription(_user_id) THEN 100 ELSE 30 END",
+    );
+  });
+
+  it("does not expose internal helpers", () => {
+    for (const fn of [
+      "ai_daily_limit(uuid)",
+      "_payment_block_reason(uuid, text)",
+      "_fulfill_payment(uuid)",
+    ]) {
+      expect(stageC).toContain(
+        `REVOKE ALL ON FUNCTION public.${fn} FROM PUBLIC, anon, authenticated`,
+      );
+      expect(stageC).not.toContain(`GRANT EXECUTE ON FUNCTION public.${fn}`);
     }
   });
 });
