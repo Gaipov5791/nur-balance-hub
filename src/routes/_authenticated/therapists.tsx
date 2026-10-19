@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_authenticated/therapists")({
       { property: "og:title", content: "Психологи — Nur Balance" },
       {
         property: "og:description",
-        content: "Выберите специалиста и отправьте заявку на консультацию — статус видно в приложении.",
+        content: "Выбери специалиста и отправь заявку на консультацию — статус видно в приложении.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -228,11 +228,11 @@ function TherapistsPage() {
 
   const submit = useMutation({
     mutationFn: async () => {
-      if (!user || !person) throw new Error("Выберите специалиста");
-      if (!form.contact.trim()) throw new Error("Укажите телефон или email для связи");
+      if (!user || !person) throw new Error("Выбери специалиста");
+      if (!form.contact.trim()) throw new Error("Укажи телефон или email для связи");
       const slot = (slots.data ?? []).find((s) => s.id === slotId) ?? null;
       if (slot && slot.duration_minutes < duration) {
-        throw new Error("Это окно короче выбранной длительности — выберите другое время");
+        throw new Error("Это окно короче выбранной длительности — выбери другое время");
       }
       const { error } = await supabase.from("therapist_requests").insert({
         user_id: user.id,
@@ -246,7 +246,7 @@ function TherapistsPage() {
         slot_id: slot?.id ?? null,
         scheduled_at: slot?.starts_at ?? null,
       });
-      if (error) throw new Error("Не удалось отправить заявку. Проверьте связь и попробуйте ещё раз");
+      if (error) throw new Error("Не удалось отправить заявку. Проверь связь и попробуй ещё раз");
     },
     onSuccess: async () => {
       setForm((f) => ({ ...f, time: "", topic: "" }));
@@ -254,7 +254,7 @@ function TherapistsPage() {
       await qc.invalidateQueries({ queryKey: ["therapist-requests"] });
       await qc.invalidateQueries({ queryKey: ["therapist-slots"] });
       await qc.invalidateQueries({ queryKey: ["therapist-request-events"] });
-      toast.success("Заявка отправлена — специалист свяжется с вами");
+      toast.success("Заявка отправлена — специалист свяжется с тобой");
     },
     onError: (e: Error) => {
       toast.error(e.message, { action: { label: "Повторить", onClick: () => submit.mutate() } });
@@ -281,7 +281,7 @@ function TherapistsPage() {
   return (
     <AppShell title="Психологи" aside={<CoinsPanel />}>
       <p className="mb-4 text-sm text-muted-foreground">
-        Выберите специалиста и отправьте заявку — после подтверждения записи откроется личный чат в
+        Выбери специалиста и отправь заявку — после подтверждения записи откроется личный чат в
         приложении.
       </p>
       <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.95fr)]">
@@ -483,7 +483,7 @@ function TherapistsPage() {
             }}
           >
             <Input
-              placeholder="Ваше имя"
+              placeholder="Твоё имя"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
             />
@@ -522,8 +522,8 @@ function TherapistsPage() {
                 <p className="mt-2 text-sm text-muted-foreground">Загружаем расписание…</p>
               ) : fittingSlots.length === 0 ? (
                 <p className="mt-2 text-sm text-muted-foreground">
-                  На {duration} минут свободных окон пока нет — выберите другую длительность или
-                  напишите удобное время ниже.
+                  На {duration} минут свободных окон пока нет — выбери другую длительность или
+                  напиши удобное время ниже.
                 </p>
               ) : (
                 <div className="mt-2 grid gap-2 sm:grid-cols-2">
@@ -547,7 +547,7 @@ function TherapistsPage() {
                 </div>
               )}
               <p className="mt-2 text-xs text-muted-foreground">
-                Время закрепляется за вами после подтверждения специалистом.
+                Время закрепляется за тобой после подтверждения специалистом.
               </p>
             </div>
             <Input
@@ -556,7 +556,7 @@ function TherapistsPage() {
               onChange={(e) => setForm({ ...form, time: e.target.value })}
             />
             <Textarea
-              placeholder="С чем хотите поработать?"
+              placeholder="С чем хочется поработать?"
               className="min-h-24"
               value={form.topic}
               onChange={(e) => setForm({ ...form, topic: e.target.value })}

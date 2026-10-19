@@ -17,9 +17,12 @@ import { Route as AuthenticatedBuddyRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedCareRouteImport } from './routes/_authenticated/care'
 import { Route as AuthenticatedJournalRouteImport } from './routes/_authenticated/journal'
 import { Route as AuthenticatedModerationRouteImport } from './routes/_authenticated/moderation'
+import { Route as AuthenticatedMoodRouteImport } from './routes/_authenticated/mood'
+import { Route as AuthenticatedMyDayRouteImport } from './routes/_authenticated/my-day'
 import { Route as AuthenticatedNurAiRouteImport } from './routes/_authenticated/nur-ai'
 import { Route as AuthenticatedRewardsRouteImport } from './routes/_authenticated/rewards'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedStatsRouteImport } from './routes/_authenticated/stats'
 import { Route as AuthenticatedTherapistDeskRouteImport } from './routes/_authenticated/therapist-desk'
 import { Route as AuthenticatedTherapistsRouteImport } from './routes/_authenticated/therapists'
 import { Route as AuthenticatedTherapyChatRouteImport } from './routes/_authenticated/therapy-chat'
@@ -65,6 +68,16 @@ const AuthenticatedModerationRoute = AuthenticatedModerationRouteImport.update({
   path: '/moderation',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMoodRoute = AuthenticatedMoodRouteImport.update({
+  id: '/mood',
+  path: '/mood',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMyDayRoute = AuthenticatedMyDayRouteImport.update({
+  id: '/my-day',
+  path: '/my-day',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedNurAiRoute = AuthenticatedNurAiRouteImport.update({
   id: '/nur-ai',
   path: '/nur-ai',
@@ -78,6 +91,11 @@ const AuthenticatedRewardsRoute = AuthenticatedRewardsRouteImport.update({
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedStatsRoute = AuthenticatedStatsRouteImport.update({
+  id: '/stats',
+  path: '/stats',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedTherapistDeskRoute =
@@ -117,9 +135,12 @@ export interface FileRoutesByFullPath {
   '/care': typeof AuthenticatedCareRoute
   '/journal': typeof AuthenticatedJournalRoute
   '/moderation': typeof AuthenticatedModerationRoute
+  '/mood': typeof AuthenticatedMoodRoute
+  '/my-day': typeof AuthenticatedMyDayRoute
   '/nur-ai': typeof AuthenticatedNurAiRoute
   '/rewards': typeof AuthenticatedRewardsRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/stats': typeof AuthenticatedStatsRoute
   '/therapist-desk': typeof AuthenticatedTherapistDeskRoute
   '/therapists': typeof AuthenticatedTherapistsRoute
   '/therapy-chat': typeof AuthenticatedTherapyChatRoute
@@ -134,9 +155,12 @@ export interface FileRoutesByTo {
   '/care': typeof AuthenticatedCareRoute
   '/journal': typeof AuthenticatedJournalRoute
   '/moderation': typeof AuthenticatedModerationRoute
+  '/mood': typeof AuthenticatedMoodRoute
+  '/my-day': typeof AuthenticatedMyDayRoute
   '/nur-ai': typeof AuthenticatedNurAiRoute
   '/rewards': typeof AuthenticatedRewardsRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/stats': typeof AuthenticatedStatsRoute
   '/therapist-desk': typeof AuthenticatedTherapistDeskRoute
   '/therapists': typeof AuthenticatedTherapistsRoute
   '/therapy-chat': typeof AuthenticatedTherapyChatRoute
@@ -153,9 +177,12 @@ export interface FileRoutesById {
   '/_authenticated/care': typeof AuthenticatedCareRoute
   '/_authenticated/journal': typeof AuthenticatedJournalRoute
   '/_authenticated/moderation': typeof AuthenticatedModerationRoute
+  '/_authenticated/mood': typeof AuthenticatedMoodRoute
+  '/_authenticated/my-day': typeof AuthenticatedMyDayRoute
   '/_authenticated/nur-ai': typeof AuthenticatedNurAiRoute
   '/_authenticated/rewards': typeof AuthenticatedRewardsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/stats': typeof AuthenticatedStatsRoute
   '/_authenticated/therapist-desk': typeof AuthenticatedTherapistDeskRoute
   '/_authenticated/therapists': typeof AuthenticatedTherapistsRoute
   '/_authenticated/therapy-chat': typeof AuthenticatedTherapyChatRoute
@@ -172,9 +199,12 @@ export interface FileRouteTypes {
     | '/care'
     | '/journal'
     | '/moderation'
+    | '/mood'
+    | '/my-day'
     | '/nur-ai'
     | '/rewards'
     | '/settings'
+    | '/stats'
     | '/therapist-desk'
     | '/therapists'
     | '/therapy-chat'
@@ -189,9 +219,12 @@ export interface FileRouteTypes {
     | '/care'
     | '/journal'
     | '/moderation'
+    | '/mood'
+    | '/my-day'
     | '/nur-ai'
     | '/rewards'
     | '/settings'
+    | '/stats'
     | '/therapist-desk'
     | '/therapists'
     | '/therapy-chat'
@@ -207,9 +240,12 @@ export interface FileRouteTypes {
     | '/_authenticated/care'
     | '/_authenticated/journal'
     | '/_authenticated/moderation'
+    | '/_authenticated/mood'
+    | '/_authenticated/my-day'
     | '/_authenticated/nur-ai'
     | '/_authenticated/rewards'
     | '/_authenticated/settings'
+    | '/_authenticated/stats'
     | '/_authenticated/therapist-desk'
     | '/_authenticated/therapists'
     | '/_authenticated/therapy-chat'
@@ -283,6 +319,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedModerationRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/mood': {
+      id: '/_authenticated/mood'
+      path: '/mood'
+      fullPath: '/mood'
+      preLoaderRoute: typeof AuthenticatedMoodRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/my-day': {
+      id: '/_authenticated/my-day'
+      path: '/my-day'
+      fullPath: '/my-day'
+      preLoaderRoute: typeof AuthenticatedMyDayRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/nur-ai': {
       id: '/_authenticated/nur-ai'
       path: '/nur-ai'
@@ -302,6 +352,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/stats': {
+      id: '/_authenticated/stats'
+      path: '/stats'
+      fullPath: '/stats'
+      preLoaderRoute: typeof AuthenticatedStatsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/therapist-desk': {
@@ -348,9 +405,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCareRoute: typeof AuthenticatedCareRoute
   AuthenticatedJournalRoute: typeof AuthenticatedJournalRoute
   AuthenticatedModerationRoute: typeof AuthenticatedModerationRoute
+  AuthenticatedMoodRoute: typeof AuthenticatedMoodRoute
+  AuthenticatedMyDayRoute: typeof AuthenticatedMyDayRoute
   AuthenticatedNurAiRoute: typeof AuthenticatedNurAiRoute
   AuthenticatedRewardsRoute: typeof AuthenticatedRewardsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedStatsRoute: typeof AuthenticatedStatsRoute
   AuthenticatedTherapistDeskRoute: typeof AuthenticatedTherapistDeskRoute
   AuthenticatedTherapistsRoute: typeof AuthenticatedTherapistsRoute
   AuthenticatedTherapyChatRoute: typeof AuthenticatedTherapyChatRoute
@@ -362,9 +422,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCareRoute: AuthenticatedCareRoute,
   AuthenticatedJournalRoute: AuthenticatedJournalRoute,
   AuthenticatedModerationRoute: AuthenticatedModerationRoute,
+  AuthenticatedMoodRoute: AuthenticatedMoodRoute,
+  AuthenticatedMyDayRoute: AuthenticatedMyDayRoute,
   AuthenticatedNurAiRoute: AuthenticatedNurAiRoute,
   AuthenticatedRewardsRoute: AuthenticatedRewardsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedStatsRoute: AuthenticatedStatsRoute,
   AuthenticatedTherapistDeskRoute: AuthenticatedTherapistDeskRoute,
   AuthenticatedTherapistsRoute: AuthenticatedTherapistsRoute,
   AuthenticatedTherapyChatRoute: AuthenticatedTherapyChatRoute,

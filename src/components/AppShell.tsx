@@ -4,15 +4,19 @@ import {
   Video,
   BriefcaseMedical,
   CalendarDays,
+  CalendarHeart,
+  ChartLine,
   HeartHandshake,
   Trophy,
   LifeBuoy,
+  Plus,
   Stethoscope,
   Settings,
   ShieldCheck,
   Menu,
   type LucideIcon,
 } from "lucide-react";
+import { FeedbackMenuCard } from "@/components/FeedbackDialog";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState, type ReactNode } from "react";
@@ -67,12 +71,14 @@ function ShellNavLink({
   );
 }
 
-type NavItem = { to: string; label: string; icon: LucideIcon; primaryMobile?: boolean };
+type NavItem = { to: string; label: string; icon: LucideIcon };
 
 const baseNav: NavItem[] = [
   { to: "/", label: "Главная", icon: Home },
-  { to: "/journal", label: "Дневник", icon: Video, primaryMobile: true },
-  { to: "/archive", label: "Календарь", icon: CalendarDays },
+  { to: "/my-day", label: "Мой день", icon: CalendarHeart },
+  { to: "/stats", label: "Статистика", icon: ChartLine },
+  { to: "/journal", label: "Дневник", icon: Video },
+  { to: "/archive", label: "Архив дневника", icon: CalendarDays },
   { to: "/buddy", label: "Круг поддержки", icon: HeartHandshake },
   { to: "/rewards", label: "Достижения", icon: Trophy },
   { to: "/care", label: "Советы", icon: LifeBuoy },
@@ -83,7 +89,24 @@ const baseNav: NavItem[] = [
 const moderationItem: NavItem = { to: "/moderation", label: "Модерация", icon: ShieldCheck };
 const deskItem: NavItem = { to: "/therapist-desk", label: "Кабинет специалиста", icon: BriefcaseMedical };
 
-const mobileNav = baseNav.filter((n) => ["/", "/journal", "/buddy", "/care"].includes(n.to));
+const mobileLeft = baseNav.filter((n) => n.to === "/" || n.to === "/my-day");
+const mobileRight = baseNav.filter((n) => n.to === "/stats");
+
+function MobileTab({ item, pathname, unread }: { item: NavItem; pathname: string; unread: number }) {
+  const active = pathname === item.to;
+  return (
+    <Link
+      to={item.to}
+      className={`relative flex min-w-16 flex-col items-center gap-1 rounded-xl px-2 py-1.5 text-[11px] font-medium ${
+        active ? "text-primary" : "text-muted-foreground"
+      }`}
+    >
+      <item.icon className="size-5" />
+      {item.to === "/buddy" ? <UnreadBadge count={unread} className="absolute top-0.5 right-2.5" /> : null}
+      {item.label}
+    </Link>
+  );
+}
 
 export function Logo() {
   return (
@@ -131,7 +154,7 @@ export function AppShell({
     ...(isAdmin ? [moderationItem] : []),
   ];
   const profile = {
-    name: real?.name || user?.email?.split("@")[0] || "Вы",
+    name: real?.name || user?.email?.split("@")[0] || "Профиль",
     coins: real?.coins ?? 0,
   };
 
@@ -146,7 +169,13 @@ export function AppShell({
           <div className="px-2 pt-1 pb-5">
             <Logo />
           </div>
-          <nav className="flex flex-1 flex-col gap-1">
+          <Link
+            to="/mood"
+            className="mb-3 flex items-center justify-center gap-2 rounded-xl bg-accent px-3 py-2.5 text-sm font-semibold text-accent-foreground shadow-soft transition-opacity hover:opacity-90"
+          >
+            <Plus className="size-4" /> Отметить настроение
+          </Link>
+          <nav className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto">
             {mainNav.map((item) => (
               <ShellNavLink key={item.to} item={item} pathname={pathname} unread={unread} />
             ))}
@@ -161,6 +190,7 @@ export function AppShell({
               </div>
             ) : null}
           </nav>
+          <FeedbackMenuCard className="mt-3" />
           <Link
             to="/settings"
             className="mt-3 flex items-center gap-3 rounded-2xl border border-border bg-card p-3 transition-shadow hover:shadow-soft"
@@ -203,36 +233,19 @@ export function AppShell({
 
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 backdrop-blur lg:hidden">
         <div className="mx-auto flex max-w-lg items-center justify-around px-2 py-2">
-          {mobileNav.map((item) => {
-            const active = pathname === item.to;
-            if (item.primaryMobile) {
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className="grid size-14 -translate-y-4 place-items-center rounded-full bg-primary text-primary-foreground shadow-lift"
-                  aria-label={item.label}
-                >
-                  <item.icon className="size-6" />
-                </Link>
-              );
-            }
-            return (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={`relative flex min-w-16 flex-col items-center gap-1 rounded-xl px-2 py-1.5 text-[11px] font-medium ${
-                  active ? "text-primary" : "text-muted-foreground"
-                }`}
-              >
-                <item.icon className="size-5" />
-                {item.to === "/buddy" ? (
-                  <UnreadBadge count={unread} className="absolute top-0.5 right-2.5" />
-                ) : null}
-                {item.label}
-              </Link>
-            );
-          })}
+          {mobileLeft.map((item) => (
+            <MobileTab key={item.to} item={item} pathname={pathname} unread={unread} />
+          ))}
+          <Link
+            to="/mood"
+            className="grid size-14 -translate-y-4 place-items-center rounded-full bg-accent text-accent-foreground shadow-lift"
+            aria-label="Отметить настроение"
+          >
+            <Plus className="size-7" />
+          </Link>
+          {mobileRight.map((item) => (
+            <MobileTab key={item.to} item={item} pathname={pathname} unread={unread} />
+          ))}
           <button
             type="button"
             onClick={() => setMenuOpen(true)}
@@ -242,7 +255,9 @@ export function AppShell({
           >
             <span className="relative">
               <Menu className="size-5" />
-              {isAdmin ? (
+              {unread > 0 ? (
+                <UnreadBadge count={unread} className="absolute -right-3.5 -top-2" />
+              ) : isAdmin ? (
                 <ShieldCheck className="absolute -right-2.5 -top-1 size-3 text-primary" aria-hidden />
               ) : null}
             </span>
@@ -299,6 +314,7 @@ export function AppShell({
                 className="py-3"
               />
             ))}
+            <FeedbackMenuCard className="mt-3 shrink-0" />
           </nav>
         </SheetContent>
       </Sheet>

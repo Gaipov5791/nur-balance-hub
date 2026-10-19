@@ -101,7 +101,7 @@ export function RewardsPage() {
       } else if (res.reason === "already") {
         toast.success(`«${r.title}» уже получено`);
       } else {
-        toast.error(`Не хватает монет: нужно ${r.cost}, у вас ${res.coins}`);
+        toast.error(`Не хватает монет: нужно ${r.cost}, у тебя ${res.coins}`);
       }
     } catch {
       toast.error("Не удалось активировать награду", {

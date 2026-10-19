@@ -7,6 +7,8 @@ import { BuddyPanel, CoinsPanel, MoodCalendar, TipPanel } from "@/components/pan
 import { Button } from "@/components/ui/button";
 import { moods } from "@/data/demo";
 import { DailyQuestionCard } from "@/components/DailyQuestionCard";
+import { QuickMoodCard } from "@/components/mood/QuickMoodCard";
+import { LEGACY_MOOD_LEVEL, moodLevel } from "@/lib/mood";
 import { useProfile } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { calendarMonth, formatRuDay } from "@/lib/dates";
@@ -52,7 +54,7 @@ function Dashboard() {
   const recent = [...entries]
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .slice(0, 3);
-  const name = real?.name || user?.email?.split("@")[0] || "Вы";
+  const name = real?.name || user?.email?.split("@")[0] || "друг";
   const navigate = useNavigate();
   const coins = real?.coins ?? 0;
   const streak = real?.streak ?? 0;
@@ -98,8 +100,8 @@ function Dashboard() {
             </h1>
             <p className="mt-3 max-w-md text-sm text-muted-foreground">
               {streak > 0
-                ? `Вы держите серию ${streak} дней. Запишите короткое видео о том, как прошёл день — это займёт три минуты.`
-                : "Запишите короткое видео о том, как прошёл день — это займёт три минуты."}
+                ? `Ты держишь серию ${streak} дней. Запиши короткое видео о том, как прошёл день — это займёт три минуты.`
+                : "Запиши короткое видео о том, как прошёл день — это займёт три минуты."}
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
               <Button asChild size="lg">
@@ -122,6 +124,10 @@ function Dashboard() {
           </div>
         </div>
       </section>
+
+      <div className="mt-5">
+        <QuickMoodCard />
+      </div>
 
       {needsTodayEntry ? (
         <section className="surface mt-5 p-5 md:p-6">
@@ -166,13 +172,17 @@ function Dashboard() {
             <p className="mt-4 text-sm text-muted-foreground">Загружаем записи…</p>
           ) : recent.length === 0 ? (
             <p className="mt-4 text-sm text-muted-foreground">
-              Здесь появятся ваши видео-записи. Первая займёт около трёх минут.
+              Здесь появятся твои видео-записи. Первая займёт около трёх минут.
             </p>
           ) : (
             <ul className="mt-4 space-y-3">
               {recent.map((e) => (
                 <li key={e.id} className="flex items-center gap-3 rounded-2xl bg-secondary/70 p-3">
-                  <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-card text-xl">
+                  <span
+                    className={`grid size-11 shrink-0 place-items-center rounded-xl text-xl ${
+                      moodLevel(LEGACY_MOOD_LEVEL[e.mood]).soft
+                    }`}
+                  >
                     {moods[e.mood].emoji}
                   </span>
                   <span className="min-w-0 flex-1">

@@ -23,12 +23,12 @@ export const Route = createFileRoute("/auth")({
       {
         name: "description",
         content:
-          "Войдите по email, выберите цель и жизненный статус, чтобы начать вести видео-дневник эмоций.",
+          "Войди по email, выбери цель и жизненный статус, чтобы начать вести видео-дневник эмоций.",
       },
       { property: "og:title", content: "Вход в Nur Balance" },
       {
         property: "og:description",
-        content: "Начните вести видео-дневник и находить поддержку от людей с похожим опытом.",
+        content: "Начни вести видео-дневник и находить поддержку от людей с похожим опытом.",
       },
     ],
   }),
@@ -44,12 +44,12 @@ function safeRedirect(r?: string) {
 function humanAuthError(message: string) {
   const m = message.toLowerCase();
   if (m.includes("invalid login credentials")) return "Неверный email или пароль";
-  if (m.includes("already registered")) return "Этот email уже зарегистрирован — попробуйте войти";
+  if (m.includes("already registered")) return "Этот email уже зарегистрирован — попробуй войти";
   if (m.includes("password") && m.includes("least")) return "Пароль должен быть не короче 6 символов";
   if (m.includes("pwned") || m.includes("compromised") || m.includes("weak"))
-    return "Этот пароль встречается в утечках. Выберите другой";
-  if (m.includes("rate limit")) return "Слишком много попыток. Подождите минуту";
-  if (m.includes("invalid email")) return "Проверьте формат email";
+    return "Этот пароль встречается в утечках. Выбери другой";
+  if (m.includes("rate limit")) return "Слишком много попыток. Подожди минуту";
+  if (m.includes("invalid email")) return "Проверь формат email";
   return message;
 }
 
@@ -116,7 +116,7 @@ function AuthPage() {
       options: { emailRedirectTo: `${window.location.origin}/auth` },
     });
     if (error) toast.error(humanAuthError(error.message));
-    else toast.success("Письмо отправлено ещё раз. Проверьте почту и папку «Спам»");
+    else toast.success("Письмо отправлено ещё раз. Проверь почту и папку «Спам»");
   };
 
   const signIn = () =>
@@ -124,7 +124,7 @@ function AuthPage() {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         if (error.message.toLowerCase().includes("not confirmed")) {
-          toast.error("Email ещё не подтверждён. Откройте письмо и перейдите по ссылке", {
+          toast.error("Email ещё не подтверждён. Открой письмо и перейди по ссылке", {
             action: { label: "Отправить ещё раз", onClick: () => void resendConfirmation() },
             duration: 10_000,
           });
@@ -175,7 +175,7 @@ function AuthPage() {
   const completeOnboarding = () =>
     run(async () => {
       const { data } = await supabase.auth.getUser();
-      if (!data.user) throw new Error("Сессия истекла, войдите снова");
+      if (!data.user) throw new Error("Сессия истекла, войди снова");
       const { error } = await supabase
         .from("profiles")
         .update({ goal, life_status: status, onboarded: true })
@@ -202,7 +202,7 @@ function AuthPage() {
             собеседника с похожим опытом.
           </p>
         </div>
-        <p className="text-xs opacity-70">Записи хранятся приватно и видны только вам</p>
+        <p className="text-xs opacity-70">Записи хранятся приватно и видны только тебе</p>
       </div>
 
       <div className="flex items-center justify-center p-6">
@@ -220,7 +220,7 @@ function AuthPage() {
               <h2 className="text-2xl">{mode === "login" ? "Вход в Nur Balance" : "Регистрация"}</h2>
               <p className="mt-2 text-sm text-muted-foreground">
                 {mode === "login"
-                  ? "Введите email и пароль"
+                  ? "Введи email и пароль"
                   : "После регистрации пришлём письмо для подтверждения email"}
               </p>
               <form
@@ -231,7 +231,7 @@ function AuthPage() {
                 }}
               >
                 {mode === "signup"
-                  ? field("name", "Как к вам обращаться", {
+                  ? field("name", "Как к тебе обращаться", {
                       value: name,
                       onChange: (e) => setName(e.target.value),
                       placeholder: "Айпери",
@@ -268,7 +268,7 @@ function AuthPage() {
                       </button>
                     </span>
                     <button type="button" className="text-primary hover:underline" onClick={() => setMode("reset")}>
-                      Забыли пароль?
+                      Не помнишь пароль?
                     </button>
                   </>
                 ) : (
@@ -283,11 +283,11 @@ function AuthPage() {
             </>
           ) : mode === "confirm" ? (
             <>
-              <h2 className="text-2xl">Подтвердите email</h2>
+              <h2 className="text-2xl">Подтверди email</h2>
               <p className="mt-2 text-sm text-muted-foreground">
                 Мы отправили письмо на <span className="font-medium text-foreground">{email}</span>.
-                Перейдите по ссылке в письме, чтобы подтвердить адрес и войти. Если письма нет —
-                проверьте папку «Спам».
+                Перейди по ссылке в письме, чтобы подтвердить адрес и войти. Если письма нет —
+                проверь папку «Спам».
               </p>
               <Button className="mt-6 w-full" size="lg" variant="secondary" onClick={() => void resendConfirmation()}>
                 Отправить письмо ещё раз
@@ -348,7 +348,7 @@ function AuthPage() {
               <h2 className="text-2xl">Пара вопросов</h2>
               <p className="mt-2 text-sm text-muted-foreground">Это поможет подобрать поддержку и практики</p>
 
-              <p className="mt-6 text-sm font-medium">Ваша цель</p>
+              <p className="mt-6 text-sm font-medium">Твоя цель</p>
               <div className="mt-2 space-y-2">
                 {goals.map((g) => (
                   <button

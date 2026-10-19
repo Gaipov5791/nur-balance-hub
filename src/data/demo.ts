@@ -1,11 +1,12 @@
 export type MoodKey = "calm" | "joy" | "anxiety" | "sadness" | "tired";
 
-export const moods: Record<MoodKey, { label: string; emoji: string; tint: string }> = {
-  calm: { label: "Спокойствие", emoji: "🌿", tint: "bg-primary-soft text-foreground" },
-  joy: { label: "Радость", emoji: "☀️", tint: "bg-coin/40 text-foreground" },
-  anxiety: { label: "Тревога", emoji: "🌀", tint: "bg-accent/25 text-foreground" },
-  sadness: { label: "Грусть", emoji: "🌧️", tint: "bg-chart-4/25 text-foreground" },
-  tired: { label: "Усталость", emoji: "🌙", tint: "bg-muted text-foreground" },
+/** Journal emotions. Calendar colors come from the mood scale via LEGACY_MOOD_LEVEL in lib/mood.ts. */
+export const moods: Record<MoodKey, { label: string; emoji: string }> = {
+  calm: { label: "Спокойствие", emoji: "🌿" },
+  joy: { label: "Радость", emoji: "☀️" },
+  anxiety: { label: "Тревога", emoji: "🌀" },
+  sadness: { label: "Грусть", emoji: "🌧️" },
+  tired: { label: "Усталость", emoji: "🌙" },
 };
 
 export const moodKeys = Object.keys(moods) as MoodKey[];

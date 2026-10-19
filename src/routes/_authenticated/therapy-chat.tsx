@@ -126,7 +126,7 @@ function TherapyChatPage() {
       await sendMessage({ kind: "text", body });
       setText("");
     } catch {
-      toast.error("Сообщение не отправлено. Попробуйте ещё раз", {
+      toast.error("Сообщение не отправлено. Попробуй ещё раз", {
         action: { label: "Повторить", onClick: () => void sendText() },
       });
     } finally {
@@ -153,7 +153,7 @@ function TherapyChatPage() {
   const sendFile = async (file: File) => {
     if (!chat || !user) return;
     if (file.size > 50 * 1024 * 1024) {
-      toast.error("Файл больше 50 МБ — выберите файл поменьше");
+      toast.error("Файл больше 50 МБ — выбери файл поменьше");
       return;
     }
     setSending(true);
@@ -174,12 +174,12 @@ function TherapyChatPage() {
     <AppShell title={chat ? `Чат — ${chat.therapist_name}` : "Чат со специалистом"}>
       {!chatId ? (
         <div className="surface p-6">
-          <h2 className="font-display text-base">Ваши чаты со специалистами</h2>
+          <h2 className="font-display text-base">Твои чаты со специалистами</h2>
           {chats.isLoading ? (
             <p className="mt-3 text-sm text-muted-foreground">Загружаем…</p>
           ) : (chats.data ?? []).length === 0 ? (
             <p className="mt-3 text-sm text-muted-foreground">
-              Чат появится автоматически, когда специалист подтвердит вашу запись.
+              Чат появится автоматически, когда специалист подтвердит твою запись.
             </p>
           ) : (
             <ul className="mt-3 space-y-2">
@@ -242,7 +242,7 @@ function TherapyChatPage() {
               <p className="text-sm text-muted-foreground">Загружаем сообщения…</p>
             ) : items.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                Сообщений пока нет — напишите первым.
+                Сообщений пока нет — можно начать разговор.
               </p>
             ) : (
               items.map((m) => {

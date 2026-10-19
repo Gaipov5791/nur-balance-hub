@@ -6,6 +6,7 @@ import { lifeStatuses, moods, type MoodKey } from "@/data/demo";
 import { useProfile } from "@/hooks/useAuth";
 import { calendarMonth } from "@/lib/dates";
 import { STREAK_MILESTONES } from "@/lib/economy";
+import { LEGACY_MOOD_LEVEL, moodLevel } from "@/lib/mood";
 
 const EMPTY_BALANCE = { coins: 0, streak: 0 };
 
@@ -40,7 +41,7 @@ export function CoinsPanel() {
         <p className="mt-2 text-xs text-muted-foreground">
           {next
             ? `Ещё ${left} дн. — и бонус за непрерывность`
-            : "Вы прошли все этапы серии — так держать"}
+            : "Все этапы серии пройдены — так держать"}
         </p>
       </div>
       <Button asChild variant="secondary" className="mt-4 w-full">
@@ -60,8 +61,8 @@ export function BuddyPanel() {
       </p>
       <p className="mt-2 text-sm text-muted-foreground">
         {status
-          ? `Ваша категория: ${status.emoji} ${status.label}`
-          : "Укажите жизненный статус в настройках — так проще найти собеседника с похожим опытом."}
+          ? `Твоя категория: ${status.emoji} ${status.label}`
+          : "Укажи жизненный статус в настройках — так проще найти собеседника с похожим опытом."}
       </p>
       <Button asChild className="mt-4 w-full">
         <Link to="/buddy">Найти собеседника</Link>
@@ -77,7 +78,7 @@ export function TipPanel() {
         <Sparkles className="size-4" /> Совет дня
       </p>
       <p className="mt-2 text-sm opacity-90">
-        Сделайте выдох длиннее вдоха — 4 счёта вдох, 8 выдох. Три минуты, и тело успокаивается.
+        Сделай выдох длиннее вдоха — 4 счёта вдох, 8 выдох. Три минуты, и тело успокаивается.
       </p>
       <Button asChild variant="secondary" className="mt-4 w-full">
         <Link to="/care">Открыть практики</Link>
@@ -138,7 +139,7 @@ export function MoodCalendar({
           const entry = byDay.get(day);
           const mood = entry ? moods[entry.mood] : null;
           const className = `grid aspect-square place-items-center rounded-xl text-sm ${
-            mood ? mood.tint : "bg-secondary/60 text-muted-foreground"
+            entry ? moodLevel(LEGACY_MOOD_LEVEL[entry.mood]).soft : "bg-secondary/60 text-muted-foreground"
           } ${day === resolvedToday ? "ring-2 ring-primary" : ""} ${
             onSelectDay
               ? mood
@@ -170,10 +171,12 @@ export function MoodCalendar({
         })}
       </div>
       <div className="mt-4 flex flex-wrap gap-2">
-        {Object.entries(moods).map(([key, m]) => (
+        {(Object.entries(moods) as [MoodKey, (typeof moods)[MoodKey]][]).map(([key, m]) => (
           <span
             key={key}
-            className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-secondary px-2.5 py-1 text-[11px] leading-tight text-secondary-foreground"
+            className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] leading-tight text-foreground ${
+              moodLevel(LEGACY_MOOD_LEVEL[key]).soft
+            }`}
           >
             {m.emoji} {m.label}
           </span>
