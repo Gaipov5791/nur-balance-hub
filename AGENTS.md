@@ -13,3 +13,5 @@ Therapist contact details live only in admin-restricted `therapist_contacts`, ne
 The launch video is an app-wide client-only overlay backed by CDN asset pointers and sessionStorage, so auth redirects stay untouched and internal navigation never replays it.
 - NurAI daily message limit is enforced server-side by `consume_ai_message()` reading `ai_daily_limit(uid)`; subscriptions change only that function, so the chat code stays plan-agnostic.
 - The daily question is derived deterministically from the local date and the `daily_questions` bank (no per-entry storage), so home, journal and archive always agree.
+- Mood colors live only in `--mood-1..5` tokens and `MOOD_LEVELS` (`src/lib/mood.ts`); old journal moods map onto that scale via `JOURNAL_MOOD_LEVEL`, so every calendar and chart shares one palette.
+- Mood check-ins are stored in `mood_checkins` with emotion/activity ids (built-in catalog in code, custom ones as `c:<label>` in `custom_tags`), so the catalog can grow without migrations and the future analyzer reads one table.
