@@ -56,7 +56,7 @@ export function TherapistSlotsAdminPanel() {
 
   const addSlot = async () => {
     if (!active || !startsAt) {
-      toast.error("Выберите специалиста и дату/время слота");
+      toast.error("Выбери специалиста и дату/время слота");
       return;
     }
     setSaving(true);

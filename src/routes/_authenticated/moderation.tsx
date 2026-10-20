@@ -114,7 +114,7 @@ function ModerationPage() {
         <div className="surface p-6">
           <h2 className="font-display text-lg">Раздел доступен только администратору</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Если доступ нужен, напишите владельцу проекта.
+            Если доступ нужен, напиши владельцу проекта.
           </p>
         </div>
       </AppShell>

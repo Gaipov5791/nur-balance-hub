@@ -40,7 +40,7 @@ export function CoinsPanel() {
         <p className="mt-2 text-xs text-muted-foreground">
           {next
             ? `Ещё ${left} дн. — и бонус за непрерывность`
-            : "Вы прошли все этапы серии — так держать"}
+            : "Ты прошёл(ла) все этапы серии — так держать"}
         </p>
       </div>
       <Button asChild variant="secondary" className="mt-4 w-full">
@@ -60,8 +60,8 @@ export function BuddyPanel() {
       </p>
       <p className="mt-2 text-sm text-muted-foreground">
         {status
-          ? `Ваша категория: ${status.emoji} ${status.label}`
-          : "Укажите жизненный статус в настройках — так проще найти собеседника с похожим опытом."}
+          ? `Твоя категория: ${status.emoji} ${status.label}`
+          : "Укажи жизненный статус в настройках — так проще найти собеседника с похожим опытом."}
       </p>
       <Button asChild className="mt-4 w-full">
         <Link to="/buddy">Найти собеседника</Link>
@@ -77,7 +77,7 @@ export function TipPanel() {
         <Sparkles className="size-4" /> Совет дня
       </p>
       <p className="mt-2 text-sm opacity-90">
-        Сделайте выдох длиннее вдоха — 4 счёта вдох, 8 выдох. Три минуты, и тело успокаивается.
+        Сделай выдох длиннее вдоха — 4 счёта вдох, 8 выдох. Три минуты, и тело успокаивается.
       </p>
       <Button asChild variant="secondary" className="mt-4 w-full">
         <Link to="/care">Открыть практики</Link>

@@ -4,8 +4,8 @@ export const REMINDER_WINDOW_MINUTES = 15;
 
 export const REMINDER_KIND = "journal_reminder";
 export const REMINDER_TITLE = "Как прошёл день?";
-export const REMINDER_BODY = "Запишите видео";
-export const REMINDER_SUBJECT = "Как прошёл день? Запишите видео";
+export const REMINDER_BODY = "Запиши видео";
+export const REMINDER_SUBJECT = "Как прошёл день? Запиши видео";
 
 export type ReminderCandidate = {
   reminder_enabled: boolean;

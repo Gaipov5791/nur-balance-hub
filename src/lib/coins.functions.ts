@@ -35,7 +35,7 @@ function asAward(data: Json | null): AwardResult {
   const o = asObject(data);
   const reason = o["reason"];
   if (reason !== "granted" && reason !== "already" && reason !== "limit") {
-    throw new Error("Не удалось начислить монеты. Попробуйте ещё раз");
+    throw new Error("Не удалось начислить монеты. Попробуй ещё раз");
   }
   const label = o["label"];
   return {
@@ -50,7 +50,7 @@ function asRedeem(data: Json | null): RedeemResult {
   const o = asObject(data);
   const reason = o["reason"];
   if (reason !== "redeemed" && reason !== "already" && reason !== "insufficient") {
-    throw new Error("Не удалось активировать награду. Попробуйте ещё раз");
+    throw new Error("Не удалось активировать награду. Попробуй ещё раз");
   }
   return {
     ok: o["ok"] === true,
@@ -66,7 +66,7 @@ export const awardCoins = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<AwardResult> => {
     const { supabase } = context;
     const { data: result, error } = await supabase.rpc("award_action", { _action: data.action });
-    if (error) throw new Error("Не удалось начислить монеты. Попробуйте ещё раз");
+    if (error) throw new Error("Не удалось начислить монеты. Попробуй ещё раз");
     return asAward(result);
   });
 
@@ -79,7 +79,7 @@ export const redeemReward = createServerFn({ method: "POST" })
     const { data: result, error } = await supabase.rpc("redeem_catalog_reward", {
       _reward_id: data.rewardId,
     });
-    if (error) throw new Error("Не удалось активировать награду. Попробуйте ещё раз");
+    if (error) throw new Error("Не удалось активировать награду. Попробуй ещё раз");
     return asRedeem(result);
   });
 

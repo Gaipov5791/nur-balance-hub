@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/therapist-desk")({
       { property: "og:title", content: "Кабинет специалиста — Nur Balance" },
       {
         property: "og:description",
-        content: "Подтверждайте заявки и фиксируйте дату, время и длительность консультации.",
+        content: "Подтверждай заявки и фиксируй дату, время и длительность консультации.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -109,7 +109,7 @@ function TherapistDeskPage() {
         <div className="surface p-6 text-center">
           <p className="font-semibold">Кабинет пока не привязан</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Попросите администратора связать вашу карточку в каталоге с этим аккаунтом.
+            Попроси администратора связать твою карточку в каталоге с этим аккаунтом.
           </p>
         </div>
       ) : (

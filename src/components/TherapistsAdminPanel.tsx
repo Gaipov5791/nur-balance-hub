@@ -105,7 +105,7 @@ export function TherapistsAdminPanel() {
   const save = async () => {
     if (!form) return;
     if (!form.name.trim()) {
-      toast.error("Укажите имя специалиста");
+      toast.error("Укажи имя специалиста");
       return;
     }
     setSaving(true);

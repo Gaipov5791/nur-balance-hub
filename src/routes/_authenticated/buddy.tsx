@@ -135,7 +135,7 @@ function BuddyPage() {
         await refreshMatch();
         setSearching(false);
       } else {
-        toast("Вы в очереди — как только появится собеседник, мы соединим вас");
+        toast("Ты в очереди — как только появится собеседник, мы вас соединим");
       }
     } catch {
       setSearching(false);
@@ -222,7 +222,7 @@ function BuddyPage() {
       await qc.invalidateQueries({ queryKey: ["buddy", "messages", match.match_id] });
       void grantCoins();
     } catch {
-      toast.error("Не удалось отправить сообщение. Запись сохранена — попробуйте ещё раз");
+      toast.error("Не удалось отправить сообщение. Запись сохранена — попробуй ещё раз");
     } finally {
       setSending(false);
     }
@@ -242,7 +242,7 @@ function BuddyPage() {
       await refreshMatch();
       toast.success("Жалоба отправлена на модерацию. Разговор завершён, этот участник больше не встретится");
     } catch {
-      toast.error("Не удалось отправить жалобу. Попробуйте ещё раз");
+      toast.error("Не удалось отправить жалобу. Попробуй ещё раз");
     }
   };
 
@@ -318,7 +318,7 @@ function BuddyPage() {
                 <p className="truncate text-xs text-muted-foreground">
                   {match
                     ? `Приватная комната 1-на-1${partnerStatus ? ` · ${partnerStatus.label}` : ""}`
-                    : "Начните поиск, чтобы открыть комнату"}
+                    : "Начни поиск, чтобы открыть комнату"}
                 </p>
               </div>
             </div>
@@ -345,17 +345,17 @@ function BuddyPage() {
             ) : !match ? (
               <div className="grid h-full place-items-center p-6 text-center">
                 <div className="max-w-sm">
-                  <p className="font-display text-lg">Здесь появится ваш разговор</p>
+                  <p className="font-display text-lg">Здесь появится твой разговор</p>
                   <p className="mt-2 text-sm text-muted-foreground">
                     {searching
                       ? "Ищем собеседника с похожим опытом. Можно оставить страницу открытой — мы соединим вас автоматически."
-                      : "Выберите категорию слева и нажмите «Найти собеседника»."}
+                      : "Выбери категорию слева и нажми «Найти собеседника»."}
                   </p>
                 </div>
               </div>
             ) : messages.length === 0 ? (
               <p className="py-10 text-center text-sm text-muted-foreground">
-                Напишите первое сообщение — например, как прошёл ваш день.
+                Напиши первое сообщение — например, как прошёл твой день.
               </p>
             ) : (
               messages.map((m) => {
@@ -427,7 +427,7 @@ function BuddyPage() {
             <Input
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder={match ? "Напишите слова поддержки…" : "Сначала найдите собеседника"}
+              placeholder={match ? "Напиши слова поддержки…" : "Сначала найди собеседника"}
               disabled={!match || sending}
               className="flex-1"
             />

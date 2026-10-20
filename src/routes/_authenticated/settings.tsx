@@ -50,7 +50,7 @@ export const Route = createFileRoute("/_authenticated/settings")({
       { property: "og:title", content: "Настройки — Nur Balance" },
       {
         property: "og:description",
-        content: "Управляйте приватностью дневника и категорией взаимоподдержки.",
+        content: "Управляй приватностью дневника и категорией взаимоподдержки.",
       },
     ],
   }),
@@ -119,7 +119,7 @@ function PasswordCard() {
           value={next}
           onChange={(e) => setNext(e.target.value)}
         />
-        <Label htmlFor="rep-pass">Повторите новый пароль</Label>
+        <Label htmlFor="rep-pass">Повтори новый пароль</Label>
         <Input
           id="rep-pass"
           type="password"
@@ -153,7 +153,7 @@ function AccountCard() {
       <h2 className="font-display text-base">Аккаунт</h2>
       {user ? (
         <>
-          <p className="mt-2 text-sm text-muted-foreground">Вы вошли как {user.email}</p>
+          <p className="mt-2 text-sm text-muted-foreground">Ты вошёл(ла) как {user.email}</p>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="secondary" className="mt-4 w-full" disabled={leaving}>
@@ -164,7 +164,7 @@ function AccountCard() {
               <AlertDialogHeader>
                 <AlertDialogTitle>Выйти из аккаунта?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Записи дневника останутся в вашем архиве. Чтобы вернуться, нужно будет войти
+                  Записи дневника останутся в твоём архиве. Чтобы вернуться, нужно будет войти
                   снова.
                 </AlertDialogDescription>
               </AlertDialogHeader>
@@ -175,10 +175,10 @@ function AccountCard() {
                     setLeaving(true);
                     try {
                       await signOut();
-                      toast.success("Вы вышли из аккаунта");
+                      toast.success("Ты вышел(ла) из аккаунта");
                       navigate({ to: "/auth" });
                     } catch {
-                      toast.error("Не удалось выйти, попробуйте ещё раз");
+                      toast.error("Не удалось выйти, попробуй ещё раз");
                     } finally {
                       setLeaving(false);
                     }
@@ -193,7 +193,7 @@ function AccountCard() {
       ) : (
         <>
           <p className="mt-2 text-sm text-muted-foreground">
-            Войдите, чтобы записи дневника сохранялись в вашем личном архиве.
+            Войди, чтобы записи дневника сохранялись в твоём личном архиве.
           </p>
           <Button asChild className="mt-4 w-full">
             <Link to="/auth">Войти или зарегистрироваться</Link>
@@ -231,7 +231,7 @@ function SettingsPage() {
     if (!user) return;
     const trimmed = name.trim();
     if (!trimmed) {
-      toast.error("Укажите имя, чтобы мы знали, как к вам обращаться");
+      toast.error("Укажи имя, чтобы мы знали, как к тебе обращаться");
       return;
     }
     setSaving(true);
@@ -261,7 +261,7 @@ function SettingsPage() {
       toast.error(
         e instanceof Error
           ? `Не удалось сохранить: ${e.message}`
-          : "Не удалось сохранить. Проверьте соединение",
+          : "Не удалось сохранить. Проверь соединение",
         { action: { label: "Повторить", onClick: () => void save() } },
       );
     } finally {
@@ -280,7 +280,7 @@ function SettingsPage() {
               {((name || user?.email?.[0]) ?? "?").slice(0, 1).toUpperCase()}
             </span>
             <div className="flex-1 space-y-2">
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Как к вам обращаться" />
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Как к тебе обращаться" />
               <Input value={user?.email ?? ""} disabled />
             </div>
           </div>
@@ -344,7 +344,7 @@ function SettingsPage() {
           <div className="surface p-5">
             <h2 className="font-display text-base">Оформление</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Выберите тему — она применится сразу и запомнится на этом устройстве.
+              Выбери тему — она применится сразу и запомнится на этом устройстве.
             </p>
             <div className="mt-4 grid gap-2">
               {THEMES.map((t) => (
@@ -425,7 +425,7 @@ function ReminderCard() {
     <div className="surface p-5">
       <h2 className="font-display text-base">Напоминание о дневнике</h2>
       <p className="mt-2 text-sm text-muted-foreground">
-        Раз в день в удобное время придёт письмо: «Как прошёл день? Запишите видео». Если запись за
+        Раз в день в удобное время придёт письмо: «Как прошёл день? Запиши видео». Если запись за
         сегодня уже есть, мы не потревожим.
       </p>
       <div className="mt-4 flex items-center justify-between gap-4 rounded-2xl bg-secondary/70 p-4">
@@ -567,7 +567,7 @@ function PinCard({ userId }: { userId: string }) {
             inputMode="numeric"
             autoComplete="off"
             maxLength={4}
-            placeholder="Повторите PIN"
+            placeholder="Повтори PIN"
           />
           <Button
             disabled={busy || nextPin.length !== 4 || nextPin !== confirmPin}
@@ -583,7 +583,7 @@ function PinCard({ userId }: { userId: string }) {
         </div>
       )}
       <p className="mt-3 text-xs text-muted-foreground">
-        Видео-записи видны только вам и не публикуются в модуле поддержки. PIN хранится в виде
+        Видео-записи видны только тебе и не публикуются в модуле поддержки. PIN хранится в виде
         хэша и нужен, чтобы закрыть экран от случайного просмотра.
       </p>
     </div>
