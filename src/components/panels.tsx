@@ -1,19 +1,21 @@
 import { Link } from "@tanstack/react-router";
-import { Flame, Sparkles, Users } from "lucide-react";
+import { Clock3, Flame, Sparkles, Users } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { lifeStatuses, moods, type MoodKey } from "@/data/demo";
 import { useProfile } from "@/hooks/useAuth";
 import { calendarMonth } from "@/lib/dates";
-import { STREAK_MILESTONES } from "@/lib/economy";
-
-const EMPTY_BALANCE = { coins: 0, streak: 0 };
+import { ANALYSIS_COST, COIN_REFILL_AMOUNT, COIN_REFILL_DAYS, refillCountdown } from "@/lib/wallet";
+import { useWallet } from "@/hooks/useWallet";
 
 export function CoinsPanel() {
-  const { profile: real } = useProfile();
-  const profile = real ? { coins: real.coins, streak: real.streak } : EMPTY_BALANCE;
-  const next = STREAK_MILESTONES.map((m) => m.days).find((m) => m > profile.streak) ?? null;
-  const left = next ? next - profile.streak : 0;
+  const { profile } = useProfile();
+  const wallet = useWallet();
+  const w = wallet.data;
+  const coins = w?.coins ?? profile?.coins ?? 0;
+  const total = (w?.refillEveryDays ?? COIN_REFILL_DAYS) * 86_400_000;
+  const left = w?.nextRefillAt ? Math.max(0, Date.parse(w.nextRefillAt) - Date.now()) : total;
+  const progress = Math.min(100, Math.max(0, ((total - left) / total) * 100));
   return (
     <div className="surface p-5">
       <div className="flex items-start justify-between">
@@ -21,30 +23,27 @@ export function CoinsPanel() {
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Баланс
           </p>
-          <p className="mt-1 font-display text-3xl">{profile.coins}</p>
+          <p className="mt-1 font-display text-3xl">{coins}</p>
           <p className="text-sm text-muted-foreground">Nur-Coins</p>
         </div>
         <span className="grid size-12 place-items-center rounded-2xl bg-coin/40 text-2xl">🪙</span>
       </div>
       <div className="mt-5 rounded-2xl bg-secondary p-4">
-        <div className="flex items-center justify-between text-sm font-medium">
+        <div className="flex items-center justify-between gap-2 text-sm font-medium">
           <span className="flex items-center gap-1.5">
-            <Flame className="size-4 text-accent" /> Серия {profile.streak} дней
+            <Clock3 className="size-4 text-accent" /> +{w?.refillAmount ?? COIN_REFILL_AMOUNT} 🪙
           </span>
-          <span className="text-muted-foreground">{next ? `до ${next}` : "все этапы"}</span>
+          <span className="text-muted-foreground">{w ? refillCountdown(w.nextRefillAt) : "…"}</span>
         </div>
-        <Progress
-          value={next ? Math.min(100, (profile.streak / next) * 100) : 100}
-          className="mt-3 h-2"
-        />
+        <Progress value={progress} className="mt-3 h-2" />
         <p className="mt-2 text-xs text-muted-foreground">
-          {next
-            ? `Ещё ${left} дн. — и бонус за непрерывность`
-            : "Ты прошёл(ла) все этапы серии — так держать"}
+          Баланс пополняется сам каждые {w?.refillEveryDays ?? COIN_REFILL_DAYS} дня. ИИ-анализ стоит{" "}
+          {w?.analysisCost ?? ANALYSIS_COST} 🪙
+          {w?.freeAnalysisAvailable ? " — сегодня он входит в подписку" : ""}.
         </p>
       </div>
       <Button asChild variant="secondary" className="mt-4 w-full">
-        <Link to="/rewards">Каталог наград</Link>
+        <Link to="/analysis">ИИ-анализ настроения</Link>
       </Button>
     </div>
   );

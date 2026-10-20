@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
@@ -69,7 +69,15 @@ function MoodPage() {
         ) : tab === "day" ? (
           <MoodDay checkins={checkins} />
         ) : (
-          <MoodStats checkins={checkins} />
+          <>
+            <MoodStats checkins={checkins} />
+            <div className="surface flex flex-wrap items-center justify-between gap-3 p-5 text-sm">
+              <span className="min-w-0">✨ Хочешь понять, что влияет на настроение? ИИ-анализ разберёт неделю или месяц.</span>
+              <Button asChild size="sm">
+                <Link to="/analysis">ИИ-анализ</Link>
+              </Button>
+            </div>
+          </>
         )}
         <p className="pb-2 text-center text-xs text-muted-foreground">
           Отметки видишь только ты. Цвета и смайлики — не диагноз, а способ заметить, как меняется настроение.

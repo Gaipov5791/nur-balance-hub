@@ -2,13 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/AppShell";
 import { CoinsPanel, TipPanel } from "@/components/panels";
 import { Button } from "@/components/ui/button";
 import { careCategories } from "@/data/demo";
-import { awardCoins } from "@/lib/coins.functions";
 
 export const Route = createFileRoute("/_authenticated/care")({
   head: () => ({
@@ -33,28 +30,11 @@ function CarePage() {
   const [activeId, setActiveId] = useState(careCategories[0]!.id);
   const active = careCategories.find((c) => c.id === activeId)!;
   const [saving, setSaving] = useState(false);
-  const award = useServerFn(awardCoins);
-  const qc = useQueryClient();
 
   const completePractice = async () => {
     setSaving(true);
-    try {
-      const res = await award({ data: { action: "practice" } });
-      await qc.invalidateQueries({ queryKey: ["profile"] });
-      if (res.reason === "granted") {
-        toast.success(`Упражнение выполнено. +${res.granted} Nur-Coins`);
-      } else if (res.reason === "already") {
-        toast.success("Упражнение отмечено. Монеты за практику уже начислены сегодня");
-      } else {
-        toast.success("Упражнение отмечено. Дневной лимит монет уже достигнут");
-      }
-    } catch {
-      toast.error("Не удалось сохранить. Проверь соединение", {
-        action: { label: "Повторить", onClick: () => void completePractice() },
-      });
-    } finally {
-      setSaving(false);
-    }
+    toast.success("Упражнение выполнено. Береги себя 🌿");
+    setSaving(false);
   };
 
 

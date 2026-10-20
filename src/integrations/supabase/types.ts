@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_analyses: {
+        Row: {
+          completed_at: string | null
+          cost: number
+          created_at: string
+          entries_count: number
+          error: string | null
+          id: string
+          paid_with: string
+          period: string
+          period_end: string
+          period_start: string
+          result: Json | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          cost?: number
+          created_at?: string
+          entries_count?: number
+          error?: string | null
+          id?: string
+          paid_with: string
+          period: string
+          period_end: string
+          period_start: string
+          result?: Json | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          cost?: number
+          created_at?: string
+          entries_count?: number
+          error?: string | null
+          id?: string
+          paid_with?: string
+          period?: string
+          period_end?: string
+          period_start?: string
+          result?: Json | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_chat_messages: {
         Row: {
           content: string
@@ -436,6 +484,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          coin_refill_at: string
           coins: number
           created_at: string
           goal: string | null
@@ -453,6 +502,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          coin_refill_at?: string
           coins?: number
           created_at?: string
           goal?: string | null
@@ -470,6 +520,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          coin_refill_at?: string
           coins?: number
           created_at?: string
           goal?: string | null
@@ -511,6 +562,48 @@ export type Database = {
           id?: string
           reward_id?: string
           title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          canceled_at: string | null
+          created_at: string
+          current_period_end: string
+          id: string
+          plan: string
+          price_kzt: number
+          provider: string
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          canceled_at?: string | null
+          created_at?: string
+          current_period_end?: string
+          id?: string
+          plan?: string
+          price_kzt?: number
+          provider?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          canceled_at?: string | null
+          created_at?: string
+          current_period_end?: string
+          id?: string
+          plan?: string
+          price_kzt?: number
+          provider?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -858,6 +951,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      _analysis_refund: {
+        Args: { _error: string; _id: string }
+        Returns: boolean
+      }
       _economy_apply_journal: {
         Args: { _day: string; _entry_id: string; _user_id: string }
         Returns: Json
@@ -885,6 +982,7 @@ export type Database = {
         }
         Returns: number
       }
+      _wallet_refill: { Args: { _user_id: string }; Returns: number }
       active_buddy_match: {
         Args: never
         Returns: {
@@ -904,7 +1002,16 @@ export type Database = {
         Returns: boolean
       }
       clear_journal_pin: { Args: { _current: string }; Returns: boolean }
+      coin_wallet: { Args: never; Returns: Json }
+      complete_ai_analysis: {
+        Args: { _id: string; _result: Json }
+        Returns: boolean
+      }
       consume_ai_message: { Args: never; Returns: Json }
+      fail_ai_analysis: {
+        Args: { _error: string; _id: string }
+        Returns: boolean
+      }
       find_or_queue_buddy: {
         Args: { _life_status: string }
         Returns: {
@@ -912,6 +1019,7 @@ export type Database = {
           matched: boolean
         }[]
       }
+      has_active_subscription: { Args: { _user_id: string }; Returns: boolean }
       has_journal_pin: { Args: never; Returns: boolean }
       has_role: {
         Args: {
@@ -964,6 +1072,7 @@ export type Database = {
         Args: { _current?: string; _pin: string }
         Returns: boolean
       }
+      start_ai_analysis: { Args: { _period: string }; Returns: Json }
       sync_assigned_admins: { Args: never; Returns: boolean }
       verify_journal_pin: { Args: { _pin: string }; Returns: boolean }
     }
