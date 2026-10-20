@@ -73,14 +73,14 @@ export function InstallPrompt() {
           <Smartphone className="size-5 text-primary" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold">Держи Nur Balance под рукой</p>
+          <p className="text-sm font-semibold">Держите Nur Balance под рукой</p>
           {ios && !deferred ? (
             <p className="mt-1 flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
-              Нажми <Share className="inline size-4" /> «Поделиться» и выбери «На экран „Домой“».
+              Нажмите <Share className="inline size-4" /> «Поделиться» и выберите «На экран „Домой“».
             </p>
           ) : (
             <p className="mt-1 text-sm text-muted-foreground">
-              Добавь приложение на экран телефона — открывается одним касанием.
+              Добавьте приложение на экран телефона — открывается одним касанием.
             </p>
           )}
           {deferred ? (

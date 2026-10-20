@@ -8,7 +8,6 @@ import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
-import { useCoinWallet } from "@/hooks/useCoins";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/nur-ai")({
@@ -53,8 +52,6 @@ function NurAiPage() {
     },
   });
 
-  const wallet = useCoinWallet();
-
   const [local, setLocal] = useState<Msg[]>([]);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
@@ -89,7 +86,7 @@ function NurAiPage() {
       });
       if (!res.ok || !res.body) {
         const j = (await res.json().catch(() => ({}))) as { error?: string };
-        throw new Error(j.error ?? "НурAI сейчас недоступен. Попробуй чуть позже");
+        throw new Error(j.error ?? "НурAI сейчас недоступен. Попробуйте чуть позже");
       }
       const reader = res.body.getReader();
       const dec = new TextDecoder();
@@ -100,7 +97,7 @@ function NurAiPage() {
         acc += dec.decode(value, { stream: true });
         setLocal((l) => l.map((m) => (m.id === answerId ? { ...m, content: acc } : m)));
       }
-      if (!acc.trim()) throw new Error("НурAI не смог ответить. Попробуй переформулировать позже");
+      if (!acc.trim()) throw new Error("НурAI не смог ответить. Попробуйте переформулировать позже");
       await qc.invalidateQueries({ queryKey: ["nur-ai", user?.id] });
       setLocal([]);
     } catch (e) {
@@ -126,7 +123,6 @@ function NurAiPage() {
     }
   };
 
-  const subscribed = wallet.data?.subscribed ?? false;
   const left = usage.data ? Math.max(0, usage.data.limit - usage.data.used) : null;
 
   return (
@@ -143,11 +139,7 @@ function NurAiPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {subscribed ? (
-              <span className="text-xs text-muted-foreground">💎 Без лимита</span>
-            ) : left !== null ? (
-              <span className="text-xs text-muted-foreground">Осталось сегодня: {left}</span>
-            ) : null}
+            {left !== null ? <span className="text-xs text-muted-foreground">Осталось сегодня: {left}</span> : null}
             <Button variant="ghost" size="sm" onClick={() => void clear()} disabled={busy || !(history.data ?? []).length}>
               <Trash2 className="size-4" /> Очистить
             </Button>
@@ -162,7 +154,7 @@ function NurAiPage() {
               <p className="font-semibold">Привет! Я НурAI.</p>
               <p className="mt-1">Можно рассказать, что на душе, или спросить, как устроено приложение.</p>
               <div className="mt-3 flex flex-wrap gap-2">
-                {["Мне тревожно, не могу уснуть", "Как записаться к психологу?", "Как работают Нур-Коины?"].map((s) => (
+                {["Мне тревожно, не могу уснуть", "Как записаться к психологу?", "Как заработать Nur-Coins?"].map((s) => (
                   <Button key={s} size="sm" variant="secondary" className="bg-background" onClick={() => void send(s)}>
                     {s}
                   </Button>
@@ -194,16 +186,9 @@ function NurAiPage() {
             <div className="rounded-xl border border-destructive/40 p-3 text-sm">
               <p className="text-destructive">{error}</p>
               {error.includes("лимит") ? (
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <Button asChild size="sm" variant="secondary">
-                    <Link to="/buddy">Найти собеседника</Link>
-                  </Button>
-                  {subscribed ? null : (
-                    <Button asChild size="sm">
-                      <Link to="/coins">💎 Подписка без лимита</Link>
-                    </Button>
-                  )}
-                </div>
+                <Button asChild size="sm" variant="secondary" className="mt-2">
+                  <Link to="/buddy">Найти собеседника</Link>
+                </Button>
               ) : null}
             </div>
           ) : null}
@@ -211,7 +196,7 @@ function NurAiPage() {
         </div>
 
         <p className="px-4 text-[11px] text-muted-foreground">
-          В опасной ситуации звони 112 или на телефон доверия 150 (бесплатно, круглосуточно).
+          В опасной ситуации звоните 112 или на телефон доверия 150 (бесплатно, круглосуточно).
         </p>
         <form
           className="flex items-end gap-2 p-4"
@@ -232,7 +217,7 @@ function NurAiPage() {
             }}
             rows={2}
             maxLength={2000}
-            placeholder="Напиши НурAI…"
+            placeholder="Напишите НурAI…"
             className="min-w-0 flex-1 resize-none"
           />
           <Button type="submit" size="icon" disabled={busy || !text.trim()} aria-label="Отправить">

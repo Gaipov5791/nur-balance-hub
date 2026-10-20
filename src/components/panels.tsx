@@ -1,18 +1,19 @@
 import { Link } from "@tanstack/react-router";
-import { CalendarClock, Sparkles, Users } from "lucide-react";
+import { Flame, Sparkles, Users } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { lifeStatuses, moods, type MoodKey } from "@/data/demo";
 import { useProfile } from "@/hooks/useAuth";
-import { useCoinWallet } from "@/hooks/useCoins";
 import { calendarMonth } from "@/lib/dates";
-import { ANALYSIS_COST, REFILL_AMOUNT, REFILL_INTERVAL_DAYS, formatRefillIn } from "@/lib/economy";
-import { LEGACY_MOOD_LEVEL, moodLevel } from "@/lib/mood";
+import { STREAK_MILESTONES } from "@/lib/economy";
+
+const EMPTY_BALANCE = { coins: 0, streak: 0 };
 
 export function CoinsPanel() {
-  const { profile } = useProfile();
-  const wallet = useCoinWallet();
-  const coins = wallet.data?.coins ?? profile?.coins ?? 0;
-  const free = wallet.data?.freeAnalysisAvailable ?? false;
+  const { profile: real } = useProfile();
+  const profile = real ? { coins: real.coins, streak: real.streak } : EMPTY_BALANCE;
+  const next = STREAK_MILESTONES.map((m) => m.days).find((m) => m > profile.streak) ?? null;
+  const left = next ? next - profile.streak : 0;
   return (
     <div className="surface p-5">
       <div className="flex items-start justify-between">
@@ -20,30 +21,30 @@ export function CoinsPanel() {
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Баланс
           </p>
-          <p className="mt-1 font-display text-3xl">{coins}</p>
-          <p className="text-sm text-muted-foreground">Нур-Коины</p>
+          <p className="mt-1 font-display text-3xl">{profile.coins}</p>
+          <p className="text-sm text-muted-foreground">Nur-Coins</p>
         </div>
         <span className="grid size-12 place-items-center rounded-2xl bg-coin/40 text-2xl">🪙</span>
       </div>
-      <div className="mt-5 flex items-start gap-2.5 rounded-2xl bg-secondary p-4 text-sm">
-        <CalendarClock className="mt-0.5 size-4 shrink-0 text-accent" />
-        <p className="min-w-0">
-          <span className="block font-medium">
-            +{REFILL_AMOUNT}{" "}
-            {wallet.data ? formatRefillIn(wallet.data.nextRefillAt, new Date()) : "скоро"}
+      <div className="mt-5 rounded-2xl bg-secondary p-4">
+        <div className="flex items-center justify-between text-sm font-medium">
+          <span className="flex items-center gap-1.5">
+            <Flame className="size-4 text-accent" /> Серия {profile.streak} дней
           </span>
-          <span className="block text-xs text-muted-foreground">
-            Коины пополняются сами каждые {REFILL_INTERVAL_DAYS} дня
-          </span>
+          <span className="text-muted-foreground">{next ? `до ${next}` : "все этапы"}</span>
+        </div>
+        <Progress
+          value={next ? Math.min(100, (profile.streak / next) * 100) : 100}
+          className="mt-3 h-2"
+        />
+        <p className="mt-2 text-xs text-muted-foreground">
+          {next
+            ? `Ещё ${left} дн. — и бонус за непрерывность`
+            : "Вы прошли все этапы серии — так держать"}
         </p>
       </div>
-      <Button asChild className="mt-4 w-full">
-        <Link to="/analysis">
-          <Sparkles className="size-4" /> ИИ-анализ · {free ? "бесплатно" : `${ANALYSIS_COST} 🪙`}
-        </Link>
-      </Button>
-      <Button asChild variant="secondary" className="mt-2 w-full">
-        <Link to="/coins">Подробнее о Нур-Коинах</Link>
+      <Button asChild variant="secondary" className="mt-4 w-full">
+        <Link to="/rewards">Каталог наград</Link>
       </Button>
     </div>
   );
@@ -59,8 +60,8 @@ export function BuddyPanel() {
       </p>
       <p className="mt-2 text-sm text-muted-foreground">
         {status
-          ? `Твоя категория: ${status.emoji} ${status.label}`
-          : "Укажи жизненный статус в настройках — так проще найти собеседника с похожим опытом."}
+          ? `Ваша категория: ${status.emoji} ${status.label}`
+          : "Укажите жизненный статус в настройках — так проще найти собеседника с похожим опытом."}
       </p>
       <Button asChild className="mt-4 w-full">
         <Link to="/buddy">Найти собеседника</Link>
@@ -76,7 +77,7 @@ export function TipPanel() {
         <Sparkles className="size-4" /> Совет дня
       </p>
       <p className="mt-2 text-sm opacity-90">
-        Сделай выдох длиннее вдоха — 4 счёта вдох, 8 выдох. Три минуты, и тело успокаивается.
+        Сделайте выдох длиннее вдоха — 4 счёта вдох, 8 выдох. Три минуты, и тело успокаивается.
       </p>
       <Button asChild variant="secondary" className="mt-4 w-full">
         <Link to="/care">Открыть практики</Link>
@@ -137,7 +138,7 @@ export function MoodCalendar({
           const entry = byDay.get(day);
           const mood = entry ? moods[entry.mood] : null;
           const className = `grid aspect-square place-items-center rounded-xl text-sm ${
-            entry ? moodLevel(LEGACY_MOOD_LEVEL[entry.mood]).soft : "bg-secondary/60 text-muted-foreground"
+            mood ? mood.tint : "bg-secondary/60 text-muted-foreground"
           } ${day === resolvedToday ? "ring-2 ring-primary" : ""} ${
             onSelectDay
               ? mood
@@ -169,12 +170,10 @@ export function MoodCalendar({
         })}
       </div>
       <div className="mt-4 flex flex-wrap gap-2">
-        {(Object.entries(moods) as [MoodKey, (typeof moods)[MoodKey]][]).map(([key, m]) => (
+        {Object.entries(moods).map(([key, m]) => (
           <span
             key={key}
-            className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] leading-tight text-foreground ${
-              moodLevel(LEGACY_MOOD_LEVEL[key]).soft
-            }`}
+            className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-secondary px-2.5 py-1 text-[11px] leading-tight text-secondary-foreground"
           >
             {m.emoji} {m.label}
           </span>

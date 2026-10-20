@@ -28,10 +28,10 @@ function pickMime(kind: MediaKind): string {
 function describe(err: unknown): string {
   const name = (err as { name?: string } | null)?.name ?? "";
   if (name === "NotAllowedError" || name === "SecurityError")
-    return "Доступ к микрофону или камере запрещён. Разреши его в настройках браузера и попробуй снова.";
-  if (name === "NotFoundError") return "Микрофон или камера не найдены. Подключи устройство.";
-  if (name === "NotReadableError") return "Устройство занято другим приложением. Закрой его и попробуй снова.";
-  return "Не удалось начать запись. Попробуй ещё раз.";
+    return "Доступ к микрофону или камере запрещён. Разрешите его в настройках браузера и попробуйте снова.";
+  if (name === "NotFoundError") return "Микрофон или камера не найдены. Подключите устройство.";
+  if (name === "NotReadableError") return "Устройство занято другим приложением. Закройте его и попробуйте снова.";
+  return "Не удалось начать запись. Попробуйте ещё раз.";
 }
 
 type Props = {
@@ -86,7 +86,7 @@ export function MediaMessageRecorder({ kind, maxSeconds = 60, busy, onSend, onCa
       mimeRef.current = pickMime(kind);
       if (!mimeRef.current) {
         stopStream();
-        setError("Этот браузер не умеет записывать такие сообщения. Попробуй Chrome или Safari.");
+        setError("Этот браузер не умеет записывать такие сообщения. Попробуйте Chrome или Safari.");
         setState("error");
         return;
       }
@@ -136,7 +136,7 @@ export function MediaMessageRecorder({ kind, maxSeconds = 60, busy, onSend, onCa
       };
       rec.onerror = () => {
         stopTicker();
-        setError("Во время записи произошла ошибка. Попробуй ещё раз.");
+        setError("Во время записи произошла ошибка. Попробуйте ещё раз.");
         setState("error");
       };
       rec.onstop = () => {
@@ -145,7 +145,7 @@ export function MediaMessageRecorder({ kind, maxSeconds = 60, busy, onSend, onCa
         const type = mimeRef.current.split(";")[0] || (kind === "audio" ? "audio/webm" : "video/webm");
         const blob = new Blob(chunksRef.current, { type });
         if (!blob.size) {
-          setError("Запись получилась пустой. Попробуй ещё раз.");
+          setError("Запись получилась пустой. Попробуйте ещё раз.");
           setState("error");
           return;
         }

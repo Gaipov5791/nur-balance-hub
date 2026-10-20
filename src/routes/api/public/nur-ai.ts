@@ -15,14 +15,14 @@ export const Route = createFileRoute("/api/public/nur-ai")({
         const auth = request.headers.get("authorization") ?? "";
         const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
         if (!url || !key) return json(500, { error: "Сервер не настроен" });
-        if (!token) return json(401, { error: "Войди, чтобы говорить с НурAI" });
+        if (!token) return json(401, { error: "Войдите, чтобы говорить с НурAI" });
 
         const supabase = createClient<Database>(url, key, {
           global: { headers: { Authorization: `Bearer ${token}`, apikey: key } },
           auth: { persistSession: false, autoRefreshToken: false },
         });
         const { data: userData, error: userErr } = await supabase.auth.getUser(token);
-        if (userErr || !userData.user) return json(401, { error: "Сессия истекла, войди снова" });
+        if (userErr || !userData.user) return json(401, { error: "Сессия истекла, войдите снова" });
         const userId = userData.user.id;
 
         let text = "";

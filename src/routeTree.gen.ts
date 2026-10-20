@@ -12,19 +12,15 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AuthenticatedAnalysisRouteImport } from './routes/_authenticated/analysis'
 import { Route as AuthenticatedArchiveRouteImport } from './routes/_authenticated/archive'
 import { Route as AuthenticatedBuddyRouteImport } from './routes/_authenticated/buddy'
 import { Route as AuthenticatedCareRouteImport } from './routes/_authenticated/care'
-import { Route as AuthenticatedCoinsRouteImport } from './routes/_authenticated/coins'
 import { Route as AuthenticatedJournalRouteImport } from './routes/_authenticated/journal'
 import { Route as AuthenticatedModerationRouteImport } from './routes/_authenticated/moderation'
 import { Route as AuthenticatedMoodRouteImport } from './routes/_authenticated/mood'
-import { Route as AuthenticatedMyDayRouteImport } from './routes/_authenticated/my-day'
 import { Route as AuthenticatedNurAiRouteImport } from './routes/_authenticated/nur-ai'
 import { Route as AuthenticatedRewardsRouteImport } from './routes/_authenticated/rewards'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
-import { Route as AuthenticatedStatsRouteImport } from './routes/_authenticated/stats'
 import { Route as AuthenticatedTherapistDeskRouteImport } from './routes/_authenticated/therapist-desk'
 import { Route as AuthenticatedTherapistsRouteImport } from './routes/_authenticated/therapists'
 import { Route as AuthenticatedTherapyChatRouteImport } from './routes/_authenticated/therapy-chat'
@@ -45,11 +41,6 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedAnalysisRoute = AuthenticatedAnalysisRouteImport.update({
-  id: '/analysis',
-  path: '/analysis',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedArchiveRoute = AuthenticatedArchiveRouteImport.update({
   id: '/archive',
   path: '/archive',
@@ -63,11 +54,6 @@ const AuthenticatedBuddyRoute = AuthenticatedBuddyRouteImport.update({
 const AuthenticatedCareRoute = AuthenticatedCareRouteImport.update({
   id: '/care',
   path: '/care',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedCoinsRoute = AuthenticatedCoinsRouteImport.update({
-  id: '/coins',
-  path: '/coins',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedJournalRoute = AuthenticatedJournalRouteImport.update({
@@ -85,11 +71,6 @@ const AuthenticatedMoodRoute = AuthenticatedMoodRouteImport.update({
   path: '/mood',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedMyDayRoute = AuthenticatedMyDayRouteImport.update({
-  id: '/my-day',
-  path: '/my-day',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedNurAiRoute = AuthenticatedNurAiRouteImport.update({
   id: '/nur-ai',
   path: '/nur-ai',
@@ -103,11 +84,6 @@ const AuthenticatedRewardsRoute = AuthenticatedRewardsRouteImport.update({
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedStatsRoute = AuthenticatedStatsRouteImport.update({
-  id: '/stats',
-  path: '/stats',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedTherapistDeskRoute =
@@ -142,19 +118,15 @@ const ApiPublicCronJournalRemindersRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/analysis': typeof AuthenticatedAnalysisRoute
   '/archive': typeof AuthenticatedArchiveRoute
   '/buddy': typeof AuthenticatedBuddyRoute
   '/care': typeof AuthenticatedCareRoute
-  '/coins': typeof AuthenticatedCoinsRoute
   '/journal': typeof AuthenticatedJournalRoute
   '/moderation': typeof AuthenticatedModerationRoute
   '/mood': typeof AuthenticatedMoodRoute
-  '/my-day': typeof AuthenticatedMyDayRoute
   '/nur-ai': typeof AuthenticatedNurAiRoute
   '/rewards': typeof AuthenticatedRewardsRoute
   '/settings': typeof AuthenticatedSettingsRoute
-  '/stats': typeof AuthenticatedStatsRoute
   '/therapist-desk': typeof AuthenticatedTherapistDeskRoute
   '/therapists': typeof AuthenticatedTherapistsRoute
   '/therapy-chat': typeof AuthenticatedTherapyChatRoute
@@ -164,19 +136,15 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/analysis': typeof AuthenticatedAnalysisRoute
   '/archive': typeof AuthenticatedArchiveRoute
   '/buddy': typeof AuthenticatedBuddyRoute
   '/care': typeof AuthenticatedCareRoute
-  '/coins': typeof AuthenticatedCoinsRoute
   '/journal': typeof AuthenticatedJournalRoute
   '/moderation': typeof AuthenticatedModerationRoute
   '/mood': typeof AuthenticatedMoodRoute
-  '/my-day': typeof AuthenticatedMyDayRoute
   '/nur-ai': typeof AuthenticatedNurAiRoute
   '/rewards': typeof AuthenticatedRewardsRoute
   '/settings': typeof AuthenticatedSettingsRoute
-  '/stats': typeof AuthenticatedStatsRoute
   '/therapist-desk': typeof AuthenticatedTherapistDeskRoute
   '/therapists': typeof AuthenticatedTherapistsRoute
   '/therapy-chat': typeof AuthenticatedTherapyChatRoute
@@ -188,19 +156,15 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/_authenticated/analysis': typeof AuthenticatedAnalysisRoute
   '/_authenticated/archive': typeof AuthenticatedArchiveRoute
   '/_authenticated/buddy': typeof AuthenticatedBuddyRoute
   '/_authenticated/care': typeof AuthenticatedCareRoute
-  '/_authenticated/coins': typeof AuthenticatedCoinsRoute
   '/_authenticated/journal': typeof AuthenticatedJournalRoute
   '/_authenticated/moderation': typeof AuthenticatedModerationRoute
   '/_authenticated/mood': typeof AuthenticatedMoodRoute
-  '/_authenticated/my-day': typeof AuthenticatedMyDayRoute
   '/_authenticated/nur-ai': typeof AuthenticatedNurAiRoute
   '/_authenticated/rewards': typeof AuthenticatedRewardsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
-  '/_authenticated/stats': typeof AuthenticatedStatsRoute
   '/_authenticated/therapist-desk': typeof AuthenticatedTherapistDeskRoute
   '/_authenticated/therapists': typeof AuthenticatedTherapistsRoute
   '/_authenticated/therapy-chat': typeof AuthenticatedTherapyChatRoute
@@ -212,19 +176,15 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
-    | '/analysis'
     | '/archive'
     | '/buddy'
     | '/care'
-    | '/coins'
     | '/journal'
     | '/moderation'
     | '/mood'
-    | '/my-day'
     | '/nur-ai'
     | '/rewards'
     | '/settings'
-    | '/stats'
     | '/therapist-desk'
     | '/therapists'
     | '/therapy-chat'
@@ -234,19 +194,15 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
-    | '/analysis'
     | '/archive'
     | '/buddy'
     | '/care'
-    | '/coins'
     | '/journal'
     | '/moderation'
     | '/mood'
-    | '/my-day'
     | '/nur-ai'
     | '/rewards'
     | '/settings'
-    | '/stats'
     | '/therapist-desk'
     | '/therapists'
     | '/therapy-chat'
@@ -257,19 +213,15 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
-    | '/_authenticated/analysis'
     | '/_authenticated/archive'
     | '/_authenticated/buddy'
     | '/_authenticated/care'
-    | '/_authenticated/coins'
     | '/_authenticated/journal'
     | '/_authenticated/moderation'
     | '/_authenticated/mood'
-    | '/_authenticated/my-day'
     | '/_authenticated/nur-ai'
     | '/_authenticated/rewards'
     | '/_authenticated/settings'
-    | '/_authenticated/stats'
     | '/_authenticated/therapist-desk'
     | '/_authenticated/therapists'
     | '/_authenticated/therapy-chat'
@@ -308,13 +260,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/analysis': {
-      id: '/_authenticated/analysis'
-      path: '/analysis'
-      fullPath: '/analysis'
-      preLoaderRoute: typeof AuthenticatedAnalysisRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/archive': {
       id: '/_authenticated/archive'
       path: '/archive'
@@ -334,13 +279,6 @@ declare module '@tanstack/react-router' {
       path: '/care'
       fullPath: '/care'
       preLoaderRoute: typeof AuthenticatedCareRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/coins': {
-      id: '/_authenticated/coins'
-      path: '/coins'
-      fullPath: '/coins'
-      preLoaderRoute: typeof AuthenticatedCoinsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/journal': {
@@ -364,13 +302,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMoodRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/my-day': {
-      id: '/_authenticated/my-day'
-      path: '/my-day'
-      fullPath: '/my-day'
-      preLoaderRoute: typeof AuthenticatedMyDayRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/nur-ai': {
       id: '/_authenticated/nur-ai'
       path: '/nur-ai'
@@ -390,13 +321,6 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/stats': {
-      id: '/_authenticated/stats'
-      path: '/stats'
-      fullPath: '/stats'
-      preLoaderRoute: typeof AuthenticatedStatsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/therapist-desk': {
@@ -438,38 +362,30 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAnalysisRoute: typeof AuthenticatedAnalysisRoute
   AuthenticatedArchiveRoute: typeof AuthenticatedArchiveRoute
   AuthenticatedBuddyRoute: typeof AuthenticatedBuddyRoute
   AuthenticatedCareRoute: typeof AuthenticatedCareRoute
-  AuthenticatedCoinsRoute: typeof AuthenticatedCoinsRoute
   AuthenticatedJournalRoute: typeof AuthenticatedJournalRoute
   AuthenticatedModerationRoute: typeof AuthenticatedModerationRoute
   AuthenticatedMoodRoute: typeof AuthenticatedMoodRoute
-  AuthenticatedMyDayRoute: typeof AuthenticatedMyDayRoute
   AuthenticatedNurAiRoute: typeof AuthenticatedNurAiRoute
   AuthenticatedRewardsRoute: typeof AuthenticatedRewardsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
-  AuthenticatedStatsRoute: typeof AuthenticatedStatsRoute
   AuthenticatedTherapistDeskRoute: typeof AuthenticatedTherapistDeskRoute
   AuthenticatedTherapistsRoute: typeof AuthenticatedTherapistsRoute
   AuthenticatedTherapyChatRoute: typeof AuthenticatedTherapyChatRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAnalysisRoute: AuthenticatedAnalysisRoute,
   AuthenticatedArchiveRoute: AuthenticatedArchiveRoute,
   AuthenticatedBuddyRoute: AuthenticatedBuddyRoute,
   AuthenticatedCareRoute: AuthenticatedCareRoute,
-  AuthenticatedCoinsRoute: AuthenticatedCoinsRoute,
   AuthenticatedJournalRoute: AuthenticatedJournalRoute,
   AuthenticatedModerationRoute: AuthenticatedModerationRoute,
   AuthenticatedMoodRoute: AuthenticatedMoodRoute,
-  AuthenticatedMyDayRoute: AuthenticatedMyDayRoute,
   AuthenticatedNurAiRoute: AuthenticatedNurAiRoute,
   AuthenticatedRewardsRoute: AuthenticatedRewardsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
-  AuthenticatedStatsRoute: AuthenticatedStatsRoute,
   AuthenticatedTherapistDeskRoute: AuthenticatedTherapistDeskRoute,
   AuthenticatedTherapistsRoute: AuthenticatedTherapistsRoute,
   AuthenticatedTherapyChatRoute: AuthenticatedTherapyChatRoute,

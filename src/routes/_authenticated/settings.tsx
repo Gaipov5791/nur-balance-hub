@@ -2,7 +2,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useProfile, useSignOut } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
+import { awardCoins } from "@/lib/coins.functions";
 import { AppShell } from "@/components/AppShell";
 import { CoinsPanel } from "@/components/panels";
 import { Button } from "@/components/ui/button";
@@ -21,7 +23,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { goals, lifeStatuses } from "@/data/demo";
-import { useDeleteAllCheckins } from "@/hooks/useMood";
 import { supabase } from "@/integrations/supabase/client";
 import {
   archivePinStorageKey,
@@ -49,7 +50,7 @@ export const Route = createFileRoute("/_authenticated/settings")({
       { property: "og:title", content: "Настройки — Nur Balance" },
       {
         property: "og:description",
-        content: "Управляй приватностью дневника и категорией взаимоподдержки.",
+        content: "Управляйте приватностью дневника и категорией взаимоподдержки.",
       },
     ],
   }),
@@ -118,7 +119,7 @@ function PasswordCard() {
           value={next}
           onChange={(e) => setNext(e.target.value)}
         />
-        <Label htmlFor="rep-pass">Повтори новый пароль</Label>
+        <Label htmlFor="rep-pass">Повторите новый пароль</Label>
         <Input
           id="rep-pass"
           type="password"
@@ -152,7 +153,7 @@ function AccountCard() {
       <h2 className="font-display text-base">Аккаунт</h2>
       {user ? (
         <>
-          <p className="mt-2 text-sm text-muted-foreground">Вход выполнен: {user.email}</p>
+          <p className="mt-2 text-sm text-muted-foreground">Вы вошли как {user.email}</p>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="secondary" className="mt-4 w-full" disabled={leaving}>
@@ -163,7 +164,7 @@ function AccountCard() {
               <AlertDialogHeader>
                 <AlertDialogTitle>Выйти из аккаунта?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Записи дневника останутся в твоём архиве. Чтобы вернуться, нужно будет войти
+                  Записи дневника останутся в вашем архиве. Чтобы вернуться, нужно будет войти
                   снова.
                 </AlertDialogDescription>
               </AlertDialogHeader>
@@ -174,10 +175,10 @@ function AccountCard() {
                     setLeaving(true);
                     try {
                       await signOut();
-                      toast.success("Выход из аккаунта выполнен");
+                      toast.success("Вы вышли из аккаунта");
                       navigate({ to: "/auth" });
                     } catch {
-                      toast.error("Не удалось выйти, попробуй ещё раз");
+                      toast.error("Не удалось выйти, попробуйте ещё раз");
                     } finally {
                       setLeaving(false);
                     }
@@ -192,7 +193,7 @@ function AccountCard() {
       ) : (
         <>
           <p className="mt-2 text-sm text-muted-foreground">
-            Войди, чтобы записи дневника сохранялись в твоём личном архиве.
+            Войдите, чтобы записи дневника сохранялись в вашем личном архиве.
           </p>
           <Button asChild className="mt-4 w-full">
             <Link to="/auth">Войти или зарегистрироваться</Link>
@@ -206,6 +207,7 @@ function AccountCard() {
 function SettingsPage() {
   const { user, profile: real } = useProfile();
   const qc = useQueryClient();
+  const award = useServerFn(awardCoins);
   const [name, setName] = useState(real?.name ?? user?.email?.split("@")[0] ?? "");
   const [goal, setGoal] = useState(real?.goal ?? goals[0]!.id);
   const [status, setStatus] = useState(real?.life_status ?? "burnout");
@@ -229,7 +231,7 @@ function SettingsPage() {
     if (!user) return;
     const trimmed = name.trim();
     if (!trimmed) {
-      toast.error("Укажи имя, чтобы мы знали, как к тебе обращаться");
+      toast.error("Укажите имя, чтобы мы знали, как к вам обращаться");
       return;
     }
     setSaving(true);
@@ -240,13 +242,26 @@ function SettingsPage() {
         .eq("id", user.id);
       if (error) throw error;
       setName(trimmed);
+      let bonus = 0;
+      if (goal && status) {
+        try {
+          const res = await award({ data: { action: "profile_complete" } });
+          bonus = res.granted;
+        } catch {
+          /* профиль сохранён — бонус начислим при следующем сохранении */
+        }
+      }
       await qc.invalidateQueries({ queryKey: ["profile"] });
-      toast.success(`Готово, ${trimmed}! Изменения сохранены`);
+      toast.success(
+        bonus > 0
+          ? `Готово, ${trimmed}! Изменения сохранены. +${bonus} Nur-Coins за заполненный профиль`
+          : `Готово, ${trimmed}! Изменения сохранены`,
+      );
     } catch (e) {
       toast.error(
         e instanceof Error
           ? `Не удалось сохранить: ${e.message}`
-          : "Не удалось сохранить. Проверь соединение",
+          : "Не удалось сохранить. Проверьте соединение",
         { action: { label: "Повторить", onClick: () => void save() } },
       );
     } finally {
@@ -265,7 +280,7 @@ function SettingsPage() {
               {((name || user?.email?.[0]) ?? "?").slice(0, 1).toUpperCase()}
             </span>
             <div className="flex-1 space-y-2">
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Как к тебе обращаться" />
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Как к вам обращаться" />
               <Input value={user?.email ?? ""} disabled />
             </div>
           </div>
@@ -325,12 +340,11 @@ function SettingsPage() {
         <section className="space-y-5">
           {user ? <ReminderCard /> : null}
           {user ? <PinCard userId={user.id} /> : null}
-          {user ? <MoodDataCard userId={user.id} /> : null}
 
           <div className="surface p-5">
             <h2 className="font-display text-base">Оформление</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Выбери тему — она применится сразу и запомнится на этом устройстве.
+              Выберите тему — она применится сразу и запомнится на этом устройстве.
             </p>
             <div className="mt-4 grid gap-2">
               {THEMES.map((t) => (
@@ -362,53 +376,6 @@ function SettingsPage() {
         </section>
       </div>
     </AppShell>
-  );
-}
-
-function MoodDataCard({ userId }: { userId: string }) {
-  const del = useDeleteAllCheckins();
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="surface p-5">
-      <h2 className="font-display text-base">Отметки настроения</h2>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Отметки, эмоции, активности и заметки видишь только ты. Можно удалить их все сразу вместе со своими
-        вариантами эмоций и активностей. Видео-дневник это не затронет.
-      </p>
-      <AlertDialog open={open} onOpenChange={setOpen}>
-        <AlertDialogTrigger asChild>
-          <Button variant="secondary" className="mt-4 w-full" disabled={del.isPending}>
-            Удалить все мои отметки
-          </Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Удалить все отметки настроения?</AlertDialogTitle>
-            <AlertDialogDescription>
-              История «Мой день» и статистика очистятся. Восстановить данные не получится.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Оставить</AlertDialogCancel>
-            <AlertDialogAction
-              disabled={del.isPending}
-              onClick={(e) => {
-                e.preventDefault();
-                del.mutate(userId, {
-                  onSuccess: () => {
-                    setOpen(false);
-                    toast.success("Все отметки удалены");
-                  },
-                  onError: (err) => toast.error(err.message),
-                });
-              }}
-            >
-              {del.isPending ? "Удаляем…" : "Удалить всё"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
   );
 }
 
@@ -458,7 +425,7 @@ function ReminderCard() {
     <div className="surface p-5">
       <h2 className="font-display text-base">Напоминание о дневнике</h2>
       <p className="mt-2 text-sm text-muted-foreground">
-        Раз в день в удобное время придёт письмо: «Как прошёл день? Запиши видео». Если запись за
+        Раз в день в удобное время придёт письмо: «Как прошёл день? Запишите видео». Если запись за
         сегодня уже есть, мы не потревожим.
       </p>
       <div className="mt-4 flex items-center justify-between gap-4 rounded-2xl bg-secondary/70 p-4">
@@ -556,7 +523,7 @@ function PinCard({ userId }: { userId: string }) {
             inputMode="numeric"
             autoComplete="off"
             maxLength={4}
-            placeholder="Новый PIN (если меняешь)"
+            placeholder="Новый PIN (если меняете)"
           />
           <div className="flex flex-wrap gap-2">
             <Button
@@ -600,7 +567,7 @@ function PinCard({ userId }: { userId: string }) {
             inputMode="numeric"
             autoComplete="off"
             maxLength={4}
-            placeholder="Повтори PIN"
+            placeholder="Повторите PIN"
           />
           <Button
             disabled={busy || nextPin.length !== 4 || nextPin !== confirmPin}
@@ -616,7 +583,7 @@ function PinCard({ userId }: { userId: string }) {
         </div>
       )}
       <p className="mt-3 text-xs text-muted-foreground">
-        Видео-записи видны только тебе и не публикуются в модуле поддержки. PIN хранится в виде
+        Видео-записи видны только вам и не публикуются в модуле поддержки. PIN хранится в виде
         хэша и нужен, чтобы закрыть экран от случайного просмотра.
       </p>
     </div>

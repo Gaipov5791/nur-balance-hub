@@ -52,17 +52,17 @@ function describeMediaError(err: unknown): string {
   switch (name) {
     case "NotAllowedError":
     case "SecurityError":
-      return "Доступ к камере и микрофону запрещён. Разреши его в настройках браузера (значок замка в адресной строке) и попробуй снова.";
+      return "Доступ к камере и микрофону запрещён. Разрешите его в настройках браузера (значок замка в адресной строке) и попробуйте снова.";
     case "NotFoundError":
     case "OverconstrainedError":
-      return "Камера или микрофон не найдены. Подключи устройство и попробуй снова.";
+      return "Камера или микрофон не найдены. Подключите устройство и попробуйте снова.";
     case "NotSupportedError":
-      return "Браузер не даёт доступ к камере на этой странице. Открой приложение по защищённой ссылке (https) в Chrome или Safari.";
+      return "Браузер не даёт доступ к камере на этой странице. Откройте приложение по защищённой ссылке (https) в Chrome или Safari.";
     case "NotReadableError":
     case "AbortError":
-      return "Камера занята другим приложением. Закрой его и попробуй снова.";
+      return "Камера занята другим приложением. Закройте его и попробуйте снова.";
     default:
-      return "Не удалось включить камеру. Обнови страницу и попробуй снова.";
+      return "Не удалось включить камеру. Обновите страницу и попробуйте снова.";
   }
 }
 
@@ -207,8 +207,8 @@ export function VideoRecorder({
         stopStream();
         setError(
           audioOnly
-            ? "Этот браузер не умеет записывать голос. Попробуй актуальный Chrome, Safari или Firefox."
-            : "Этот браузер не умеет записывать видео. Попробуй актуальный Chrome, Safari или Firefox.",
+            ? "Этот браузер не умеет записывать голос. Попробуйте актуальный Chrome, Safari или Firefox."
+            : "Этот браузер не умеет записывать видео. Попробуйте актуальный Chrome, Safari или Firefox.",
         );
         setState("error");
         return;
@@ -250,7 +250,7 @@ export function VideoRecorder({
     const type = mimeRef.current.split(";")[0] || (audioOnly ? "audio/webm" : "video/webm");
     const blob = new Blob(chunksRef.current, { type });
     if (!blob.size) {
-      setError("Запись получилась пустой. Попробуй записать ещё раз.");
+      setError("Запись получилась пустой. Попробуйте записать ещё раз.");
       setState("error");
       return;
     }
@@ -281,7 +281,7 @@ export function VideoRecorder({
       };
       rec.onerror = () => {
         stopTicker();
-        setError("Во время записи произошла ошибка. Запись остановлена — попробуй ещё раз.");
+        setError("Во время записи произошла ошибка. Запись остановлена — попробуйте ещё раз.");
         setState("error");
       };
       rec.onstop = finalize;
@@ -361,20 +361,20 @@ export function VideoRecorder({
   const hint =
     state === "idle"
       ? audioOnly
-        ? "Шаг 1 из 2: включи микрофон — браузер спросит разрешение"
-        : "Шаг 1 из 2: включи камеру — браузер спросит разрешение"
+        ? "Шаг 1 из 2: включите микрофон — браузер спросит разрешение"
+        : "Шаг 1 из 2: включите камеру — браузер спросит разрешение"
       : state === "requesting"
-        ? "Ждём твоего разрешения в окне браузера…"
+        ? "Ждём вашего разрешения в окне браузера…"
         : state === "ready"
-          ? "Шаг 2 из 2: нажми «Начать запись»"
+          ? "Шаг 2 из 2: нажмите «Начать запись»"
           : state === "recording"
-            ? "Идёт запись. Нажми «Остановить», когда закончишь"
+            ? "Идёт запись. Нажмите «Остановить», когда закончите"
             : state === "paused"
-              ? "Пауза. Продолжи или останови запись"
+              ? "Пауза. Продолжите или остановите запись"
               : state === "stopped"
                 ? audioOnly
-                  ? "Прослушай запись и сохрани её справа"
-                  : "Посмотри запись и сохрани её справа"
+                  ? "Прослушайте запись и сохраните её справа"
+                  : "Посмотрите запись и сохраните её справа"
                 : "";
 
   return (
@@ -405,7 +405,7 @@ export function VideoRecorder({
                   <AlertTriangle className="mx-auto size-8 text-accent" />
                   <p className="mt-3 text-sm">
                     {error ??
-                      "Этот браузер не поддерживает запись. Открой приложение в Chrome или Safari."}
+                      "Этот браузер не поддерживает запись. Откройте приложение в Chrome или Safari."}
                   </p>
                 </>
               ) : state === "requesting" ? (
@@ -417,8 +417,8 @@ export function VideoRecorder({
                   )}
                   <p className="mt-3 text-sm">
                     {audioOnly
-                      ? "Разреши доступ к микрофону в окне браузера"
-                      : "Разреши доступ к камере и микрофону в окне браузера"}
+                      ? "Разрешите доступ к микрофону в окне браузера"
+                      : "Разрешите доступ к камере и микрофону в окне браузера"}
                   </p>
                 </>
               ) : audioOnly && showLive ? (
@@ -428,7 +428,7 @@ export function VideoRecorder({
                   />
                   <p className="mt-3 font-display text-lg tabular-nums">{formatTime(elapsed)}</p>
                   <p className="mt-1 text-sm opacity-70">
-                    {state === "recording" ? "Говори — тебя слышно" : "Микрофон включён"}
+                    {state === "recording" ? "Говорите — вас слышно" : "Микрофон включён"}
                   </p>
                 </>
               ) : (
@@ -442,7 +442,7 @@ export function VideoRecorder({
                     {audioOnly ? "Микрофон выключен" : "Камера выключена"}
                   </p>
                   <p className="mt-1 text-sm opacity-70">
-                    {audioOnly ? "Включи микрофон" : "Включи камеру"}, чтобы записать до{" "}
+                    {audioOnly ? "Включите микрофон" : "Включите камеру"}, чтобы записать до{" "}
                     {Math.round(maxSeconds / 60)} минут о своём дне
                   </p>
                 </>

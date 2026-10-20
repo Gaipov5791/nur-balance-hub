@@ -32,6 +32,11 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-coin: var(--coin);
   --color-coin-foreground: var(--coin-foreground);
+  --color-mood-1: var(--mood-1);
+  --color-mood-2: var(--mood-2);
+  --color-mood-3: var(--mood-3);
+  --color-mood-4: var(--mood-4);
+  --color-mood-5: var(--mood-5);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
@@ -43,11 +48,6 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  --color-mood-1: var(--mood-1);
-  --color-mood-2: var(--mood-2);
-  --color-mood-3: var(--mood-3);
-  --color-mood-4: var(--mood-4);
-  --color-mood-5: var(--mood-5);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -80,6 +80,12 @@
   --accent-foreground: oklch(0.99 0.01 90);
   --coin: oklch(0.79 0.13 78);
   --coin-foreground: oklch(0.29 0.06 60);
+  /* Mood scale: 1 очень плохое (синий) → 5 отличное (жёлтый); same in every theme */
+  --mood-1: oklch(0.6 0.13 250);
+  --mood-2: oklch(0.6 0.19 25);
+  --mood-3: oklch(0.66 0.15 150);
+  --mood-4: oklch(0.72 0.16 55);
+  --mood-5: oklch(0.84 0.16 95);
   --destructive: oklch(0.58 0.2 25);
   --destructive-foreground: oklch(0.98 0.01 90);
   --border: oklch(0.9 0.018 85);
@@ -90,12 +96,6 @@
   --chart-3: oklch(0.79 0.13 78);
   --chart-4: oklch(0.6 0.09 240);
   --chart-5: oklch(0.65 0.13 330);
-  /* Mood scale from the spec: very bad blue, bad red, normal green, good orange, great yellow. Same in every theme. */
-  --mood-1: oklch(0.6 0.13 250);
-  --mood-2: oklch(0.6 0.19 25);
-  --mood-3: oklch(0.66 0.15 150);
-  --mood-4: oklch(0.72 0.16 55);
-  --mood-5: oklch(0.84 0.16 92);
   --sidebar: oklch(0.965 0.016 85);
   --sidebar-foreground: oklch(0.26 0.03 155);
   --sidebar-primary: oklch(0.46 0.09 168);
@@ -177,11 +177,6 @@
   --chart-3: oklch(0.83 0.13 80);
   --chart-4: oklch(0.7 0.09 240);
   --chart-5: oklch(0.72 0.13 330);
-  --mood-1: oklch(0.68 0.12 250);
-  --mood-2: oklch(0.67 0.17 25);
-  --mood-3: oklch(0.72 0.14 150);
-  --mood-4: oklch(0.76 0.15 55);
-  --mood-5: oklch(0.86 0.15 92);
   --sidebar: oklch(0.225 0.022 165);
   --sidebar-foreground: oklch(0.95 0.012 85);
   --sidebar-primary: oklch(0.74 0.11 168);

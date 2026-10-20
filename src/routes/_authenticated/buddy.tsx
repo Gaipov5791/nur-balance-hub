@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/AppShell";
 import { CoinsPanel } from "@/components/panels";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ import {
 } from "@/hooks/useBuddyChat";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadWithRetry } from "@/lib/upload";
+import { awardCoins } from "@/lib/coins.functions";
 
 export const Route = createFileRoute("/_authenticated/buddy")({
   head: () => ({
@@ -91,6 +93,7 @@ function BuddyPage() {
   const { user } = useAuth();
   const { profile } = useProfile();
   const qc = useQueryClient();
+  const award = useServerFn(awardCoins);
 
   const [status, setStatus] = useState(profile?.life_status ?? "other");
   const [searching, setSearching] = useState(false);
@@ -132,7 +135,7 @@ function BuddyPage() {
         await refreshMatch();
         setSearching(false);
       } else {
-        toast("Ты в очереди — как только появится собеседник, мы вас соединим");
+        toast("Вы в очереди — как только появится собеседник, мы соединим вас");
       }
     } catch {
       setSearching(false);
@@ -167,6 +170,16 @@ function BuddyPage() {
     }
   };
 
+  const grantCoins = async () => {
+    try {
+      const res = await award({ data: { action: "buddy" } });
+      await qc.invalidateQueries({ queryKey: ["profile"] });
+      if (res.reason === "granted") toast.success(`+${res.granted} Nur-Coins за поддержку`);
+    } catch {
+      /* монеты не критичны для отправки сообщения */
+    }
+  };
+
   const sendText = async (value: string) => {
     if (!match || !user) return;
     setSending(true);
@@ -180,6 +193,7 @@ function BuddyPage() {
       if (error) throw error;
       setText("");
       await qc.invalidateQueries({ queryKey: ["buddy", "messages", match.match_id] });
+      void grantCoins();
     } catch {
       toast.error("Сообщение не отправлено", {
         action: { label: "Повторить", onClick: () => void sendText(value) },
@@ -206,8 +220,9 @@ function BuddyPage() {
       if (error) throw error;
       setRecorder(null);
       await qc.invalidateQueries({ queryKey: ["buddy", "messages", match.match_id] });
+      void grantCoins();
     } catch {
-      toast.error("Не удалось отправить сообщение. Запись сохранена — попробуй ещё раз");
+      toast.error("Не удалось отправить сообщение. Запись сохранена — попробуйте ещё раз");
     } finally {
       setSending(false);
     }
@@ -227,7 +242,7 @@ function BuddyPage() {
       await refreshMatch();
       toast.success("Жалоба отправлена на модерацию. Разговор завершён, этот участник больше не встретится");
     } catch {
-      toast.error("Не удалось отправить жалобу. Попробуй ещё раз");
+      toast.error("Не удалось отправить жалобу. Попробуйте ещё раз");
     }
   };
 
@@ -303,7 +318,7 @@ function BuddyPage() {
                 <p className="truncate text-xs text-muted-foreground">
                   {match
                     ? `Приватная комната 1-на-1${partnerStatus ? ` · ${partnerStatus.label}` : ""}`
-                    : "Начни поиск, чтобы открыть комнату"}
+                    : "Начните поиск, чтобы открыть комнату"}
                 </p>
               </div>
             </div>
@@ -330,17 +345,17 @@ function BuddyPage() {
             ) : !match ? (
               <div className="grid h-full place-items-center p-6 text-center">
                 <div className="max-w-sm">
-                  <p className="font-display text-lg">Здесь появится твой разговор</p>
+                  <p className="font-display text-lg">Здесь появится ваш разговор</p>
                   <p className="mt-2 text-sm text-muted-foreground">
                     {searching
                       ? "Ищем собеседника с похожим опытом. Можно оставить страницу открытой — мы соединим вас автоматически."
-                      : "Выбери категорию слева и нажми «Найти собеседника»."}
+                      : "Выберите категорию слева и нажмите «Найти собеседника»."}
                   </p>
                 </div>
               </div>
             ) : messages.length === 0 ? (
               <p className="py-10 text-center text-sm text-muted-foreground">
-                Напиши первое сообщение — например, как прошёл твой день.
+                Напишите первое сообщение — например, как прошёл ваш день.
               </p>
             ) : (
               messages.map((m) => {
@@ -412,7 +427,7 @@ function BuddyPage() {
             <Input
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder={match ? "Напиши слова поддержки…" : "Сначала найди собеседника"}
+              placeholder={match ? "Напишите слова поддержки…" : "Сначала найдите собеседника"}
               disabled={!match || sending}
               className="flex-1"
             />

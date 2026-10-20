@@ -2,7 +2,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Calculator, ClipboardList, MessageSquareText, ShieldCheck } from "lucide-react";
+import { Calculator, ClipboardList, ShieldCheck } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { TherapistsAdminPanel } from "@/components/TherapistsAdminPanel";
 import { UserStatsPanel } from "@/components/UserStatsPanel";
@@ -123,7 +123,6 @@ function ModerationPage() {
   return (
     <AppShell title="Модерация">
       <UserStatsPanel />
-      <FeedbackPanel />
       <TherapistsAdminPanel />
       <TherapistSlotsAdminPanel />
       <TherapistRequestsPanel />
@@ -207,66 +206,6 @@ function ModerationPage() {
         )}
       </div>
     </AppShell>
-  );
-}
-
-function FeedbackPanel() {
-  const [showAll, setShowAll] = useState(false);
-  const feedback = useQuery({
-    queryKey: ["moderation", "feedback"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("app_feedback")
-        .select("id, user_id, message, created_at")
-        .order("created_at", { ascending: false })
-        .limit(200);
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-  const all = feedback.data ?? [];
-  const rows = showAll ? all : all.slice(0, 5);
-
-  return (
-    <div className="surface mt-5 p-5">
-      <h2 className="flex items-center gap-2 font-display text-base">
-        <MessageSquareText className="size-4 text-primary" /> Отзывы о приложении
-        {all.length > 0 ? (
-          <span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-normal">{all.length}</span>
-        ) : null}
-      </h2>
-      <p className="mt-1 text-xs text-muted-foreground">Идеи и предложения из кнопки «Написать» в меню.</p>
-      {feedback.isLoading ? (
-        <p className="mt-4 text-sm text-muted-foreground">Загружаем…</p>
-      ) : feedback.isError ? (
-        <div className="mt-4">
-          <p className="text-sm">Не удалось загрузить отзывы.</p>
-          <Button className="mt-3" variant="secondary" onClick={() => void feedback.refetch()}>
-            Повторить
-          </Button>
-        </div>
-      ) : all.length === 0 ? (
-        <p className="mt-4 text-sm text-muted-foreground">Отзывов пока нет.</p>
-      ) : (
-        <>
-          <ul className="mt-4 space-y-3">
-            {rows.map((f) => (
-              <li key={f.id} className="rounded-2xl border border-border p-4">
-                <p className="text-xs text-muted-foreground">
-                  {new Date(f.created_at).toLocaleString("ru-RU")} · {f.user_id.slice(0, 8)}
-                </p>
-                <p className="mt-2 whitespace-pre-line break-words text-sm">{f.message}</p>
-              </li>
-            ))}
-          </ul>
-          {all.length > 5 ? (
-            <Button className="mt-3" variant="secondary" size="sm" onClick={() => setShowAll((v) => !v)}>
-              {showAll ? "Свернуть" : `Показать все (${all.length})`}
-            </Button>
-          ) : null}
-        </>
-      )}
-    </div>
   );
 }
 

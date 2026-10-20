@@ -1,94 +1,86 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { MAX_NOTE, timestampRange, type Checkin, type CustomTag, type TagKind } from "@/lib/mood";
+import { useAuth } from "@/hooks/useAuth";
+import { customTagId, type Checkin, type Tag } from "@/lib/mood";
 
-const CHECKIN_FIELDS = "id, level, emotions, activities, note, created_at";
+const HISTORY_DAYS = 120;
 
-export const moodKeys = {
-  all: ["mood"] as const,
-  range: (from: string, to: string) => ["mood", "range", from, to] as const,
-  one: (id: string) => ["mood", "one", id] as const,
-  tags: ["mood", "custom-tags"] as const,
-};
-
-/** Check-ins whose local day falls in [from, to], oldest first. */
-export function useCheckins(from: string, to: string) {
+/** Signed-in user's mood check-ins for the last ~4 months (RLS: owner only). */
+export function useMoodCheckins() {
+  const { user } = useAuth();
   return useQuery({
-    queryKey: moodKeys.range(from, to),
+    queryKey: ["mood-checkins", user?.id ?? null],
+    enabled: !!user,
     queryFn: async (): Promise<Checkin[]> => {
-      const { gte, lt } = timestampRange(from, to);
+      const since = new Date(Date.now() - HISTORY_DAYS * 86_400_000).toISOString();
       const { data, error } = await supabase
         .from("mood_checkins")
-        .select(CHECKIN_FIELDS)
-        .gte("created_at", gte)
-        .lt("created_at", lt)
-        .order("created_at", { ascending: true })
-        .limit(2000);
-      if (error) throw new Error("Не удалось загрузить отметки");
+        .select("id, level, emotions, activities, note, created_at")
+        .gte("created_at", since)
+        .order("created_at", { ascending: false })
+        .limit(1000);
+      if (error) throw error;
       return data ?? [];
     },
   });
 }
 
-export function useCheckin(id: string | undefined) {
-  return useQuery({
-    queryKey: moodKeys.one(id ?? ""),
-    enabled: !!id,
-    queryFn: async (): Promise<Checkin | null> => {
-      const { data, error } = await supabase
-        .from("mood_checkins")
-        .select(CHECKIN_FIELDS)
-        .eq("id", id!)
-        .maybeSingle();
-      if (error) throw new Error("Не удалось открыть отметку");
-      return data;
-    },
-  });
-}
+export type CustomTag = Tag & { kind: "emotion" | "activity" };
 
 export function useCustomTags() {
+  const { user } = useAuth();
   return useQuery({
-    queryKey: moodKeys.tags,
-    staleTime: 5 * 60 * 1000,
+    queryKey: ["custom-tags", user?.id ?? null],
+    enabled: !!user,
     queryFn: async (): Promise<CustomTag[]> => {
       const { data, error } = await supabase
         .from("custom_tags")
-        .select("id, kind, label, emoji")
-        .order("created_at", { ascending: true });
-      if (error) throw new Error("Не удалось загрузить свои варианты");
-      return (data ?? []).filter(
-        (t): t is CustomTag => t.kind === "emotion" || t.kind === "activity",
-      );
+        .select("kind, label, emoji")
+        .order("created_at");
+      if (error) throw error;
+      return (data ?? []).map((r) => ({
+        id: customTagId(r.label),
+        label: r.label,
+        emoji: r.emoji,
+        kind: r.kind as "emotion" | "activity",
+      }));
     },
   });
 }
 
-export type CheckinDraft = {
-  level: number;
-  emotions: string[];
-  activities: string[];
-  note: string;
-  createdAt: string;
-};
+export function useAddCustomTag() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async (input: { kind: "emotion" | "activity"; label: string; emoji: string }) => {
+      const label = input.label.trim().slice(0, 40);
+      const { error } = await supabase
+        .from("custom_tags")
+        .upsert(
+          { user_id: user!.id, kind: input.kind, label, emoji: input.emoji.trim() || "✨" },
+          { onConflict: "user_id,kind,label" },
+        );
+      if (error) throw error;
+      return customTagId(label);
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["custom-tags"] }),
+  });
+}
+
+export type CheckinInput = { level: number; emotions: string[]; activities: string[]; note: string };
 
 export function useSaveCheckin() {
   const qc = useQueryClient();
+  const { user } = useAuth();
   return useMutation({
-    mutationFn: async ({ id, draft }: { id?: string | undefined; draft: CheckinDraft }) => {
-      const row = {
-        level: draft.level,
-        emotions: draft.emotions,
-        activities: draft.activities,
-        note: draft.note.trim().slice(0, MAX_NOTE),
-        created_at: draft.createdAt,
-      };
-      const { error } = id
+    mutationFn: async ({ id, ...input }: CheckinInput & { id?: string }) => {
+      const row = { ...input, note: input.note.trim().slice(0, 1000) };
+      const res = id
         ? await supabase.from("mood_checkins").update(row).eq("id", id)
-        : await supabase.from("mood_checkins").insert(row);
-      if (error)
-        throw new Error("Не удалось сохранить отметку. Проверь интернет и попробуй ещё раз");
+        : await supabase.from("mood_checkins").insert({ ...row, user_id: user!.id });
+      if (res.error) throw res.error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: moodKeys.all }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["mood-checkins"] }),
   });
 }
 
@@ -97,37 +89,8 @@ export function useDeleteCheckin() {
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("mood_checkins").delete().eq("id", id);
-      if (error) throw new Error("Не удалось удалить отметку");
+      if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: moodKeys.all }),
-  });
-}
-
-export function useDeleteAllCheckins() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (userId: string) => {
-      const checkins = await supabase.from("mood_checkins").delete().eq("user_id", userId);
-      if (checkins.error) throw new Error("Не удалось удалить отметки");
-      const tags = await supabase.from("custom_tags").delete().eq("user_id", userId);
-      if (tags.error) throw new Error("Отметки удалены, но свои варианты удалить не удалось");
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: moodKeys.all }),
-  });
-}
-
-export function useAddCustomTag() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ kind, label, emoji }: { kind: TagKind; label: string; emoji: string }) => {
-      const { error } = await supabase
-        .from("custom_tags")
-        .upsert(
-          { kind, label, emoji: emoji || "✨" },
-          { onConflict: "user_id,kind,label", ignoreDuplicates: true },
-        );
-      if (error) throw new Error("Не удалось добавить вариант");
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: moodKeys.tags }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["mood-checkins"] }),
   });
 }

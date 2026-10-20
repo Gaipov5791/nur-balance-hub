@@ -33,12 +33,12 @@ export const Route = createFileRoute("/_authenticated/journal")({
       {
         name: "description",
         content:
-          "Запиши короткое видео о своём дне и отметь эмоцию по шкале от 1 до 5 — текст дневника учитывается в ИИ-анализе.",
+          "Запишите короткое видео о своём дне, отметьте эмоцию по шкале от 1 до 5 и получите +10 Nur-Coins.",
       },
       { property: "og:title", content: "Видео-дневник эмоций — Nur Balance" },
       {
         property: "og:description",
-        content: "Запись до 3 минут, метка настроения и продолжение твоей серии дней.",
+        content: "Запись до 3 минут, метка настроения и продолжение вашей серии дней.",
       },
     ],
   }),
@@ -146,7 +146,7 @@ function JournalPage() {
 
       setStep("saving");
       setProgressText("Сохраняем запись…");
-      await createEntry({
+      const result = await createEntry({
         data: {
           entryDate: localDateString(),
           mood,
@@ -162,7 +162,11 @@ function JournalPage() {
       setStep("done");
       qc.invalidateQueries({ queryKey: ["profile"] });
       qc.invalidateQueries({ queryKey: ["journal"] });
-      toast.success("Запись сохранена");
+      toast.success(
+        result.total > 0
+          ? `Запись сохранена. +${result.total} Nur-Coins`
+          : "Запись сохранена. Дневной лимит монет уже набран",
+      );
     } catch (err) {
       setStep("failed");
       setSaveError(err instanceof Error ? err.message : "Неизвестная ошибка");
@@ -227,7 +231,7 @@ function JournalPage() {
               <p className="text-sm font-semibold text-destructive">Не удалось сохранить запись</p>
               <p className="mt-1 text-sm text-muted-foreground">{saveError}</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Видео осталось на этом экране — ничего не потеряно. Проверь интернет и повтори.
+                Видео осталось на этом экране — ничего не потеряно. Проверьте интернет и повторите.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <Button size="sm" onClick={save}>
@@ -247,7 +251,7 @@ function JournalPage() {
               <CheckCircle2 className="mx-auto size-10 text-primary" />
               <h2 className="mt-3 font-display text-base">Запись сохранена</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Она уже в твоём календаре и доступна только тебе.
+                Она уже в вашем календаре и доступна только вам.
               </p>
               <div className="mt-5 grid gap-2">
                 <Button onClick={() => navigate({ to: "/archive" })}>Открыть календарь</Button>
@@ -258,7 +262,7 @@ function JournalPage() {
             </div>
           ) : (
             <>
-              <h2 className="font-display text-base">Как ты себя чувствуешь?</h2>
+              <h2 className="font-display text-base">Как вы себя чувствуете?</h2>
               <div className="mt-4 grid grid-cols-2 gap-2">
                 {moodKeys.map((key) => (
                   <button
@@ -318,13 +322,13 @@ function JournalPage() {
               <p className="mt-3 text-center text-xs text-muted-foreground">
                 {!recording
                   ? recorderState === "recording" || recorderState === "paused"
-                    ? "Останови запись, чтобы сохранить её"
+                    ? "Остановите запись, чтобы сохранить её"
                     : recordMode === "audio"
-                      ? "Сначала запиши голос"
-                      : "Сначала запиши видео"
+                      ? "Сначала запишите голос"
+                      : "Сначала запишите видео"
                   : !mood
-                    ? "Выбери эмоцию, чтобы сохранить"
-                    : "Записи видны только тебе."}{" "}
+                    ? "Выберите эмоцию, чтобы сохранить"
+                    : "Записи видны только вам."}{" "}
                 <Link to="/settings" className="text-primary hover:underline">
                   Настройки приватности
                 </Link>
@@ -349,7 +353,7 @@ function JournalPage() {
                   Эмоция: {mood ? `${moods[mood].emoji} ${moods[mood].label}` : "—"} · интенсивность {level}/5
                 </p>
                 <p className="text-muted-foreground">
-                  Запись будет зашифрованно загружена в твой личный архив. Её увидишь только ты.
+                  Запись будет зашифрованно загружена в ваш личный архив. Её увидите только вы.
                 </p>
               </div>
             </AlertDialogDescription>
