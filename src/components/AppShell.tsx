@@ -166,9 +166,6 @@ export function AppShell({
               </div>
             ) : null}
           </nav>
-          <div className="mt-3 shrink-0">
-            <FeedbackButton />
-          </div>
           <Link
             to="/settings"
             className="mt-3 flex shrink-0 items-center gap-3 rounded-2xl border border-border bg-card p-3 transition-shadow hover:shadow-soft"
@@ -197,7 +194,10 @@ export function AppShell({
           </header>
           <div className="mb-5 hidden items-center justify-between gap-4 lg:flex">
             <h1 className="text-2xl">{title ?? ""}</h1>
-            <NotificationsBell />
+            <div className="flex items-center gap-2">
+              <FeedbackButton variant="icon" />
+              <NotificationsBell />
+            </div>
           </div>
           {children}
         </main>
