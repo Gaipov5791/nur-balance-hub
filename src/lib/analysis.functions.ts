@@ -120,7 +120,7 @@ export const runAnalysis = createServerFn({ method: "POST" })
       return {
         ok: false,
         reason: "ai_error",
-        message: `${msg || "Не удалось получить анализ."} Монеты вернулись на баланс.`,
+        message: `${msg || "Не удалось получить анализ."} Списание отменено — можно попробовать снова.`,
       };
     }
   });

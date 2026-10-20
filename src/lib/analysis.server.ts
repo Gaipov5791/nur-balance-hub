@@ -37,6 +37,7 @@ export class AnalyzerError extends Error {
     readonly status: number,
   ) {
     super(message);
+    this.name = "AnalyzerError";
   }
 }
 
