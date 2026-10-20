@@ -1008,6 +1008,9 @@ export type Database = {
         Returns: boolean
       }
       consume_ai_message: { Args: never; Returns: Json }
+      demo_buy_coin_pack: { Args: never; Returns: Json }
+      demo_cancel_subscription: { Args: never; Returns: boolean }
+      demo_subscribe: { Args: never; Returns: Json }
       fail_ai_analysis: {
         Args: { _error: string; _id: string }
         Returns: boolean
