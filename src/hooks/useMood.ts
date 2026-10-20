@@ -73,7 +73,7 @@ export function useSaveCheckin() {
   const qc = useQueryClient();
   const { user } = useAuth();
   return useMutation({
-    mutationFn: async ({ id, ...input }: CheckinInput & { id?: string }) => {
+    mutationFn: async ({ id, ...input }: CheckinInput & { id?: string | undefined }) => {
       const row = { ...input, note: input.note.trim().slice(0, 1000) };
       const res = id
         ? await supabase.from("mood_checkins").update(row).eq("id", id)
