@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
 /** Menu block «Написать»: collects improvement ideas; admins get a bell notification. */
-export function FeedbackButton() {
+export function FeedbackButton({ variant = "card" }: { variant?: "card" | "icon" }) {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
@@ -31,14 +31,26 @@ export function FeedbackButton() {
 
   return (
     <>
-      <div className="rounded-2xl border border-border bg-card p-3">
-        <p className="text-xs text-muted-foreground">
-          Как мы можем сделать приложение лучше? Если есть идеи — напиши!
-        </p>
-        <Button size="sm" variant="secondary" className="mt-2 w-full" onClick={() => setOpen(true)}>
-          <MessageSquarePlus className="size-4" /> Написать
-        </Button>
-      </div>
+      {variant === "icon" ? (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label="Написать идею"
+          title="Есть идея? Напиши нам"
+          className="grid size-10 shrink-0 place-items-center rounded-full border border-border bg-card transition-shadow hover:shadow-soft"
+        >
+          <MessageSquarePlus className="size-[18px]" />
+        </button>
+      ) : (
+        <div className="rounded-2xl border border-border bg-card p-3">
+          <p className="text-xs text-muted-foreground">
+            Как мы можем сделать приложение лучше? Если есть идеи — напиши!
+          </p>
+          <Button size="sm" variant="secondary" className="mt-2 w-full" onClick={() => setOpen(true)}>
+            <MessageSquarePlus className="size-4" /> Написать
+          </Button>
+        </div>
+      )}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
