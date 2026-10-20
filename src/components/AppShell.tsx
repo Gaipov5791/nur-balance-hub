@@ -134,7 +134,7 @@ export function AppShell({
     ...(isAdmin ? [moderationItem] : []),
   ];
   const profile = {
-    name: real?.name || user?.email?.split("@")[0] || "Вы",
+    name: real?.name || user?.email?.split("@")[0] || "Ты",
     coins: real?.coins ?? 0,
   };
 
