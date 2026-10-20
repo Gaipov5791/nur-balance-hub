@@ -33,6 +33,8 @@ export function DemoPayDialog({ open, onOpenChange, title, description, priceLab
     try {
       await onPay();
       onOpenChange(false);
+    } catch {
+      // The caller already showed a toast; keep the window open for a retry.
     } finally {
       setBusy(false);
     }

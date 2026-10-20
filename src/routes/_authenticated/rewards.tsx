@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Crown, Sparkles } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { BuddyPanel, CoinsPanel } from "@/components/panels";
@@ -11,7 +11,7 @@ import {
   SUBSCRIPTION,
 } from "@/lib/wallet";
 import { useWallet } from "@/hooks/useWallet";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,12 +36,57 @@ export const Route = createFileRoute("/_authenticated/rewards")({
 
 const fmtKzt = (n: number) => `${n.toLocaleString("ru-RU")} ₸`;
 
+const PENDING_PAY_KEY = "nb:pending-pay";
+type PayKind = "sub" | "pack";
+
+function isAuthError(error: { code?: string; message?: string; status?: number } | null) {
+  if (!error) return false;
+  const m = (error.message ?? "").toLowerCase();
+  return (
+    error.code === "42501" ||
+    error.code === "PGRST301" ||
+    error.code === "PGRST303" ||
+    error.status === 401 ||
+    m.includes("jwt") ||
+    m.includes("permission denied") ||
+    m.includes("нужно войти")
+  );
+}
+
+/** Returns a valid session, refreshing an expired one; null when the user must sign in again. */
+async function ensureSession() {
+  const { data } = await supabase.auth.getSession();
+  const s = data.session;
+  if (s && (s.expires_at ?? 0) * 1000 > Date.now() + 30_000) return s;
+  const { data: refreshed } = await supabase.auth.refreshSession();
+  return refreshed.session ?? null;
+}
+
 export function RewardsPage() {
   const wallet = useWallet();
   const sub = wallet.data?.subscriptionActive;
   const until = wallet.data?.subscriptionUntil;
   const qc = useQueryClient();
-  const [payFor, setPayFor] = useState<"sub" | "pack" | null>(null);
+  const navigate = useNavigate();
+  const [payFor, setPayFor] = useState<PayKind | null>(null);
+
+  // After a re-login, reopen the payment window the user had started.
+  useEffect(() => {
+    const pending = sessionStorage.getItem(PENDING_PAY_KEY);
+    if (pending === "sub" || pending === "pack") {
+      sessionStorage.removeItem(PENDING_PAY_KEY);
+      setPayFor(pending);
+    }
+  }, []);
+
+  const toLogin = async (kind: PayKind | null) => {
+    if (kind) sessionStorage.setItem(PENDING_PAY_KEY, kind);
+    toast.error("Сессия истекла. Войди снова — оплата продолжится сразу после входа.");
+    setPayFor(null);
+    await supabase.auth.signOut({ scope: "local" });
+    navigate({ to: "/auth", search: { redirect: "/rewards" }, replace: true });
+  };
+
   const refresh = () =>
     Promise.all([
       qc.invalidateQueries({ queryKey: ["wallet"] }),
@@ -49,7 +94,16 @@ export function RewardsPage() {
       qc.invalidateQueries({ queryKey: ["nur-ai-usage"] }),
     ]);
   const run = async (fn: "demo_buy_coin_pack" | "demo_subscribe", ok: string) => {
-    const { error } = await supabase.rpc(fn);
+    const kind: PayKind = fn === "demo_subscribe" ? "sub" : "pack";
+    if (!(await ensureSession())) return toLogin(kind);
+    let { error } = await supabase.rpc(fn);
+    if (isAuthError(error)) {
+      // Token may have expired mid-flight: refresh once and retry.
+      const { data } = await supabase.auth.refreshSession();
+      if (!data.session) return toLogin(kind);
+      ({ error } = await supabase.rpc(fn));
+      if (isAuthError(error)) return toLogin(kind);
+    }
     if (error) {
       toast.error("Не получилось провести оплату. Попробуй ещё раз.");
       throw error;
@@ -59,7 +113,9 @@ export function RewardsPage() {
   };
   const cancel = async () => {
     if (!window.confirm("Отменить подписку? Безлимитный НурAI и бесплатный анализ отключатся.")) return;
+    if (!(await ensureSession())) return toLogin(null);
     const { error } = await supabase.rpc("demo_cancel_subscription");
+    if (isAuthError(error)) return toLogin(null);
     if (error) return void toast.error("Не получилось отменить. Попробуй ещё раз.");
     toast.success("Подписка отменена");
     await refresh();
