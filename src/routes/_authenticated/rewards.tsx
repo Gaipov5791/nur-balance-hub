@@ -46,7 +46,7 @@ export function RewardsPage() {
     Promise.all([
       qc.invalidateQueries({ queryKey: ["wallet"] }),
       qc.invalidateQueries({ queryKey: ["profile"] }),
-      qc.invalidateQueries({ queryKey: ["ai-usage"] }),
+      qc.invalidateQueries({ queryKey: ["nur-ai-usage"] }),
     ]);
   const run = async (fn: "demo_buy_coin_pack" | "demo_subscribe", ok: string) => {
     const { error } = await supabase.rpc(fn);
