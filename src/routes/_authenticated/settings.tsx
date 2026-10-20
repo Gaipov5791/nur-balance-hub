@@ -523,7 +523,7 @@ function PinCard({ userId }: { userId: string }) {
             inputMode="numeric"
             autoComplete="off"
             maxLength={4}
-            placeholder="Новый PIN (если меняете)"
+            placeholder="Новый PIN (если меняешь)"
           />
           <div className="flex flex-wrap gap-2">
             <Button
