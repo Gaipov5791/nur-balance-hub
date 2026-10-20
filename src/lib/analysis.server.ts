@@ -67,7 +67,7 @@ export async function runMoodAnalyzer(input: string, signal?: AbortSignal): Prom
     instructions: INSTRUCTIONS,
     prompt: input,
     output: Output.object({ schema }),
-    abortSignal: signal,
+    ...(signal ? { abortSignal: signal } : {}),
     maxRetries: 0,
     providerOptions: {
       openai: {

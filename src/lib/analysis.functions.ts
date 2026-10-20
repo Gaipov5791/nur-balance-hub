@@ -7,7 +7,7 @@ import type { AnalysisResult, AnalysisRow } from "@/lib/wallet";
 
 export type RunAnalysisResponse =
   | { ok: true; analysis: AnalysisRow }
-  | { ok: false; reason: "not_enough" | "insufficient" | "busy" | "ai_error"; message: string; entries?: number; coins?: number };
+  | { ok: false; reason: "not_enough" | "insufficient" | "busy" | "ai_error"; message: string; entries?: number | undefined; coins?: number | undefined };
 
 const START_MESSAGES: Record<string, string> = {
   not_enough: "Нужно минимум 3 записи за период — отметь настроение ещё пару раз.",
