@@ -86,7 +86,7 @@ const baseNav: NavItem[] = [
 const moderationItem: NavItem = { to: "/moderation", label: "Модерация", icon: ShieldCheck };
 const deskItem: NavItem = { to: "/therapist-desk", label: "Кабинет специалиста", icon: BriefcaseMedical };
 
-const mobileNav = baseNav.filter((n) => ["/", "/journal", "/mood", "/buddy"].includes(n.to));
+const mobileNav = ["/", "/journal", "/mood", "/buddy"].map((to) => baseNav.find((n) => n.to === to)!);
 
 export function Logo() {
   return (
