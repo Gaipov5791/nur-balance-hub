@@ -11,6 +11,11 @@ import {
   SUBSCRIPTION,
 } from "@/lib/wallet";
 import { useWallet } from "@/hooks/useWallet";
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { DemoPayDialog } from "@/components/DemoPayDialog";
 
 export const Route = createFileRoute("/_authenticated/rewards")({
   head: () => ({
@@ -34,6 +39,31 @@ const fmtKzt = (n: number) => `${n.toLocaleString("ru-RU")} ₸`;
 export function RewardsPage() {
   const wallet = useWallet();
   const sub = wallet.data?.subscriptionActive;
+  const until = wallet.data?.subscriptionUntil;
+  const qc = useQueryClient();
+  const [payFor, setPayFor] = useState<"sub" | "pack" | null>(null);
+  const refresh = () =>
+    Promise.all([
+      qc.invalidateQueries({ queryKey: ["wallet"] }),
+      qc.invalidateQueries({ queryKey: ["profile"] }),
+      qc.invalidateQueries({ queryKey: ["ai-usage"] }),
+    ]);
+  const run = async (fn: "demo_buy_coin_pack" | "demo_subscribe", ok: string) => {
+    const { error } = await supabase.rpc(fn);
+    if (error) {
+      toast.error("Не получилось провести оплату. Попробуй ещё раз.");
+      throw error;
+    }
+    toast.success(ok);
+    await refresh();
+  };
+  const cancel = async () => {
+    if (!window.confirm("Отменить подписку? Безлимитный НурAI и бесплатный анализ отключатся.")) return;
+    const { error } = await supabase.rpc("demo_cancel_subscription");
+    if (error) return void toast.error("Не получилось отменить. Попробуй ещё раз.");
+    toast.success("Подписка отменена");
+    await refresh();
+  };
   return (
     <AppShell title="Nur-Coins" aside={<BuddyPanel />}>
       <div className="grid gap-5 lg:grid-cols-[1fr_1.2fr]">
@@ -87,9 +117,23 @@ export function RewardsPage() {
               <li>✨ Один ИИ-анализ настроения каждый день — без монет</li>
               <li>🪙 Пополнение +{COIN_REFILL_AMOUNT} каждые {COIN_REFILL_DAYS} дня сохраняется</li>
             </ul>
-            <Button className="mt-4 w-full" variant="secondary" disabled>
-              Оформление подписки — скоро
-            </Button>
+            {sub ? (
+              <div className="mt-4 space-y-2">
+                {until ? (
+                  <p className="text-xs text-muted-foreground">
+                    Действует до {new Date(until).toLocaleDateString("ru-RU")}
+                  </p>
+                ) : null}
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="secondary" onClick={() => setPayFor("sub")}>Продлить на месяц</Button>
+                  <Button variant="ghost" onClick={cancel}>Отменить подписку</Button>
+                </div>
+              </div>
+            ) : (
+              <Button className="mt-4 w-full" onClick={() => setPayFor("sub")}>
+                Оформить за {fmtKzt(SUBSCRIPTION.priceKzt)}
+              </Button>
+            )}
           </section>
 
           <section className="surface p-5">
@@ -103,15 +147,31 @@ export function RewardsPage() {
               </span>
               <span className="font-semibold">{fmtKzt(COIN_PACK.priceKzt)}</span>
             </div>
-            <Button className="mt-4 w-full" variant="secondary" disabled>
-              Покупка — скоро
+            <Button className="mt-4 w-full" onClick={() => setPayFor("pack")}>
+              Купить за {fmtKzt(COIN_PACK.priceKzt)}
             </Button>
             <p className="mt-3 text-xs text-muted-foreground">
-              Оплата появится после подключения Kaspi Pay. Монеты, накопленные раньше, остаются на балансе.
+              Сейчас оплата работает в демо-режиме. Монеты, накопленные раньше, остаются на балансе.
             </p>
           </section>
         </div>
       </div>
+      <DemoPayDialog
+        open={payFor !== null}
+        onOpenChange={(v) => !v && setPayFor(null)}
+        title={payFor === "sub" ? "Подписка Nur Balance" : `Пакет ${COIN_PACK.coins} Nur-Coins`}
+        description={
+          payFor === "sub"
+            ? "30 дней: безлимитный НурAI и один ИИ-анализ каждый день без монет."
+            : `${COIN_PACK.coins} монет сразу на баланс.`
+        }
+        priceLabel={fmtKzt(payFor === "sub" ? SUBSCRIPTION.priceKzt : COIN_PACK.priceKzt)}
+        onPay={() =>
+          payFor === "sub"
+            ? run("demo_subscribe", "Подписка активна на 30 дней")
+            : run("demo_buy_coin_pack", `+${COIN_PACK.coins} Nur-Coins на баланс`)
+        }
+      />
     </AppShell>
   );
 }
