@@ -36,6 +36,13 @@
       "when": 1792465263328,
       "tag": "0004_subscription_check_auth_only",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792473286548,
+      "tag": "0005_demo_payments_welcome_coins",
+      "breakpoints": true
     }
   ]
 }
