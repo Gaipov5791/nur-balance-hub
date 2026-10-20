@@ -14,7 +14,10 @@ const TABS = [
 ] as const;
 
 export const Route = createFileRoute("/_authenticated/mood")({
-  validateSearch: z.object({ tab: z.enum(["new", "day", "stats"]).optional() }),
+  validateSearch: z.object({
+    tab: z.enum(["new", "day", "stats"]).optional(),
+    level: z.coerce.number().int().min(1).max(5).optional(),
+  }),
   head: () => ({
     meta: [
       { title: "Настроение, эмоции и активности — Nur Balance" },
@@ -29,7 +32,7 @@ export const Route = createFileRoute("/_authenticated/mood")({
 });
 
 function MoodPage() {
-  const { tab = "new" } = Route.useSearch();
+  const { tab = "new", level } = Route.useSearch();
   const navigate = useNavigate({ from: "/mood" });
   const q = useMoodCheckins();
   const checkins = q.data ?? [];
@@ -53,7 +56,7 @@ function MoodPage() {
         </div>
 
         {tab === "new" ? (
-          <MoodCheckinForm onDone={() => navigate({ search: { tab: "stats" } })} />
+          <MoodCheckinForm key={level ?? 0} initialLevel={level} onDone={() => navigate({ search: { tab: "stats" } })} />
         ) : q.isPending ? (
           <p className="text-sm text-muted-foreground">Загружаем отметки…</p>
         ) : q.isError ? (

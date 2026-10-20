@@ -6,6 +6,7 @@ import { AppShell } from "@/components/AppShell";
 import { BuddyPanel, CoinsPanel, MoodCalendar, TipPanel } from "@/components/panels";
 import { Button } from "@/components/ui/button";
 import { moods } from "@/data/demo";
+import { MOOD_LEVELS } from "@/lib/mood";
 import { DailyQuestionCard } from "@/components/DailyQuestionCard";
 import { useProfile } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -120,6 +121,28 @@ function Dashboard() {
               label="записей"
             />
           </div>
+        </div>
+      </section>
+
+      <section className="surface mt-5 p-5 md:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="font-display text-base">Как твоё настроение сейчас?</p>
+          <Link to="/mood" search={{ tab: "stats" }} className="flex items-center gap-1 text-sm text-primary hover:underline">
+            Статистика <ArrowRight className="size-3.5" />
+          </Link>
+        </div>
+        <div className="mt-4 grid grid-cols-5 gap-2">
+          {MOOD_LEVELS.map((m) => (
+            <Link
+              key={m.level}
+              to="/mood"
+              search={{ tab: "new", level: m.level }}
+              className="flex min-w-0 flex-col items-center gap-1.5 rounded-2xl bg-secondary/60 p-2 transition-transform hover:scale-105"
+            >
+              <span className={`grid size-11 place-items-center rounded-full text-2xl ${m.bg}`}>{m.emoji}</span>
+              <span className="w-full text-center text-[11px] leading-tight">{m.label}</span>
+            </Link>
+          ))}
         </div>
       </section>
 
