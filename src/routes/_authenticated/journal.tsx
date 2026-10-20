@@ -33,7 +33,7 @@ export const Route = createFileRoute("/_authenticated/journal")({
       {
         name: "description",
         content:
-          "Запиши короткое видео о своём дне, отметь эмоцию по шкале от 1 до 5 и получи +10 Nur-Coins.",
+          "Запиши короткое видео о своём дне, отметь эмоцию по шкале от 1 до 5 — запись увидишь только ты.",
       },
       { property: "og:title", content: "Видео-дневник эмоций — Nur Balance" },
       {
@@ -162,11 +162,8 @@ function JournalPage() {
       setStep("done");
       qc.invalidateQueries({ queryKey: ["profile"] });
       qc.invalidateQueries({ queryKey: ["journal"] });
-      toast.success(
-        result.total > 0
-          ? `Запись сохранена. +${result.total} Nur-Coins`
-          : "Запись сохранена. Дневной лимит монет уже набран",
-      );
+      void result;
+      toast.success("Запись сохранена. Её видишь только ты");
     } catch (err) {
       setStep("failed");
       setSaveError(err instanceof Error ? err.message : "Неизвестная ошибка");
