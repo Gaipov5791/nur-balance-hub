@@ -17,6 +17,7 @@ import { Route as AuthenticatedBuddyRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedCareRouteImport } from './routes/_authenticated/care'
 import { Route as AuthenticatedJournalRouteImport } from './routes/_authenticated/journal'
 import { Route as AuthenticatedModerationRouteImport } from './routes/_authenticated/moderation'
+import { Route as AuthenticatedMoodRouteImport } from './routes/_authenticated/mood'
 import { Route as AuthenticatedNurAiRouteImport } from './routes/_authenticated/nur-ai'
 import { Route as AuthenticatedRewardsRouteImport } from './routes/_authenticated/rewards'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -63,6 +64,11 @@ const AuthenticatedJournalRoute = AuthenticatedJournalRouteImport.update({
 const AuthenticatedModerationRoute = AuthenticatedModerationRouteImport.update({
   id: '/moderation',
   path: '/moderation',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMoodRoute = AuthenticatedMoodRouteImport.update({
+  id: '/mood',
+  path: '/mood',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedNurAiRoute = AuthenticatedNurAiRouteImport.update({
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/care': typeof AuthenticatedCareRoute
   '/journal': typeof AuthenticatedJournalRoute
   '/moderation': typeof AuthenticatedModerationRoute
+  '/mood': typeof AuthenticatedMoodRoute
   '/nur-ai': typeof AuthenticatedNurAiRoute
   '/rewards': typeof AuthenticatedRewardsRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -134,6 +141,7 @@ export interface FileRoutesByTo {
   '/care': typeof AuthenticatedCareRoute
   '/journal': typeof AuthenticatedJournalRoute
   '/moderation': typeof AuthenticatedModerationRoute
+  '/mood': typeof AuthenticatedMoodRoute
   '/nur-ai': typeof AuthenticatedNurAiRoute
   '/rewards': typeof AuthenticatedRewardsRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -153,6 +161,7 @@ export interface FileRoutesById {
   '/_authenticated/care': typeof AuthenticatedCareRoute
   '/_authenticated/journal': typeof AuthenticatedJournalRoute
   '/_authenticated/moderation': typeof AuthenticatedModerationRoute
+  '/_authenticated/mood': typeof AuthenticatedMoodRoute
   '/_authenticated/nur-ai': typeof AuthenticatedNurAiRoute
   '/_authenticated/rewards': typeof AuthenticatedRewardsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
@@ -172,6 +181,7 @@ export interface FileRouteTypes {
     | '/care'
     | '/journal'
     | '/moderation'
+    | '/mood'
     | '/nur-ai'
     | '/rewards'
     | '/settings'
@@ -189,6 +199,7 @@ export interface FileRouteTypes {
     | '/care'
     | '/journal'
     | '/moderation'
+    | '/mood'
     | '/nur-ai'
     | '/rewards'
     | '/settings'
@@ -207,6 +218,7 @@ export interface FileRouteTypes {
     | '/_authenticated/care'
     | '/_authenticated/journal'
     | '/_authenticated/moderation'
+    | '/_authenticated/mood'
     | '/_authenticated/nur-ai'
     | '/_authenticated/rewards'
     | '/_authenticated/settings'
@@ -283,6 +295,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedModerationRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/mood': {
+      id: '/_authenticated/mood'
+      path: '/mood'
+      fullPath: '/mood'
+      preLoaderRoute: typeof AuthenticatedMoodRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/nur-ai': {
       id: '/_authenticated/nur-ai'
       path: '/nur-ai'
@@ -348,6 +367,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCareRoute: typeof AuthenticatedCareRoute
   AuthenticatedJournalRoute: typeof AuthenticatedJournalRoute
   AuthenticatedModerationRoute: typeof AuthenticatedModerationRoute
+  AuthenticatedMoodRoute: typeof AuthenticatedMoodRoute
   AuthenticatedNurAiRoute: typeof AuthenticatedNurAiRoute
   AuthenticatedRewardsRoute: typeof AuthenticatedRewardsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -362,6 +382,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCareRoute: AuthenticatedCareRoute,
   AuthenticatedJournalRoute: AuthenticatedJournalRoute,
   AuthenticatedModerationRoute: AuthenticatedModerationRoute,
+  AuthenticatedMoodRoute: AuthenticatedMoodRoute,
   AuthenticatedNurAiRoute: AuthenticatedNurAiRoute,
   AuthenticatedRewardsRoute: AuthenticatedRewardsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
