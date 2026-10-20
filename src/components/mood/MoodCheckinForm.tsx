@@ -14,8 +14,16 @@ import {
   type TagGroup,
 } from "@/lib/mood";
 
-export function MoodCheckinForm({ editing, onDone }: { editing?: Checkin; onDone?: () => void }) {
-  const [level, setLevel] = useState<number | null>(editing?.level ?? null);
+export function MoodCheckinForm({
+  editing,
+  initialLevel,
+  onDone,
+}: {
+  editing?: Checkin;
+  initialLevel?: number | undefined;
+  onDone?: () => void;
+}) {
+  const [level, setLevel] = useState<number | null>(editing?.level ?? initialLevel ?? null);
   const [emotions, setEmotions] = useState<string[]>(editing?.emotions ?? []);
   const [activities, setActivities] = useState<string[]>(editing?.activities ?? []);
   const [note, setNote] = useState(editing?.note ?? "");

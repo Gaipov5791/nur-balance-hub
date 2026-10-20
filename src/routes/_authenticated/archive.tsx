@@ -28,12 +28,12 @@ export const Route = createFileRoute("/_authenticated/archive")({
       { title: "Календарь настроений и архив записей — Nur Balance" },
       {
         name: "description",
-        content: "Календарная сетка с иконками настроения и закрытый архив ваших видео-записей.",
+        content: "Календарная сетка с иконками настроения и закрытый архив твоих видео-записей.",
       },
       { property: "og:title", content: "Календарь настроений — Nur Balance" },
       {
         property: "og:description",
-        content: "Смотрите динамику состояния по дням и пересматривайте свои записи.",
+        content: "Смотри динамику состояния по дням и пересматривай свои записи.",
       },
     ],
   }),
@@ -119,7 +119,7 @@ function ArchivePage() {
           <Lock className="mx-auto size-8 text-primary" />
           <h2 className="mt-3 font-display text-lg">Архив закрыт PIN-кодом</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Введите 4 цифры, чтобы открыть календарь и записи на этом устройстве.
+            Введи 4 цифры, чтобы открыть календарь и записи на этом устройстве.
           </p>
           <form
             className="mt-5 space-y-3"
@@ -187,7 +187,7 @@ function ArchivePage() {
           <div className="flex items-center justify-between">
             <h2 className="font-display text-base">Личный архив</h2>
             <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Lock className="size-3.5" /> видно только вам
+              <Lock className="size-3.5" /> видно только тебе
             </span>
           </div>
 
@@ -212,7 +212,7 @@ function ArchivePage() {
               <span className="text-3xl">🎥</span>
               <p className="mt-3 font-semibold">Пока нет записей</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Первая запись принесёт +20 Nur-Coins и начнёт вашу серию дней.
+                Первая запись принесёт +20 Nur-Coins и начнёт твою серию дней.
               </p>
               <Button asChild className="mt-4">
                 <Link to="/journal">Записать первое видео</Link>

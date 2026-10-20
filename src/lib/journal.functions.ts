@@ -146,7 +146,7 @@ export const getEntryPlaybackUrl = createServerFn({ method: "POST" })
     const { data: signed, error: signError } = await supabase.storage
       .from(VIDEO_BUCKET)
       .createSignedUrl(entry.video_path, SIGNED_URL_TTL);
-    if (signError || !signed) throw new Error("Не удалось открыть видео. Попробуйте ещё раз");
+    if (signError || !signed) throw new Error("Не удалось открыть видео. Попробуй ещё раз");
     return { url: signed.signedUrl, mimeType: entry.mime_type, expiresIn: SIGNED_URL_TTL };
   });
 

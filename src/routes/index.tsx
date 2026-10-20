@@ -6,6 +6,7 @@ import { AppShell } from "@/components/AppShell";
 import { BuddyPanel, CoinsPanel, MoodCalendar, TipPanel } from "@/components/panels";
 import { Button } from "@/components/ui/button";
 import { moods } from "@/data/demo";
+import { MOOD_LEVELS } from "@/lib/mood";
 import { DailyQuestionCard } from "@/components/DailyQuestionCard";
 import { useProfile } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -52,7 +53,7 @@ function Dashboard() {
   const recent = [...entries]
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .slice(0, 3);
-  const name = real?.name || user?.email?.split("@")[0] || "Вы";
+  const name = real?.name || user?.email?.split("@")[0] || "Ты";
   const navigate = useNavigate();
   const coins = real?.coins ?? 0;
   const streak = real?.streak ?? 0;
@@ -98,8 +99,8 @@ function Dashboard() {
             </h1>
             <p className="mt-3 max-w-md text-sm text-muted-foreground">
               {streak > 0
-                ? `Вы держите серию ${streak} дней. Запишите короткое видео о том, как прошёл день — это займёт три минуты.`
-                : "Запишите короткое видео о том, как прошёл день — это займёт три минуты."}
+                ? `Ты держишь серию ${streak} дней. Запиши короткое видео о том, как прошёл день — это займёт три минуты.`
+                : "Запиши короткое видео о том, как прошёл день — это займёт три минуты."}
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
               <Button asChild size="lg">
@@ -120,6 +121,28 @@ function Dashboard() {
               label="записей"
             />
           </div>
+        </div>
+      </section>
+
+      <section className="surface mt-5 p-5 md:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="font-display text-base">Как твоё настроение сейчас?</p>
+          <Link to="/mood" search={{ tab: "stats" }} className="flex items-center gap-1 text-sm text-primary hover:underline">
+            Статистика <ArrowRight className="size-3.5" />
+          </Link>
+        </div>
+        <div className="mt-4 grid grid-cols-5 gap-2">
+          {MOOD_LEVELS.map((m) => (
+            <Link
+              key={m.level}
+              to="/mood"
+              search={{ tab: "new", level: m.level }}
+              className="flex min-w-0 flex-col items-center gap-1.5 rounded-2xl bg-secondary/60 p-2 transition-transform hover:scale-105"
+            >
+              <span className={`grid size-11 place-items-center rounded-full text-2xl ${m.bg}`}>{m.emoji}</span>
+              <span className="w-full text-center text-[11px] leading-tight">{m.label}</span>
+            </Link>
+          ))}
         </div>
       </section>
 
@@ -166,7 +189,7 @@ function Dashboard() {
             <p className="mt-4 text-sm text-muted-foreground">Загружаем записи…</p>
           ) : recent.length === 0 ? (
             <p className="mt-4 text-sm text-muted-foreground">
-              Здесь появятся ваши видео-записи. Первая займёт около трёх минут.
+              Здесь появятся твои видео-записи. Первая займёт около трёх минут.
             </p>
           ) : (
             <ul className="mt-4 space-y-3">

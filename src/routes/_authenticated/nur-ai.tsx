@@ -86,7 +86,7 @@ function NurAiPage() {
       });
       if (!res.ok || !res.body) {
         const j = (await res.json().catch(() => ({}))) as { error?: string };
-        throw new Error(j.error ?? "НурAI сейчас недоступен. Попробуйте чуть позже");
+        throw new Error(j.error ?? "НурAI сейчас недоступен. Попробуй чуть позже");
       }
       const reader = res.body.getReader();
       const dec = new TextDecoder();
@@ -97,7 +97,7 @@ function NurAiPage() {
         acc += dec.decode(value, { stream: true });
         setLocal((l) => l.map((m) => (m.id === answerId ? { ...m, content: acc } : m)));
       }
-      if (!acc.trim()) throw new Error("НурAI не смог ответить. Попробуйте переформулировать позже");
+      if (!acc.trim()) throw new Error("НурAI не смог ответить. Попробуй переформулировать позже");
       await qc.invalidateQueries({ queryKey: ["nur-ai", user?.id] });
       setLocal([]);
     } catch (e) {
@@ -196,7 +196,7 @@ function NurAiPage() {
         </div>
 
         <p className="px-4 text-[11px] text-muted-foreground">
-          В опасной ситуации звоните 112 или на телефон доверия 150 (бесплатно, круглосуточно).
+          В опасной ситуации звони 112 или на телефон доверия 150 (бесплатно, круглосуточно).
         </p>
         <form
           className="flex items-end gap-2 p-4"
@@ -217,7 +217,7 @@ function NurAiPage() {
             }}
             rows={2}
             maxLength={2000}
-            placeholder="Напишите НурAI…"
+            placeholder="Напиши НурAI…"
             className="min-w-0 flex-1 resize-none"
           />
           <Button type="submit" size="icon" disabled={busy || !text.trim()} aria-label="Отправить">

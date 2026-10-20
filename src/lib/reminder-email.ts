@@ -25,7 +25,7 @@ export function renderJournalReminderText(vars: ReminderEmailVars = {}): string 
     `${REMINDER_BODY} — короткое видео в дневнике, когда будет удобно.`,
     journalUrl,
     "",
-    "Если письмо больше не нужно, отключите напоминание в настройках:",
+    "Если письмо больше не нужно, отключи напоминание в настройках:",
     settingsUrl,
   ].join("\n");
 }
@@ -59,7 +59,7 @@ export function renderJournalReminderHtml(vars: ReminderEmailVars = {}): string 
                   Открыть дневник
                 </a>
                 <p style="margin:28px 0 0;font-size:12px;line-height:1.5;color:#6b7a70;">
-                  Это напоминание, которое вы включили в Nur Balance.
+                  Это напоминание, которое ты включил(а) в Nur Balance.
                   <a href="${escapeHtml(settingsUrl)}" style="color:#2f6b54;">Отключить в настройках</a>
                   или
                   <a href="{{ unsubscribe_url }}" style="color:#2f6b54;">отписаться от писем</a>.

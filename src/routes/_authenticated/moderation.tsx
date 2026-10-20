@@ -6,6 +6,7 @@ import { Calculator, ClipboardList, ShieldCheck } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { TherapistsAdminPanel } from "@/components/TherapistsAdminPanel";
 import { UserStatsPanel } from "@/components/UserStatsPanel";
+import { FeedbackAdminPanel } from "@/components/FeedbackAdminPanel";
 import { TherapistSlotsAdminPanel } from "@/components/TherapistSlotsAdminPanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -113,7 +114,7 @@ function ModerationPage() {
         <div className="surface p-6">
           <h2 className="font-display text-lg">Раздел доступен только администратору</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Если доступ нужен, напишите владельцу проекта.
+            Если доступ нужен, напиши владельцу проекта.
           </p>
         </div>
       </AppShell>
@@ -123,6 +124,7 @@ function ModerationPage() {
   return (
     <AppShell title="Модерация">
       <UserStatsPanel />
+      <FeedbackAdminPanel />
       <TherapistsAdminPanel />
       <TherapistSlotsAdminPanel />
       <TherapistRequestsPanel />

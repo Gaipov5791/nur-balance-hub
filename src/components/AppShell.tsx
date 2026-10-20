@@ -11,6 +11,7 @@ import {
   Settings,
   ShieldCheck,
   Menu,
+  Plus,
   type LucideIcon,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -26,6 +27,7 @@ import { useStaffAccess, useProfile } from "@/hooks/useAuth";
 import { canAccessModeration } from "@/lib/staff";
 import { useBuddyNotifications, useBuddyUnread } from "@/hooks/useBuddyNotifications";
 import { NotificationsBell } from "@/components/NotificationsBell";
+import { FeedbackButton } from "@/components/FeedbackButton";
 
 function UnreadBadge({ count, className = "" }: { count: number; className?: string }) {
   if (count <= 0) return null;
@@ -71,7 +73,8 @@ type NavItem = { to: string; label: string; icon: LucideIcon; primaryMobile?: bo
 
 const baseNav: NavItem[] = [
   { to: "/", label: "Главная", icon: Home },
-  { to: "/journal", label: "Дневник", icon: Video, primaryMobile: true },
+  { to: "/mood", label: "Настроение", icon: Plus, primaryMobile: true },
+  { to: "/journal", label: "Дневник", icon: Video },
   { to: "/archive", label: "Календарь", icon: CalendarDays },
   { to: "/buddy", label: "Круг поддержки", icon: HeartHandshake },
   { to: "/rewards", label: "Достижения", icon: Trophy },
@@ -83,7 +86,7 @@ const baseNav: NavItem[] = [
 const moderationItem: NavItem = { to: "/moderation", label: "Модерация", icon: ShieldCheck };
 const deskItem: NavItem = { to: "/therapist-desk", label: "Кабинет специалиста", icon: BriefcaseMedical };
 
-const mobileNav = baseNav.filter((n) => ["/", "/journal", "/buddy", "/care"].includes(n.to));
+const mobileNav = ["/", "/journal", "/mood", "/buddy"].map((to) => baseNav.find((n) => n.to === to)!);
 
 export function Logo() {
   return (
@@ -131,7 +134,7 @@ export function AppShell({
     ...(isAdmin ? [moderationItem] : []),
   ];
   const profile = {
-    name: real?.name || user?.email?.split("@")[0] || "Вы",
+    name: real?.name || user?.email?.split("@")[0] || "Ты",
     coins: real?.coins ?? 0,
   };
 
@@ -146,7 +149,7 @@ export function AppShell({
           <div className="px-2 pt-1 pb-5">
             <Logo />
           </div>
-          <nav className="flex flex-1 flex-col gap-1">
+          <nav className="-mx-1 flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-1">
             {mainNav.map((item) => (
               <ShellNavLink key={item.to} item={item} pathname={pathname} unread={unread} />
             ))}
@@ -161,9 +164,12 @@ export function AppShell({
               </div>
             ) : null}
           </nav>
+          <div className="mt-3 shrink-0">
+            <FeedbackButton />
+          </div>
           <Link
             to="/settings"
-            className="mt-3 flex items-center gap-3 rounded-2xl border border-border bg-card p-3 transition-shadow hover:shadow-soft"
+            className="mt-3 flex shrink-0 items-center gap-3 rounded-2xl border border-border bg-card p-3 transition-shadow hover:shadow-soft"
           >
             <span className="grid size-10 place-items-center rounded-full bg-primary-soft font-display text-sm">
               {profile.name.slice(0, 1)}
@@ -299,6 +305,9 @@ export function AppShell({
                 className="py-3"
               />
             ))}
+            <div className="mt-3">
+              <FeedbackButton />
+            </div>
           </nav>
         </SheetContent>
       </Sheet>

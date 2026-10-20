@@ -27,7 +27,7 @@ export const linkTherapistAccount = createServerFn({ method: "POST" })
     });
     if (listError) throw new Error("Не удалось прочитать список аккаунтов");
     const account = list.users.find((u) => (u.email ?? "").toLowerCase() === email);
-    if (!account) throw new Error("Аккаунт с таким email не найден — сначала попросите специалиста зарегистрироваться");
+    if (!account) throw new Error("Аккаунт с таким email не найден — сначала попроси специалиста зарегистрироваться");
 
     const { error: updateError } = await supabaseAdmin
       .from("therapists")
