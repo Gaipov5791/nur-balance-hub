@@ -8,6 +8,7 @@ import { useProfile } from "@/hooks/useAuth";
 import { useTherapyChats } from "@/hooks/useTherapyChat";
 import { supabase } from "@/integrations/supabase/client";
 import { formatSlot } from "@/routes/_authenticated/therapists";
+import { TelegramConnectCard } from "@/components/TelegramConnectCard";
 
 export const Route = createFileRoute("/_authenticated/therapist-desk")({
   head: () => ({
@@ -113,6 +114,8 @@ function TherapistDeskPage() {
           </p>
         </div>
       ) : (
+        <>
+        <TelegramConnectCard therapistId={card.data.id} />
         <section className="surface p-5">
           <h2 className="flex items-center gap-2 font-display text-base">
             <CalendarClock className="size-4 text-primary" /> Заявки — {card.data.name}
@@ -188,6 +191,7 @@ function TherapistDeskPage() {
             </ul>
           )}
         </section>
+        </>
       )}
     </AppShell>
   );
