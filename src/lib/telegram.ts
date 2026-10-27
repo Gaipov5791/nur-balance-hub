@@ -109,8 +109,8 @@ export function buildTelegramMessage(
   }
 
   if (kind === "status_changed") {
-    const to = String(payload.to ?? r.status);
-    const byClient = payload.by_client === true;
+    const to = String(payload["to"] ?? r.status);
+    const byClient = payload["by_client"] === true;
     const title =
       to === "cancelled" && byClient
         ? "❌ <b>Клиент отменил заявку</b>"

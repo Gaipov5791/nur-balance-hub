@@ -77,7 +77,7 @@ export async function flushTelegramOutbox(limit = 25): Promise<FlushResult> {
   result.claimed = list.length;
 
   for (const row of list) {
-    const finish = (patch: Record<string, unknown>) =>
+    const finish = (patch: { status: string; last_error?: string | null; sent_at?: string }) =>
       supabaseAdmin.from("telegram_outbox").update(patch).eq("id", row.id);
 
     try {
