@@ -13,6 +13,7 @@ import { useProfile } from "@/hooks/useAuth";
 import { useTherapyChats } from "@/hooks/useTherapyChat";
 import { priceParts, specItems } from "@/lib/therapists";
 import { ensureTherapistCatalog } from "@/lib/therapist-catalog.functions";
+import { flushTelegramNotifications } from "@/lib/telegram.functions";
 
 export const Route = createFileRoute("/_authenticated/therapists")({
   head: () => ({
@@ -249,6 +250,7 @@ function TherapistsPage() {
       if (error) throw new Error("Не удалось отправить заявку. Проверь связь и попробуй ещё раз");
     },
     onSuccess: async () => {
+      void flushTelegramNotifications().catch(() => undefined);
       setForm((f) => ({ ...f, time: "", topic: "" }));
       setSlotId(null);
       await qc.invalidateQueries({ queryKey: ["therapist-requests"] });
@@ -272,6 +274,7 @@ function TherapistsPage() {
       });
       return;
     }
+    void flushTelegramNotifications().catch(() => undefined);
     await qc.invalidateQueries({ queryKey: ["therapist-requests"] });
     await qc.invalidateQueries({ queryKey: ["therapist-request-events"] });
     await qc.invalidateQueries({ queryKey: ["therapist-slots"] });
