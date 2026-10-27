@@ -608,6 +608,95 @@ export type Database = {
         }
         Relationships: []
       }
+      telegram_link_codes: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string
+          therapist_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          expires_at: string
+          therapist_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string
+          therapist_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "telegram_link_codes_therapist_id_fkey"
+            columns: ["therapist_id"]
+            isOneToOne: false
+            referencedRelation: "therapists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      telegram_outbox: {
+        Row: {
+          attempts: number
+          claimed_at: string | null
+          created_at: string
+          dedupe_key: string | null
+          id: string
+          kind: string
+          last_error: string | null
+          payload: Json
+          request_id: string | null
+          sent_at: string | null
+          status: string
+          therapist_id: string
+        }
+        Insert: {
+          attempts?: number
+          claimed_at?: string | null
+          created_at?: string
+          dedupe_key?: string | null
+          id?: string
+          kind: string
+          last_error?: string | null
+          payload?: Json
+          request_id?: string | null
+          sent_at?: string | null
+          status?: string
+          therapist_id: string
+        }
+        Update: {
+          attempts?: number
+          claimed_at?: string | null
+          created_at?: string
+          dedupe_key?: string | null
+          id?: string
+          kind?: string
+          last_error?: string | null
+          payload?: Json
+          request_id?: string | null
+          sent_at?: string | null
+          status?: string
+          therapist_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "telegram_outbox_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "therapist_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "telegram_outbox_therapist_id_fkey"
+            columns: ["therapist_id"]
+            isOneToOne: false
+            referencedRelation: "therapists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       therapist_chats: {
         Row: {
           client_id: string
@@ -868,6 +957,35 @@ export type Database = {
           },
         ]
       }
+      therapist_telegram: {
+        Row: {
+          chat_id: number
+          linked_at: string
+          tg_username: string | null
+          therapist_id: string
+        }
+        Insert: {
+          chat_id: number
+          linked_at?: string
+          tg_username?: string | null
+          therapist_id: string
+        }
+        Update: {
+          chat_id?: number
+          linked_at?: string
+          tg_username?: string | null
+          therapist_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "therapist_telegram_therapist_id_fkey"
+            columns: ["therapist_id"]
+            isOneToOne: true
+            referencedRelation: "therapists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       therapists: {
         Row: {
           bio: string
@@ -1001,6 +1119,29 @@ export type Database = {
         Args: { _local_date: string; _user_id: string }
         Returns: boolean
       }
+      claim_telegram_outbox: {
+        Args: { _limit?: number }
+        Returns: {
+          attempts: number
+          claimed_at: string | null
+          created_at: string
+          dedupe_key: string | null
+          id: string
+          kind: string
+          last_error: string | null
+          payload: Json
+          request_id: string | null
+          sent_at: string | null
+          status: string
+          therapist_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "telegram_outbox"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       clear_journal_pin: { Args: { _current: string }; Returns: boolean }
       coin_wallet: { Args: never; Returns: Json }
       complete_ai_analysis: {
@@ -1008,9 +1149,15 @@ export type Database = {
         Returns: boolean
       }
       consume_ai_message: { Args: never; Returns: Json }
+      consume_telegram_link_code: {
+        Args: { _chat_id: number; _code: string; _username: string }
+        Returns: string
+      }
+      create_telegram_link_code: { Args: never; Returns: string }
       demo_buy_coin_pack: { Args: never; Returns: Json }
       demo_cancel_subscription: { Args: never; Returns: boolean }
       demo_subscribe: { Args: never; Returns: Json }
+      enqueue_telegram_reminders: { Args: never; Returns: number }
       fail_ai_analysis: {
         Args: { _error: string; _id: string }
         Returns: boolean
@@ -1077,6 +1224,7 @@ export type Database = {
       }
       start_ai_analysis: { Args: { _period: string }; Returns: Json }
       sync_assigned_admins: { Args: never; Returns: boolean }
+      unlink_my_telegram: { Args: never; Returns: undefined }
       verify_journal_pin: { Args: { _pin: string }; Returns: boolean }
     }
     Enums: {
