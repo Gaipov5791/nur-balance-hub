@@ -12,10 +12,20 @@ async function handle(request: Request) {
   }
 
 
+  // Telegram reminders to therapists share this 15-minute schedule.
+  let telegram: unknown = null;
+  try {
+    const { runTelegramReminders } = await import("@/lib/telegram.server");
+    telegram = await runTelegramReminders();
+  } catch (error) {
+    console.error("Telegram reminders failed", error);
+    telegram = { error: error instanceof Error ? error.message : "failed" };
+  }
+
   try {
     const { runJournalReminders } = await import("@/lib/reminders.server");
     const result = await runJournalReminders();
-    return Response.json(result);
+    return Response.json({ ...result, telegram });
   } catch (error) {
     console.error(error);
     return Response.json(

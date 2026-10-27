@@ -27,6 +27,7 @@ import { Route as AuthenticatedTherapistsRouteImport } from './routes/_authentic
 import { Route as AuthenticatedTherapyChatRouteImport } from './routes/_authenticated/therapy-chat'
 import { Route as ApiPublicNurAiRouteImport } from './routes/api/public/nur-ai'
 import { Route as ApiPublicCronJournalRemindersRouteImport } from './routes/api/public/cron/journal-reminders'
+import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram/webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -120,6 +121,12 @@ const ApiPublicCronJournalRemindersRoute =
     path: '/api/public/cron/journal-reminders',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicTelegramWebhookRoute =
+  ApiPublicTelegramWebhookRouteImport.update({
+    id: '/api/public/telegram/webhook',
+    path: '/api/public/telegram/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByFullPath {
   '/therapy-chat': typeof AuthenticatedTherapyChatRoute
   '/api/public/nur-ai': typeof ApiPublicNurAiRoute
   '/api/public/cron/journal-reminders': typeof ApiPublicCronJournalRemindersRoute
+  '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -158,6 +166,7 @@ export interface FileRoutesByTo {
   '/therapy-chat': typeof AuthenticatedTherapyChatRoute
   '/api/public/nur-ai': typeof ApiPublicNurAiRoute
   '/api/public/cron/journal-reminders': typeof ApiPublicCronJournalRemindersRoute
+  '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -179,6 +188,7 @@ export interface FileRoutesById {
   '/_authenticated/therapy-chat': typeof AuthenticatedTherapyChatRoute
   '/api/public/nur-ai': typeof ApiPublicNurAiRoute
   '/api/public/cron/journal-reminders': typeof ApiPublicCronJournalRemindersRoute
+  '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -200,6 +210,7 @@ export interface FileRouteTypes {
     | '/therapy-chat'
     | '/api/public/nur-ai'
     | '/api/public/cron/journal-reminders'
+    | '/api/public/telegram/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -219,6 +230,7 @@ export interface FileRouteTypes {
     | '/therapy-chat'
     | '/api/public/nur-ai'
     | '/api/public/cron/journal-reminders'
+    | '/api/public/telegram/webhook'
   id:
     | '__root__'
     | '/'
@@ -239,6 +251,7 @@ export interface FileRouteTypes {
     | '/_authenticated/therapy-chat'
     | '/api/public/nur-ai'
     | '/api/public/cron/journal-reminders'
+    | '/api/public/telegram/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -247,6 +260,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ApiPublicNurAiRoute: typeof ApiPublicNurAiRoute
   ApiPublicCronJournalRemindersRoute: typeof ApiPublicCronJournalRemindersRoute
+  ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -377,6 +391,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicCronJournalRemindersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/telegram/webhook': {
+      id: '/api/public/telegram/webhook'
+      path: '/api/public/telegram/webhook'
+      fullPath: '/api/public/telegram/webhook'
+      preLoaderRoute: typeof ApiPublicTelegramWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -421,6 +442,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ApiPublicNurAiRoute: ApiPublicNurAiRoute,
   ApiPublicCronJournalRemindersRoute: ApiPublicCronJournalRemindersRoute,
+  ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

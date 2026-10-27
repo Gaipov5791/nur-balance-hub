@@ -15,6 +15,7 @@ import { useStaffAccess } from "@/hooks/useAuth";
 import { loadStaffAccess, canAccessModeration } from "@/lib/staff";
 import { formatTime } from "@/components/VideoRecorder";
 import { REQUEST_STATUS_LABEL } from "@/routes/_authenticated/therapists";
+import { flushTelegramNotifications } from "@/lib/telegram.functions";
 
 export const Route = createFileRoute("/_authenticated/moderation")({
   beforeLoad: async () => {
@@ -303,6 +304,7 @@ function TherapistRequestsPanel() {
       });
       return;
     }
+    void flushTelegramNotifications().catch(() => undefined);
     await qc.invalidateQueries({ queryKey: ["moderation", "therapist-requests"] });
     await qc.invalidateQueries({ queryKey: ["moderation", "request-events"] });
     toast.success("Статус заявки обновлён");
