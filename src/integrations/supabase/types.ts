@@ -482,6 +482,42 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_orders: {
+        Row: {
+          amount_kzt: number
+          created_at: string
+          id: string
+          kind: string
+          paid_at: string | null
+          provider: string
+          provider_payment_id: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount_kzt: number
+          created_at?: string
+          id?: string
+          kind: string
+          paid_at?: string | null
+          provider?: string
+          provider_payment_id?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount_kzt?: number
+          created_at?: string
+          id?: string
+          kind?: string
+          paid_at?: string | null
+          provider?: string
+          provider_payment_id?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           coin_refill_at: string
@@ -1162,12 +1198,21 @@ export type Database = {
         Args: { _error: string; _id: string }
         Returns: boolean
       }
+      fail_payment_order: { Args: { _order_id: string }; Returns: undefined }
       find_or_queue_buddy: {
         Args: { _life_status: string }
         Returns: {
           match_id: string
           matched: boolean
         }[]
+      }
+      fulfill_payment_order: {
+        Args: {
+          _amount: number
+          _order_id: string
+          _provider_payment_id: string
+        }
+        Returns: Json
       }
       has_active_subscription: { Args: { _user_id: string }; Returns: boolean }
       has_journal_pin: { Args: never; Returns: boolean }
