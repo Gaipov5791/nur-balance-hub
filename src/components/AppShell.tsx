@@ -1,3 +1,4 @@
+import { LegalLinks } from "@/components/LegalPage";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   Home,
@@ -180,6 +181,7 @@ export function AppShell({
               </span>
             </span>
           </Link>
+          <LegalLinks className="mt-3 shrink-0" />
         </aside>
 
         <main className="min-w-0 flex-1">
