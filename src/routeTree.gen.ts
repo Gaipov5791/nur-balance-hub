@@ -30,6 +30,7 @@ import { Route as AuthenticatedTherapistsRouteImport } from './routes/_authentic
 import { Route as AuthenticatedTherapyChatRouteImport } from './routes/_authenticated/therapy-chat'
 import { Route as ApiPublicNurAiRouteImport } from './routes/api/public/nur-ai'
 import { Route as ApiPublicCronJournalRemindersRouteImport } from './routes/api/public/cron/journal-reminders'
+import { Route as ApiPublicPaymentsFreedompayRouteImport } from './routes/api/public/payments/freedompay'
 import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram/webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -139,6 +140,12 @@ const ApiPublicCronJournalRemindersRoute =
     path: '/api/public/cron/journal-reminders',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicPaymentsFreedompayRoute =
+  ApiPublicPaymentsFreedompayRouteImport.update({
+    id: '/api/public/payments/freedompay',
+    path: '/api/public/payments/freedompay',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicTelegramWebhookRoute =
   ApiPublicTelegramWebhookRouteImport.update({
     id: '/api/public/telegram/webhook',
@@ -167,6 +174,7 @@ export interface FileRoutesByFullPath {
   '/therapy-chat': typeof AuthenticatedTherapyChatRoute
   '/api/public/nur-ai': typeof ApiPublicNurAiRoute
   '/api/public/cron/journal-reminders': typeof ApiPublicCronJournalRemindersRoute
+  '/api/public/payments/freedompay': typeof ApiPublicPaymentsFreedompayRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -190,6 +198,7 @@ export interface FileRoutesByTo {
   '/therapy-chat': typeof AuthenticatedTherapyChatRoute
   '/api/public/nur-ai': typeof ApiPublicNurAiRoute
   '/api/public/cron/journal-reminders': typeof ApiPublicCronJournalRemindersRoute
+  '/api/public/payments/freedompay': typeof ApiPublicPaymentsFreedompayRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
 }
 export interface FileRoutesById {
@@ -215,6 +224,7 @@ export interface FileRoutesById {
   '/_authenticated/therapy-chat': typeof AuthenticatedTherapyChatRoute
   '/api/public/nur-ai': typeof ApiPublicNurAiRoute
   '/api/public/cron/journal-reminders': typeof ApiPublicCronJournalRemindersRoute
+  '/api/public/payments/freedompay': typeof ApiPublicPaymentsFreedompayRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
 }
 export interface FileRouteTypes {
@@ -240,6 +250,7 @@ export interface FileRouteTypes {
     | '/therapy-chat'
     | '/api/public/nur-ai'
     | '/api/public/cron/journal-reminders'
+    | '/api/public/payments/freedompay'
     | '/api/public/telegram/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -263,6 +274,7 @@ export interface FileRouteTypes {
     | '/therapy-chat'
     | '/api/public/nur-ai'
     | '/api/public/cron/journal-reminders'
+    | '/api/public/payments/freedompay'
     | '/api/public/telegram/webhook'
   id:
     | '__root__'
@@ -287,6 +299,7 @@ export interface FileRouteTypes {
     | '/_authenticated/therapy-chat'
     | '/api/public/nur-ai'
     | '/api/public/cron/journal-reminders'
+    | '/api/public/payments/freedompay'
     | '/api/public/telegram/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -299,6 +312,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   ApiPublicNurAiRoute: typeof ApiPublicNurAiRoute
   ApiPublicCronJournalRemindersRoute: typeof ApiPublicCronJournalRemindersRoute
+  ApiPublicPaymentsFreedompayRoute: typeof ApiPublicPaymentsFreedompayRoute
   ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
 }
 
@@ -451,6 +465,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicCronJournalRemindersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/payments/freedompay': {
+      id: '/api/public/payments/freedompay'
+      path: '/api/public/payments/freedompay'
+      fullPath: '/api/public/payments/freedompay'
+      preLoaderRoute: typeof ApiPublicPaymentsFreedompayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/telegram/webhook': {
       id: '/api/public/telegram/webhook'
       path: '/api/public/telegram/webhook'
@@ -505,6 +526,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   ApiPublicNurAiRoute: ApiPublicNurAiRoute,
   ApiPublicCronJournalRemindersRoute: ApiPublicCronJournalRemindersRoute,
+  ApiPublicPaymentsFreedompayRoute: ApiPublicPaymentsFreedompayRoute,
   ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,
 }
 export const routeTree = rootRouteImport

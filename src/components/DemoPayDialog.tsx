@@ -64,11 +64,11 @@ export function DemoPayDialog({ open, onOpenChange, title, description, priceLab
           ))}
         </div>
         <p className="rounded-xl bg-secondary p-3 text-xs text-muted-foreground">
-          Демо-режим: деньги не списываются. Настоящая оплата появится после подключения банка.
+          Оплата через защищённую страницу Freedom Pay. Сейчас включён тестовый режим — используй тестовые карты.
         </p>
         <DialogFooter>
           <Button className="w-full" onClick={pay} disabled={busy}>
-            {busy ? "Оплачиваем…" : `Оплатить ${priceLabel} (демо)`}
+            {busy ? "Переходим к оплате…" : `Оплатить ${priceLabel}`}
           </Button>
         </DialogFooter>
         <p className="text-center text-xs text-muted-foreground">

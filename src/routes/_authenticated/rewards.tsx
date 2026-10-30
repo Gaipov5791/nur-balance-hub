@@ -16,6 +16,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { DemoPayDialog } from "@/components/DemoPayDialog";
+import { startPayment } from "@/lib/payments.functions";
 
 export const Route = createFileRoute("/_authenticated/rewards")({
   head: () => ({
@@ -93,24 +94,40 @@ export function RewardsPage() {
       qc.invalidateQueries({ queryKey: ["profile"] }),
       qc.invalidateQueries({ queryKey: ["nur-ai-usage"] }),
     ]);
-  const run = async (fn: "demo_buy_coin_pack" | "demo_subscribe", ok: string) => {
-    const kind: PayKind = fn === "demo_subscribe" ? "sub" : "pack";
-    if (!(await ensureSession())) return toLogin(kind);
-    let { error } = await supabase.rpc(fn);
-    if (isAuthError(error)) {
-      // Token may have expired mid-flight: refresh once and retry.
-      const { data } = await supabase.auth.refreshSession();
-      if (!data.session) return toLogin(kind);
-      ({ error } = await supabase.rpc(fn));
-      if (isAuthError(error)) return toLogin(kind);
+  const run = async (kind: "subscription" | "coin_pack") => {
+    const pk: PayKind = kind === "subscription" ? "sub" : "pack";
+    if (!(await ensureSession())) return toLogin(pk);
+    try {
+      const { url } = await startPayment({ data: { kind, origin: window.location.origin } });
+      window.location.href = url;
+      await new Promise(() => {}); // keep the window busy while leaving the page
+    } catch (e) {
+      if (isAuthError(e as { message?: string })) return toLogin(pk);
+      toast.error(e instanceof Error ? e.message : "Не получилось начать оплату. Попробуй ещё раз.");
+      throw e;
     }
-    if (error) {
-      toast.error("Не получилось провести оплату. Попробуй ещё раз.");
-      throw error;
-    }
-    toast.success(ok);
-    await refresh();
   };
+
+  // Back from Freedom Pay: wait for the bank confirmation, then refresh balance.
+  useEffect(() => {
+    const sp = new URLSearchParams(window.location.search);
+    const paid = sp.get("paid");
+    if (sp.get("payfail")) toast.error("Оплата не прошла. Деньги не списаны.");
+    if (!paid) return;
+    window.history.replaceState(null, "", "/rewards");
+    let tries = 0;
+    const tick = async () => {
+      const { data } = await supabase.from("payment_orders").select("status").eq("id", paid).maybeSingle();
+      if (data?.status === "paid") {
+        toast.success("Оплата прошла! Спасибо 💚");
+        await refresh();
+      } else if (data?.status === "failed") toast.error("Оплата не прошла.");
+      else if (++tries < 20) setTimeout(tick, 3000);
+      else toast("Ждём подтверждение от банка — баланс обновится чуть позже.");
+    };
+    tick();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const cancel = async () => {
     if (!window.confirm("Отменить подписку? Безлимитный НурAI и бесплатный анализ отключатся.")) return;
     if (!(await ensureSession())) return toLogin(null);
@@ -222,10 +239,7 @@ export function RewardsPage() {
             : `${COIN_PACK.coins} монет сразу на баланс.`
         }
         priceLabel={fmtKzt(payFor === "sub" ? SUBSCRIPTION.priceKzt : COIN_PACK.priceKzt)}
-        onPay={() =>
-          payFor === "sub"
-            ? run("demo_subscribe", "Подписка активна на 30 дней")
-            : run("demo_buy_coin_pack", `+${COIN_PACK.coins} Nur-Coins на баланс`)
+        onPay={() => run(payFor === "sub" ? "subscription" : "coin_pack")
         }
       />
     </AppShell>
