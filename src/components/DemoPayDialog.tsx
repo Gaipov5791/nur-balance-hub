@@ -1,3 +1,4 @@
+import { LegalLinks } from "@/components/LegalPage";
 import { useState } from "react";
 import { CreditCard, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -70,6 +71,10 @@ export function DemoPayDialog({ open, onOpenChange, title, description, priceLab
             {busy ? "Оплачиваем…" : `Оплатить ${priceLabel} (демо)`}
           </Button>
         </DialogFooter>
+        <p className="text-center text-xs text-muted-foreground">
+          Нажимая «Оплатить», ты принимаешь условия оферты и правила возврата.
+        </p>
+        <LegalLinks />
       </DialogContent>
     </Dialog>
   );
