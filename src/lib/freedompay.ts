@@ -27,5 +27,5 @@ export async function fpVerify(script: string, params: FpParams, secret: string)
 
 export function xmlValue(xml: string, tag: string): string | null {
   const m = xml.match(new RegExp(`<${tag}>(?:<!\\[CDATA\\[)?([\\s\\S]*?)(?:\\]\\]>)?</${tag}>`));
-  return m ? m[1].trim() : null;
+  return m?.[1] ? m[1].trim() : null;
 }

@@ -9,7 +9,7 @@ async function reply(status: "ok" | "rejected", description: string, secret: str
     pg_description: description,
     pg_salt: crypto.randomUUID().replace(/-/g, ""),
   };
-  p.pg_sig = await fpSign(SCRIPT, p, secret);
+  p["pg_sig"] = await fpSign(SCRIPT, p, secret);
   const xml = `<?xml version="1.0" encoding="utf-8"?><response>${Object.entries(p)
     .map(([k, v]) => `<${k}>${v}</${k}>`)
     .join("")}</response>`;

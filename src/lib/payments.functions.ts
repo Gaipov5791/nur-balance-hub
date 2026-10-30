@@ -40,7 +40,7 @@ export const startPayment = createServerFn({ method: "POST" })
       pg_testing_mode: testing ? "1" : "0",
       pg_language: "ru",
     };
-    params.pg_sig = await fpSign("init_payment.php", params, secret);
+    params["pg_sig"] = await fpSign("init_payment.php", params, secret);
     const res = await fetch("https://api.freedompay.kz/init_payment.php", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
