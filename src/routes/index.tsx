@@ -137,10 +137,10 @@ function Dashboard() {
               key={m.level}
               to="/mood"
               search={{ tab: "new", level: m.level }}
-              className="flex min-w-0 flex-col items-center gap-1.5 rounded-2xl bg-secondary/60 p-2 transition-transform hover:scale-105"
+              className="flex min-w-0 flex-col items-center gap-1.5 rounded-2xl bg-secondary/60 px-0.5 py-2 transition-transform hover:scale-105"
             >
               <span className={`grid size-11 place-items-center rounded-full text-2xl ${m.bg}`}>{m.emoji}</span>
-              <span className="w-full hyphens-auto text-center text-[10px] leading-tight [overflow-wrap:anywhere] sm:text-[11px]">{m.label}</span>
+              <span className="w-full text-center text-[10px] leading-tight sm:text-[11px]"><span className="sm:hidden">{m.short}</span><span className="hidden sm:inline">{m.label}</span></span>
             </Link>
           ))}
         </div>

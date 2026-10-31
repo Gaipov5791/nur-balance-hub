@@ -72,13 +72,13 @@ export function MoodCheckinForm({
                 type="button"
                 onClick={() => setLevel(m.level)}
                 aria-pressed={active}
-                className={`flex min-w-0 flex-col items-center gap-1.5 rounded-2xl border-2 p-2 transition-all sm:p-3 ${
+                className={`flex min-w-0 flex-col items-center gap-1.5 rounded-2xl border-2 px-0.5 py-2 transition-all sm:p-3 ${
                   active ? `${m.soft} border-current ${m.text} scale-105` : "border-transparent bg-secondary/60 hover:bg-secondary"
                 }`}
               >
                 <span className={`grid size-11 place-items-center rounded-full text-2xl sm:size-12 ${m.bg}`}>{m.emoji}</span>
-                <span className="w-full hyphens-auto text-center text-[10px] font-medium leading-tight text-foreground [overflow-wrap:anywhere] sm:text-xs">
-                  {m.label}
+                <span className="w-full text-center text-[10px] font-medium leading-tight text-foreground sm:text-xs">
+                  <span className="sm:hidden">{m.short}</span><span className="hidden sm:inline">{m.label}</span>
                 </span>
               </button>
             );

@@ -2,12 +2,12 @@
 
 export type MoodLevel = 1 | 2 | 3 | 4 | 5;
 
-export const MOOD_LEVELS: { level: MoodLevel; label: string; emoji: string; bg: string; soft: string; text: string; color: string }[] = [
-  { level: 1, label: "Очень плохое", emoji: "😞", bg: "bg-mood-1", soft: "bg-mood-1/25", text: "text-mood-1", color: "var(--mood-1)" },
-  { level: 2, label: "Плохое", emoji: "😟", bg: "bg-mood-2", soft: "bg-mood-2/25", text: "text-mood-2", color: "var(--mood-2)" },
-  { level: 3, label: "Нормальное", emoji: "😐", bg: "bg-mood-3", soft: "bg-mood-3/25", text: "text-mood-3", color: "var(--mood-3)" },
-  { level: 4, label: "Хорошее", emoji: "😊", bg: "bg-mood-4", soft: "bg-mood-4/25", text: "text-mood-4", color: "var(--mood-4)" },
-  { level: 5, label: "Отличное", emoji: "😄", bg: "bg-mood-5", soft: "bg-mood-5/30", text: "text-mood-5", color: "var(--mood-5)" },
+export const MOOD_LEVELS: { level: MoodLevel; label: string; short: string; emoji: string; bg: string; soft: string; text: string; color: string }[] = [
+  { level: 1, label: "Очень плохое", short: "Оч. плохо", emoji: "😞", bg: "bg-mood-1", soft: "bg-mood-1/25", text: "text-mood-1", color: "var(--mood-1)" },
+  { level: 2, label: "Плохое", short: "Плохо", emoji: "😟", bg: "bg-mood-2", soft: "bg-mood-2/25", text: "text-mood-2", color: "var(--mood-2)" },
+  { level: 3, label: "Нормальное", short: "Норм", emoji: "😐", bg: "bg-mood-3", soft: "bg-mood-3/25", text: "text-mood-3", color: "var(--mood-3)" },
+  { level: 4, label: "Хорошее", short: "Хорошо", emoji: "😊", bg: "bg-mood-4", soft: "bg-mood-4/25", text: "text-mood-4", color: "var(--mood-4)" },
+  { level: 5, label: "Отличное", short: "Отлично", emoji: "😄", bg: "bg-mood-5", soft: "bg-mood-5/30", text: "text-mood-5", color: "var(--mood-5)" },
 ];
 
 export function moodInfo(level: number) {

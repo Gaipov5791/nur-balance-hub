@@ -56,7 +56,7 @@ export const runAnalysis = createServerFn({ method: "POST" })
           .limit(500),
         supabase
           .from("journal_entries")
-          .select("entry_date, mood, level, note")
+          .select("id, entry_date, mood, level, note, video_path, mime_type, transcript, transcript_status")
           .eq("user_id", userId)
           .gte("entry_date", start)
           .lte("entry_date", end)
@@ -66,7 +66,19 @@ export const runAnalysis = createServerFn({ method: "POST" })
       ]);
       if (checkinsRes.error || journalRes.error) throw new Error("data");
       const checkins = checkinsRes.data ?? [];
-      const journal = journalRes.data ?? [];
+      type JournalRow = { id: string; entry_date: string; mood: string; level: number; note: string; video_path: string | null; mime_type: string | null; transcript: string | null; transcript_status: string | null };
+      const rawJournal = (journalRes.data ?? []) as unknown as JournalRow[];
+      // Speech-to-text for audio/video entries (cached on the entry; failures just skip the speech).
+      const { ensureTranscript } = await import("@/lib/transcribe.server");
+      const pending = rawJournal.filter((j) => j.video_path && j.transcript === null && j.transcript_status !== "failed").slice(-12);
+      for (let i = 0; i < pending.length; i += 3) {
+        await Promise.all(
+          pending.slice(i, i + 3).map(async (j) => {
+            j.transcript = await ensureTranscript(supabaseAdmin, j);
+          }),
+        );
+      }
+      const journal = rawJournal.map((j) => ({ ...j, transcript: j.transcript ?? "" }));
       const custom = new Map((tagsRes.data ?? []).map((t) => [`c:${t.label}`, { id: `c:${t.label}`, label: t.label, emoji: t.emoji }]));
 
       const prompt = buildAnalyzerInput({

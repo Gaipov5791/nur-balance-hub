@@ -208,6 +208,16 @@ function TherapistsPage() {
     setSlotId(null);
   }, [person?.id]);
 
+  // When the specialist's schedule loads, preselect a duration that actually has free windows.
+  useEffect(() => {
+    const list = slots.data ?? [];
+    if (!list.length || list.some((s) => s.duration_minutes >= duration)) return;
+    const longest = Math.max(...list.map((s) => s.duration_minutes));
+    const fit = [60, 50, 30].find((d) => d <= longest);
+    if (fit) setDuration(fit);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slots.data]);
+
   useEffect(() => {
     if (!selected && therapists[0]) setSelected(therapists[0].id);
   }, [selected, therapists]);
