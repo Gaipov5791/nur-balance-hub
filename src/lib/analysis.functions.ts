@@ -66,7 +66,8 @@ export const runAnalysis = createServerFn({ method: "POST" })
       ]);
       if (checkinsRes.error || journalRes.error) throw new Error("data");
       const checkins = checkinsRes.data ?? [];
-      const rawJournal = journalRes.data ?? [];
+      type JournalRow = { id: string; entry_date: string; mood: string; level: number; note: string; video_path: string | null; mime_type: string | null; transcript: string | null; transcript_status: string | null };
+      const rawJournal = (journalRes.data ?? []) as unknown as JournalRow[];
       // Speech-to-text for audio/video entries (cached on the entry; failures just skip the speech).
       const { ensureTranscript } = await import("@/lib/transcribe.server");
       const pending = rawJournal.filter((j) => j.video_path && j.transcript === null && j.transcript_status !== "failed").slice(-12);
