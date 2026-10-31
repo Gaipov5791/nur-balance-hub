@@ -77,7 +77,7 @@ export function MoodCheckinForm({
                 }`}
               >
                 <span className={`grid size-11 place-items-center rounded-full text-2xl sm:size-12 ${m.bg}`}>{m.emoji}</span>
-                <span className="w-full text-center text-[11px] font-medium leading-tight text-foreground sm:text-xs">
+                <span className="w-full hyphens-auto text-center text-[10px] font-medium leading-tight text-foreground [overflow-wrap:anywhere] sm:text-xs">
                   {m.label}
                 </span>
               </button>

@@ -186,10 +186,14 @@ export function RewardsPage() {
               ) : null}
             </div>
             <ul className="mt-4 space-y-2 text-sm">
-              <li>💬 Безлимитные разговоры с НурAI</li>
-              <li>✨ Один ИИ-анализ настроения каждый день — без монет</li>
-              <li>🪙 Пополнение +{COIN_REFILL_AMOUNT} каждые {COIN_REFILL_DAYS} дня сохраняется</li>
+              <li>💬 Безлимитный ИИ-чат с НурAI</li>
+              <li>🎙️ Аудио-дневник</li>
+              <li>🤝 Круг поддержки</li>
+              <li>✨ Анализатор дневника без списания Nur-Coins</li>
             </ul>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Бесплатно для всех: трекер настроения, статистика, советы, темы, «Мне сейчас тяжело», 30 сообщений НурAI в день и +{COIN_REFILL_AMOUNT} монет каждые {COIN_REFILL_DAYS} дня. Запись к психологу оплачивается отдельно.
+            </p>
             {sub ? (
               <div className="mt-4 space-y-2">
                 {until ? (

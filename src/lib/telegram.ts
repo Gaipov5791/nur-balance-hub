@@ -103,7 +103,7 @@ export function buildTelegramMessage(
       `Длительность: ${r.duration_minutes} мин`,
       `Время: ${escapeHtml(whenLine(r))}`,
     ];
-    if (r.topic?.trim()) lines.push(`Тема: ${escapeHtml(shorten(r.topic))}`);
+    // Topic is intentionally omitted from Telegram for client privacy; it is visible only in the desk.
     lines.push("", "Подтверди или отклони заявку в кабинете специалиста.");
     return { text: lines.join("\n"), button: desk };
   }

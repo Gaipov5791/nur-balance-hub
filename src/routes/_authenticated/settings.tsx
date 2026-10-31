@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { DataAccountCard } from "@/components/DataAccountCard";
 import { useProfile, useSignOut } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -356,6 +357,8 @@ function SettingsPage() {
           <PasswordCard />
 
           <AccountCard />
+
+          {user ? <DataAccountCard /> : null}
 
         </section>
       </div>
