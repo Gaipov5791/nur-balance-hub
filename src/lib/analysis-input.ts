@@ -2,7 +2,7 @@ import { JOURNAL_MOOD_LEVEL, moodInfo, resolveTag, type Tag } from "@/lib/mood";
 import type { AnalysisResult } from "@/lib/wallet";
 
 export type AnalyzerCheckin = { level: number; emotions: string[]; activities: string[]; note: string; created_at: string };
-export type AnalyzerJournal = { entry_date: string; mood: string; level: number; note: string };
+export type AnalyzerJournal = { entry_date: string; mood: string; level: number; note: string; transcript?: string | null };
 
 const JOURNAL_MOOD_LABEL: Record<string, string> = {
   calm: "Спокойствие",
@@ -28,7 +28,7 @@ function almatyStamp(iso: string) {
   });
 }
 
-/** Plain-text prompt for the analyzer: only levels, tags, check-in notes and journal text (no media). */
+/** Plain-text prompt for the analyzer: only levels, tags, check-in notes and journal text plus speech transcripts. */
 export function buildAnalyzerInput(input: {
   periodLabel: string;
   start: string;
@@ -54,11 +54,12 @@ export function buildAnalyzerInput(input: {
     lines.push(`- ${parts.join(" · ")}`);
   }
   if (!checkins.length) lines.push("- нет");
-  lines.push("", "Видео-дневник (только текст заметок):");
+  lines.push("", "Дневник (заметки и расшифровка речи из аудио/видео):");
   const journal = [...input.journal].sort((a, b) => a.entry_date.localeCompare(b.entry_date)).slice(-60);
   for (const j of journal) {
     const parts = [`${j.entry_date} · эмоция: ${JOURNAL_MOOD_LABEL[j.mood] ?? j.mood}, интенсивность ${j.level}/5`];
     if (j.note.trim()) parts.push(`заметка: «${clip(j.note, 600)}»`);
+    if (j.transcript?.trim()) parts.push(`сказано в записи: «${clip(j.transcript, 1500)}»`);
     lines.push(`- ${parts.join(" · ")}`);
   }
   if (!journal.length) lines.push("- нет");

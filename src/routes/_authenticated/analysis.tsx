@@ -141,7 +141,7 @@ function AnalysisPage() {
             </p>
           ) : null}
           <p className="mt-3 text-xs text-muted-foreground">
-            Нужно минимум {ANALYSIS_MIN_ENTRIES} записи за период. Голосовые и видео пока не анализируются — только текст.
+            Нужно минимум {ANALYSIS_MIN_ENTRIES} записи за период. ИИ учитывает текст, а также речь из голосовых и видеозаписей.
           </p>
           {running ? (
             <p className="mt-3 text-sm text-primary">НурAI изучает твои записи — обычно это занимает до минуты.</p>
