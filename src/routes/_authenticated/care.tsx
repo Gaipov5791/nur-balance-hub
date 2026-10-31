@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2, Phone } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { CoinsPanel, TipPanel } from "@/components/panels";
@@ -48,6 +48,31 @@ function CarePage() {
         </>
       }
     >
+      <section className="surface mb-5 border-2 border-accent/40 p-5">
+        <h2 className="font-display text-base">Если тебе сейчас небезопасно — позвони</h2>
+        <p className="mt-1 text-sm text-muted-foreground">Бесплатно и круглосуточно по Казахстану</p>
+        <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+          {[
+            { n: "150", t: "Телефон доверия" },
+            { n: "112", t: "Экстренная служба" },
+            { n: "103", t: "Скорая помощь" },
+            { n: "111", t: "Защита детей и семьи" },
+          ].map((p) => (
+            <a
+              key={p.n}
+              href={`tel:${p.n}`}
+              className="flex items-center gap-3 rounded-2xl bg-accent/15 p-4 transition-colors hover:bg-accent/25"
+            >
+              <Phone className="size-5 shrink-0 text-accent" />
+              <span>
+                <span className="block font-display text-2xl leading-none">{p.n}</span>
+                <span className="mt-1 block text-xs text-muted-foreground">{p.t}</span>
+              </span>
+            </a>
+          ))}
+        </div>
+      </section>
+
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {careCategories.map((c) => (
           <button
