@@ -383,6 +383,8 @@ export type Database = {
           mood: string
           note: string
           thumbnail_path: string | null
+          transcript: string | null
+          transcript_status: string | null
           user_id: string
           video_path: string | null
         }
@@ -397,6 +399,8 @@ export type Database = {
           mood: string
           note?: string
           thumbnail_path?: string | null
+          transcript?: string | null
+          transcript_status?: string | null
           user_id: string
           video_path?: string | null
         }
@@ -411,6 +415,8 @@ export type Database = {
           mood?: string
           note?: string
           thumbnail_path?: string | null
+          transcript?: string | null
+          transcript_status?: string | null
           user_id?: string
           video_path?: string | null
         }
