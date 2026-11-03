@@ -1,6 +1,6 @@
 import { LegalLinks } from "@/components/LegalPage";
 import { useState } from "react";
-import { CreditCard, QrCode } from "lucide-react";
+import { PaymentBadges } from "@/components/PaymentBadges";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,7 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
 
 type Props = {
   open: boolean;
@@ -21,13 +20,8 @@ type Props = {
   onPay: () => Promise<void>;
 };
 
-const METHODS = [
-  { id: "kaspi", label: "Kaspi QR", icon: QrCode },
-  { id: "card", label: "Банковская карта", icon: CreditCard },
-] as const;
 
 export function DemoPayDialog({ open, onOpenChange, title, description, priceLabel, onPay }: Props) {
-  const [method, setMethod] = useState<(typeof METHODS)[number]["id"]>("kaspi");
   const [busy, setBusy] = useState(false);
   const pay = async () => {
     setBusy(true);
@@ -47,24 +41,12 @@ export function DemoPayDialog({ open, onOpenChange, title, description, priceLab
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        <div className="grid grid-cols-2 gap-3">
-          {METHODS.map((m) => (
-            <button
-              key={m.id}
-              type="button"
-              onClick={() => setMethod(m.id)}
-              className={cn(
-                "flex flex-col items-center gap-2 rounded-2xl border p-4 text-sm transition",
-                method === m.id ? "border-primary bg-primary-soft text-primary" : "border-border",
-              )}
-            >
-              <m.icon className="size-6" />
-              {m.label}
-            </button>
-          ))}
+        <div className="rounded-2xl border border-border p-4">
+          <p className="text-sm">Оплата банковской картой</p>
+          <PaymentBadges className="mt-3" />
         </div>
         <p className="rounded-xl bg-secondary p-3 text-xs text-muted-foreground">
-          Оплата через защищённую страницу Freedom Pay. Сейчас включён тестовый режим — используй тестовые карты.
+          После нажатия «Оплатить» откроется защищённая страница Freedom Pay: введи данные карты и подтверди платёж кодом 3-D Secure. Данные карты не хранятся в Nur Balance.
         </p>
         <DialogFooter>
           <Button className="w-full" onClick={pay} disabled={busy}>

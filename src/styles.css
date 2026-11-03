@@ -37,6 +37,12 @@
   --color-mood-3: var(--mood-3);
   --color-mood-4: var(--mood-4);
   --color-mood-5: var(--mood-5);
+  /* Fixed payment-brand colors (Visa / Mastercard guidelines), identical in every theme. */
+  --color-brand-card: #ffffff;
+  --color-brand-visa: #1a1f71;
+  --color-brand-mc-red: #eb001b;
+  --color-brand-mc-yellow: #f79e1b;
+  --color-brand-mc-orange: #ff5f00;
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
