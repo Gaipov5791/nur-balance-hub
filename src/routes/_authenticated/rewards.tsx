@@ -16,6 +16,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { DemoPayDialog } from "@/components/DemoPayDialog";
+import { PaymentInfo } from "@/components/PaymentBadges";
 import { startPayment } from "@/lib/payments.functions";
 
 export const Route = createFileRoute("/_authenticated/rewards")({
@@ -228,9 +229,11 @@ export function RewardsPage() {
               Купить за {fmtKzt(COIN_PACK.priceKzt)}
             </Button>
             <p className="mt-3 text-xs text-muted-foreground">
-              Сейчас оплата работает в демо-режиме. Монеты, накопленные раньше, остаются на балансе.
+              Монеты, накопленные раньше, остаются на балансе.
             </p>
           </section>
+
+          <PaymentInfo />
         </div>
       </div>
       <DemoPayDialog

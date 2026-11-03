@@ -1,4 +1,5 @@
 import { LegalLinks } from "@/components/LegalPage";
+import { PaymentBadges } from "@/components/PaymentBadges";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
@@ -387,7 +388,8 @@ function AuthPage() {
               </Button>
             </>
           )}
-          <LegalLinks className="mt-8" />
+          <PaymentBadges centered className="mt-8" />
+          <LegalLinks className="mt-3" />
         </div>
       </div>
     </div>
