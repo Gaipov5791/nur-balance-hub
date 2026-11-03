@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { LEGAL_DOCS } from "@/content/legal";
+import { PaymentBadges, PaymentInfo } from "@/components/PaymentBadges";
 
 type Kind = keyof typeof LEGAL_DOCS;
 
@@ -26,6 +27,11 @@ export function LegalPage({ kind }: { kind: Kind }) {
           ),
         )}
       </div>
+      {kind !== "privacy" ? <PaymentInfo className="mt-10" /> : null}
+      <footer className="mt-10 border-t border-border pt-6">
+        <PaymentBadges centered />
+        <LegalLinks className="mt-3" />
+      </footer>
     </main>
   );
 }
